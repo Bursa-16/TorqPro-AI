@@ -401,6 +401,18 @@ def migrate():
         migrate_production_validation(c)
         from backend.question_bank.store import migrate as migrate_question_bank
         migrate_question_bank(c)
+        # Stage 2 / Slice 4: MarkItDown document-ingestion feature.
+        # Additive only -- one new table (document_extractions),
+        # deliberately registered here only once the phase that
+        # actually needs it live (the upload/read API below) exists,
+        # matching every other domain migration's own call-site
+        # comment on this exact pattern (migrate_joints/
+        # migrate_production_validation/migrate_question_bank above).
+        # backend.documents.repository is itself FastAPI-independent
+        # (Slice 3 design) but migrate() takes an already-open
+        # connection, so this import is safe and adds no cycle.
+        from backend.documents.repository import migrate as migrate_documents
+        migrate_documents(c)
 
         # Faz v3.0.0-alpha.6 (Persistent Audit, ADR-0020): backend.app
         # is structurally forbidden from importing backend.ai_gateway
@@ -2109,5 +2121,17 @@ app.include_router(ai_gateway_router)
 # Reuses the same `user` auth dependency as every other endpoint.
 from backend.api.routes.torque_recommendation import router as torque_recommendation_router
 app.include_router(torque_recommendation_router)
+
+# Stage 2 / Slice 4: MarkItDown document-ingestion HTTP exposure
+# (backend/api/routes/documents.py). Additive only -- three new
+# routes (POST /api/documents/upload, GET /api/documents/{id}, GET
+# /api/documents), nothing existing renamed or removed. Thin HTTP
+# adapter over the pre-existing backend.documents.ingestion_service
+# pipeline (Slice 3), which itself orchestrates the already-tested
+# Slice 1/2 validation/extraction modules -- no new engineering
+# formula, coefficient, or standard, and no AI Gateway involvement.
+# Reuses the same `user` auth dependency as every other endpoint.
+from backend.api.routes.documents import router as documents_router
+app.include_router(documents_router)
 
 app.mount("/",StaticFiles(directory=FRONT,html=True),name="frontend")

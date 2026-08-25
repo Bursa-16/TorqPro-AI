@@ -93,6 +93,26 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);font-size:14
 .pill-nok{background:rgba(239,68,68,.15);color:var(--danger)}
 .pill-warn{background:rgba(245,158,11,.15);color:var(--warning)}
 .pill-info{background:rgba(79,126,248,.15);color:var(--accent2)}
+/* Stage 2 / Slice 5: Document Intelligence. Scoped to button.sidebar-item
+   only -- the existing 46 div.sidebar-item elements are untouched by
+   this rule (compound tag+class selector). A real <button> is used for
+   this one new nav entry so it is natively keyboard-focusable/
+   activatable without adding a global keyboard handler to the existing
+   div-based items (out of this slice's scope -- see UI/UX Pro Max
+   separation note). Visual values match .sidebar-item exactly; the
+   focus-visible outline reuses the same var(--accent) technique
+   already established by .info-icon-btn/.class-row-btn elsewhere in
+   this file. */
+button.sidebar-item{all:unset;box-sizing:border-box;width:100%;display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:7px;cursor:pointer;color:var(--text2);font-size:13px;transition:all .15s;margin-bottom:2px}
+button.sidebar-item:hover{background:var(--surface2);color:var(--text)}
+button.sidebar-item.active{background:rgba(79,126,248,.15);color:var(--accent2);border-left:2px solid var(--accent)}
+button.sidebar-item:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+.di-content-viewer{max-height:420px;overflow:auto;white-space:pre-wrap;word-break:break-word;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:12px;font-family:ui-monospace,SFMono-Regular,Consolas,monospace;font-size:12.5px;color:var(--text);margin:0}
+.di-content-viewer:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+.di-field-row{display:flex;justify-content:space-between;gap:12px;padding:6px 0;border-bottom:1px solid var(--border);font-size:13px}
+.di-field-row:last-child{border-bottom:none}
+.di-field-key{color:var(--text2);flex-shrink:0}
+.di-field-val{color:var(--text);text-align:right;word-break:break-all;font-family:ui-monospace,SFMono-Regular,Consolas,monospace;font-size:12px}
 .progress-bar{background:var(--surface2);border-radius:20px;height:8px;overflow:hidden}
 .progress-fill{height:100%;border-radius:20px;transition:width .4s}
 .table{width:100%;border-collapse:collapse;font-size:13px}
@@ -454,6 +474,7 @@ html{scrollbar-width:thin;scrollbar-color:var(--neutral) var(--surface)}
     <div class="sidebar-item" onclick="showPage('jointanalysis')"><span class="sidebar-icon">⚙️</span> <span data-i18n="sidebar.jointanalysis">Joint Analysis</span></div>
     <div class="sidebar-item" onclick="showPage('materialintelligence')"><span class="sidebar-icon">🧬</span> <span data-i18n="sidebar.materialintelligence">Material Intelligence</span></div>
     <div class="sidebar-item" onclick="showPage('validation',this)"><span class="sidebar-icon">🔎</span> <span data-i18n="sidebar.technical_validation">Teknik Doğrulama</span></div>
+    <button type="button" class="sidebar-item" onclick="showPage('documentintelligence',this)"><span class="sidebar-icon" aria-hidden="true">📃</span> <span data-i18n="sidebar.documentintelligence">Document Intelligence</span></button>
   </div>
   <div class="sidebar-section">
     <div class="sidebar-label" data-i18n="sidebar.section_production">Üretim / Kalite</div>
@@ -1634,6 +1655,72 @@ html{scrollbar-width:thin;scrollbar-color:var(--neutral) var(--surface)}
     <button class="btn btn-primary" onclick="qbSubmitForm()" id="qb-form-submit-btn" data-i18n="qb.create_submit_button">Create Question</button>
     <button class="btn btn-secondary" onclick="qbCancelForm()" data-i18n="qb.cancel_button">Cancel</button>
     <div id="qb-form-result" style="margin-top:10px"></div>
+  </div>
+</div>
+
+<!-- Stage 2 / Slice 5: Document Intelligence -- MarkItDown document
+     extraction + provenance + traceability. Additive only; reuses
+     .page/.section-header/.card/.form-*/.btn/.pill/.alert/.table
+     conventions already established elsewhere in this file (see
+     Friction Condition / Question Bank pages for the same patterns).
+     This feature is extraction + provenance only -- no AI
+     interpretation, no engineering write-back (see di.boundary_note
+     below, rendered from the deterministic-engineering-boundary
+     translation keys). -->
+<div id="page-documentintelligence" class="page">
+  <div class="section-header"><span class="section-icon" aria-hidden="true">📃</span><div>
+    <div class="section-title" data-i18n="di.page_title">Document Intelligence</div>
+    <div class="section-sub" data-i18n="di.page_subtitle">Secure technical document extraction and traceability</div>
+  </div></div>
+  <div class="alert alert-info" id="di-boundary-note" data-i18n="di.boundary_note">
+    Document extraction is for reference and traceability. Extracted content does not modify TorqPro engineering calculations or validated results.
+  </div>
+
+  <div class="card">
+    <div class="card-title" data-i18n="di.upload_title">Upload Document</div>
+    <div class="card-sub" data-i18n="di.upload_sub">Extract text and structure from a technical document for reference and traceability.</div>
+    <div style="font-size:12px;color:var(--text3);margin-bottom:10px">
+      <span data-i18n="di.supported_formats_label">Supported: PDF · DOCX · XLSX · PPTX</span>
+      &nbsp;·&nbsp;
+      <span data-i18n="di.max_size_label">Maximum: 15 MiB</span>
+    </div>
+    <div class="form-group">
+      <label class="form-label" for="di-file-input" data-i18n="di.file_label">Document file</label>
+      <input class="form-input" type="file" id="di-file-input" accept=".pdf,.docx,.xlsx,.pptx" onchange="diFileSelected(event)">
+    </div>
+    <div id="di-selected-file-info" style="font-size:12px;color:var(--text3);margin-top:8px" data-i18n="di.no_file_selected">No file selected.</div>
+    <div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap">
+      <button type="button" class="btn btn-primary" id="di-upload-btn" onclick="diUploadDocument()" disabled data-i18n="di.extract_button">Extract Document</button>
+      <button type="button" class="btn btn-secondary" id="di-clear-btn" onclick="diResetUploadForm()" data-i18n="di.clear_button">Clear</button>
+    </div>
+    <div id="di-upload-status" style="margin-top:10px" role="status" aria-live="polite"></div>
+  </div>
+
+  <div class="card" id="di-result-card" style="display:none">
+    <div class="card-title" data-i18n="di.result_title">Extraction Result</div>
+    <div id="di-result-summary" class="grid2"></div>
+  </div>
+
+  <div class="card" id="di-provenance-card" style="display:none">
+    <div class="card-title" data-i18n="di.provenance_title">Provenance</div>
+    <div class="card-sub" data-i18n="di.provenance_sub">Hashes and traceability metadata for this extraction.</div>
+    <div id="di-provenance-fields"></div>
+  </div>
+
+  <div class="card" id="di-content-card" style="display:none">
+    <div class="card-title" data-i18n="di.content_title">Extracted Content</div>
+    <div class="card-sub" data-i18n="di.content_sub">Raw text extracted from the document. This is untrusted source content, shown as plain text only.</div>
+    <pre id="di-content-viewer" class="di-content-viewer" tabindex="0"></pre>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <div><div class="card-title" style="margin-bottom:0" data-i18n="di.mydocs_title">My Documents</div>
+        <div class="card-sub" data-i18n="di.mydocs_sub">Your previous document extractions</div></div>
+      <button type="button" class="btn btn-secondary btn-sm" onclick="diLoadDocumentList()" data-i18n="di.mydocs_refresh">Refresh</button>
+    </div>
+    <div id="di-mydocs-status" style="font-size:12px;color:var(--text3);margin-bottom:8px"></div>
+    <div id="di-mydocs-list"></div>
   </div>
 </div>
 
@@ -4005,6 +4092,64 @@ const I18N = {
     'qb.stats.history.snapshot_success': 'Snapshot saved.',
     'qb.stats.history.col_taken_at': 'Taken at',
     'qb.stats.history.col_total': 'Total questions',
+    // ---- Stage 2 / Slice 5: Document Intelligence ----
+    'sidebar.documentintelligence': 'Document Intelligence',
+    'di.page_title': 'Document Intelligence',
+    'di.page_subtitle': 'Secure technical document extraction and traceability',
+    'di.boundary_note': 'Document extraction is for reference and traceability. Extracted content does not modify TorqPro engineering calculations or validated results.',
+    'di.upload_title': 'Upload Document',
+    'di.upload_sub': 'Extract text and structure from a technical document for reference and traceability.',
+    'di.supported_formats_label': 'Supported: PDF · DOCX · XLSX · PPTX',
+    'di.max_size_label': 'Maximum: 15 MiB',
+    'di.file_label': 'Document file',
+    'di.no_file_selected': 'No file selected.',
+    'di.selected_file_prefix': 'Selected: ',
+    'di.clear_button': 'Clear',
+    'di.extract_button': 'Extract Document',
+    'di.extracting': 'Extracting document…',
+    'di.precheck_unsupported_format': 'This file type is not supported. Allowed: PDF, DOCX, XLSX, PPTX.',
+    'di.precheck_too_large': 'The selected file exceeds the 15 MiB limit.',
+    'di.result_title': 'Extraction Result',
+    'di.field_original_filename': 'File name',
+    'di.field_extension': 'Extension',
+    'di.field_detected_media_type': 'Detected type',
+    'di.field_file_size_bytes': 'File size',
+    'di.field_status': 'Status',
+    'di.field_character_count': 'Character count',
+    'di.field_extraction_method': 'Extraction method',
+    'di.field_markitdown_version': 'MarkItDown version',
+    'di.field_request_id': 'Request ID',
+    'di.field_created_at': 'Created at',
+    'di.field_original_retained': 'Original file retained',
+    'di.original_retained_no': 'No',
+    'di.status_processing': 'Processing',
+    'di.status_extracted': 'Extracted',
+    'di.status_failed': 'Extraction failed',
+    'di.provenance_title': 'Provenance',
+    'di.provenance_sub': 'Hashes and traceability metadata for this extraction.',
+    'di.field_content_sha256': 'Content SHA-256',
+    'di.field_markdown_sha256': 'Markdown SHA-256',
+    'di.content_title': 'Extracted Content',
+    'di.content_sub': 'Raw text extracted from the document. This is untrusted source content, shown as plain text only.',
+    'di.content_empty': 'No extracted content available.',
+    'di.mydocs_title': 'My Documents',
+    'di.mydocs_sub': 'Your previous document extractions',
+    'di.mydocs_refresh': 'Refresh',
+    'di.mydocs_loading': 'Loading documents…',
+    'di.mydocs_empty': 'No documents uploaded yet.',
+    'di.mydocs_error_prefix': 'Could not load documents: ',
+    'di.mydocs_col_filename': 'File name',
+    'di.mydocs_col_format': 'Format',
+    'di.mydocs_col_status': 'Status',
+    'di.mydocs_col_created_at': 'Created at',
+    'di.mydocs_col_character_count': 'Characters',
+    'di.mydocs_col_request_id': 'Request ID',
+    'di.error_413': 'The selected file exceeds the 15 MiB limit.',
+    'di.error_415': 'The document format is unsupported or does not match its contents.',
+    'di.error_422': 'The document is damaged or could not be safely processed.',
+    'di.error_503': 'Document extraction is temporarily unavailable.',
+    'di.error_500': 'An internal document-processing error occurred.',
+    'di.error_generic_prefix': 'Document extraction failed: ',
   },
   tr: {
     // ---- Faz 2.7.1: Calculations & Production Validation ----
@@ -5864,6 +6009,64 @@ const I18N = {
     'qb.stats.history.snapshot_success': 'Anlık görüntü kaydedildi.',
     'qb.stats.history.col_taken_at': 'Alınma zamanı',
     'qb.stats.history.col_total': 'Toplam soru sayısı',
+    // ---- Stage 2 / Slice 5: Document Intelligence ----
+    'sidebar.documentintelligence': 'Doküman Analizi',
+    'di.page_title': 'Doküman Analizi',
+    'di.page_subtitle': 'Teknik doküman çıkarımı ve izlenebilirlik',
+    'di.boundary_note': 'Doküman çıkarımı referans ve izlenebilirlik amaçlıdır. Çıkarılan içerik TorqPro mühendislik hesaplarını veya doğrulanmış sonuçları değiştirmez.',
+    'di.upload_title': 'Doküman Yükle',
+    'di.upload_sub': 'Referans ve izlenebilirlik amacıyla teknik bir dokümandan metin ve yapı çıkarın.',
+    'di.supported_formats_label': 'Desteklenen: PDF · DOCX · XLSX · PPTX',
+    'di.max_size_label': 'Maksimum: 15 MiB',
+    'di.file_label': 'Doküman dosyası',
+    'di.no_file_selected': 'Dosya seçilmedi.',
+    'di.selected_file_prefix': 'Seçilen: ',
+    'di.clear_button': 'Temizle',
+    'di.extract_button': 'Dokümanı Çıkar',
+    'di.extracting': 'Doküman çıkarılıyor…',
+    'di.precheck_unsupported_format': 'Bu dosya türü desteklenmiyor. İzin verilenler: PDF, DOCX, XLSX, PPTX.',
+    'di.precheck_too_large': 'Seçilen dosya 15 MiB sınırını aşıyor.',
+    'di.result_title': 'Çıkarma Sonucu',
+    'di.field_original_filename': 'Dosya adı',
+    'di.field_extension': 'Uzantı',
+    'di.field_detected_media_type': 'Algılanan tür',
+    'di.field_file_size_bytes': 'Dosya boyutu',
+    'di.field_status': 'Durum',
+    'di.field_character_count': 'Karakter sayısı',
+    'di.field_extraction_method': 'Çıkarma yöntemi',
+    'di.field_markitdown_version': 'MarkItDown sürümü',
+    'di.field_request_id': 'İstek kimliği',
+    'di.field_created_at': 'Oluşturulma zamanı',
+    'di.field_original_retained': 'Orijinal dosya saklandı',
+    'di.original_retained_no': 'Hayır',
+    'di.status_processing': 'İşleniyor',
+    'di.status_extracted': 'Çıkarıldı',
+    'di.status_failed': 'Çıkarma başarısız',
+    'di.provenance_title': 'İzlenebilirlik',
+    'di.provenance_sub': 'Bu çıkarma işlemine ait özet değerleri ve izlenebilirlik verileri.',
+    'di.field_content_sha256': 'İçerik SHA-256',
+    'di.field_markdown_sha256': 'Markdown Özeti (SHA-256)',
+    'di.content_title': 'Çıkarılan İçerik',
+    'di.content_sub': 'Dokümandan çıkarılan ham metin. Bu, güvenilmeyen kaynak içeriğidir ve yalnızca düz metin olarak gösterilir.',
+    'di.content_empty': 'Çıkarılan içerik yok.',
+    'di.mydocs_title': 'Dokümanlarım',
+    'di.mydocs_sub': 'Önceki doküman çıkarımlarınız',
+    'di.mydocs_refresh': 'Yenile',
+    'di.mydocs_loading': 'Dokümanlar yükleniyor…',
+    'di.mydocs_empty': 'Henüz doküman yüklenmedi.',
+    'di.mydocs_error_prefix': 'Dokümanlar yüklenemedi: ',
+    'di.mydocs_col_filename': 'Dosya adı',
+    'di.mydocs_col_format': 'Biçim',
+    'di.mydocs_col_status': 'Durum',
+    'di.mydocs_col_created_at': 'Oluşturulma zamanı',
+    'di.mydocs_col_character_count': 'Karakter',
+    'di.mydocs_col_request_id': 'İstek kimliği',
+    'di.error_413': 'Seçilen dosya 15 MiB sınırını aşıyor.',
+    'di.error_415': 'Doküman biçimi desteklenmiyor veya dosya içeriğiyle eşleşmiyor.',
+    'di.error_422': 'Doküman bozuk veya güvenli şekilde işlenemedi.',
+    'di.error_503': 'Doküman çıkarma hizmeti geçici olarak kullanılamıyor.',
+    'di.error_500': 'Doküman işlenirken dahili bir hata oluştu.',
+    'di.error_generic_prefix': 'Doküman çıkarma başarısız oldu: ',
   },
 };
 
@@ -7836,6 +8039,7 @@ function setLanguage(lang) {
   if (typeof wrrReapplyLanguage === 'function') wrrReapplyLanguage();
   if (typeof govReapplyLanguage === 'function') govReapplyLanguage();
   if (typeof qbReapplyLanguage === 'function') qbReapplyLanguage();
+  if (typeof diReapplyLanguage === 'function') diReapplyLanguage();
   if (typeof oemReapplyLanguage === 'function') oemReapplyLanguage();
   if (typeof buildFmea === 'function' && document.getElementById('fmea-list')) buildFmea();
   if (typeof problemReapplyLanguage === 'function') problemReapplyLanguage();
@@ -8156,7 +8360,323 @@ function showPage(id, el) {
   const pg = document.getElementById('page-' + id);
   if (pg) pg.classList.add('active');
   document.querySelectorAll('.sidebar-item').forEach(i => i.classList.remove('active'));
-  if(id==='arsiv')renderArchive();if(id==='validation'){renderValidationDatasets();refreshValidationPanel();}if(id==='dataadmin'){loadDataPackages();}if(id==='calibration'){loadCalibrationCases();}if(id==='versions'){loadDataVersions();}if(id==='qualitygate'){loadQualityGate();}if(id==='projects'){loadProjects();}if(id==='releasepackage'){populateReleaseProjects();}if(id==='organization'){loadOrganization();}if(id==='deployment'){loadDeploymentProfile();}if(id==='mobileaccess'){loadMobileAccess();document.querySelector('.sidebar')?.classList.remove('mobile-open');}if(id==='clouddeploy'){loadCloudReadiness();}if(id==='golivewizard'){loadGoLiveProfile();}if(id==='runtimehealth'){if(CURRENT_ROLE!=='admin'){alert('Bu sayfa için yönetici yetkisi gerekir.');showPage('dashboard');return;}loadRuntimeHealth();}if(id==='migration'){loadMigrationHistory();}if(id==='diagnostics'){runDiagnostics();}if(id==='license'){loadLicense();}if(id==='usage'){loadUsage();}if(id==='traceability'){populateReleaseProjects();}if(id==='revisions'){loadRevisions();}if(id==='approvals'){loadApprovalQueue();}if(id==='goldencases'){loadGoldenCases();}if(id==='admin'){if(CURRENT_ROLE!=='admin'){alert('Bu sayfa için yönetici yetkisi gerekir.');showPage('dashboard');return;}loadAdminUsers();loadAudit();loadSystemHealth();}if(id==='frictioncondition'){loadFrictionConditionWorkspace();}if(id==='strengthclasses'){loadStrengthClassesWorkspace();}if(id==='materialintelligence'){loadMaterialIntelligenceWorkspace();}if(id==='washerresolution'){loadWasherResolutionReport();loadWasherResolutionQueue();}if(id==='governance'){govInit();}if(id==='questionbank'){qbInit();}
+  if(id==='arsiv')renderArchive();if(id==='validation'){renderValidationDatasets();refreshValidationPanel();}if(id==='dataadmin'){loadDataPackages();}if(id==='calibration'){loadCalibrationCases();}if(id==='versions'){loadDataVersions();}if(id==='qualitygate'){loadQualityGate();}if(id==='projects'){loadProjects();}if(id==='releasepackage'){populateReleaseProjects();}if(id==='organization'){loadOrganization();}if(id==='deployment'){loadDeploymentProfile();}if(id==='mobileaccess'){loadMobileAccess();document.querySelector('.sidebar')?.classList.remove('mobile-open');}if(id==='clouddeploy'){loadCloudReadiness();}if(id==='golivewizard'){loadGoLiveProfile();}if(id==='runtimehealth'){if(CURRENT_ROLE!=='admin'){alert('Bu sayfa için yönetici yetkisi gerekir.');showPage('dashboard');return;}loadRuntimeHealth();}if(id==='migration'){loadMigrationHistory();}if(id==='diagnostics'){runDiagnostics();}if(id==='license'){loadLicense();}if(id==='usage'){loadUsage();}if(id==='traceability'){populateReleaseProjects();}if(id==='revisions'){loadRevisions();}if(id==='approvals'){loadApprovalQueue();}if(id==='goldencases'){loadGoldenCases();}if(id==='admin'){if(CURRENT_ROLE!=='admin'){alert('Bu sayfa için yönetici yetkisi gerekir.');showPage('dashboard');return;}loadAdminUsers();loadAudit();loadSystemHealth();}if(id==='frictioncondition'){loadFrictionConditionWorkspace();}if(id==='strengthclasses'){loadStrengthClassesWorkspace();}if(id==='materialintelligence'){loadMaterialIntelligenceWorkspace();}if(id==='washerresolution'){loadWasherResolutionReport();loadWasherResolutionQueue();}if(id==='governance'){govInit();}if(id==='questionbank'){qbInit();}if(id==='documentintelligence'){diInit();}
+}
+
+// ========== DOCUMENT INTELLIGENCE (Stage 2 / Slice 5) ==========
+// Thin frontend over the completed, backend-authoritative MarkItDown
+// document-ingestion API (POST/GET /api/documents, GET
+// /api/documents/{id}). This module performs NO engineering
+// calculation, NO AI call, and NO write-back to any other TorqPro
+// data -- it only uploads, displays extraction status/provenance, and
+// renders extracted text as inert plain text. The backend's own
+// Magika/OOXML validation remains the sole security authority; every
+// client-side check here is convenience-only (Step 6).
+const DI_MAX_UPLOAD_BYTES = 15 * 1024 * 1024;
+const DI_ALLOWED_EXTENSIONS = ['.pdf', '.docx', '.xlsx', '.pptx'];
+let DI_SELECTED_FILE = null;
+let DI_LAST_RECORD = null;
+
+function diEsc(s) {
+  if (s === null || s === undefined || s === '') return '—';
+  return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+// Human-readable byte formatter -- no existing shared formatter was
+// found elsewhere in this file (Step 9), so this is a small,
+// feature-scoped helper mirroring the naming convention of other
+// feature-local formatters (e.g. fcFmtNum).
+function diFormatBytes(n) {
+  if (n === null || n === undefined || isNaN(n)) return '—';
+  if (n < 1024) return n + ' B';
+  const units = ['KiB', 'MiB', 'GiB'];
+  let val = n / 1024;
+  let i = 0;
+  while (val >= 1024 && i < units.length - 1) { val /= 1024; i++; }
+  return val.toFixed(val >= 10 ? 1 : 2) + ' ' + units[i];
+}
+
+function diExtensionOf(filename) {
+  const idx = filename.lastIndexOf('.');
+  if (idx === -1 || idx === filename.length - 1) return '';
+  return filename.slice(idx).toLowerCase();
+}
+
+// Called once when the Document Intelligence page is opened
+// (showPage's own per-page hook, matching qbInit()/loadFrictionConditionWorkspace()'s
+// established convention).
+function diInit() {
+  diLoadDocumentList();
+}
+
+function diReapplyLanguage() {
+  if (DI_LAST_RECORD) diRenderResult(DI_LAST_RECORD);
+  if (Array.isArray(DI_LAST_DOC_LIST)) diRenderDocumentList(DI_LAST_DOC_LIST);
+}
+
+// ---------------------------------------------------------------
+// Upload panel
+// ---------------------------------------------------------------
+
+function diFileSelected(event) {
+  const file = event.target.files && event.target.files[0];
+  const infoEl = document.getElementById('di-selected-file-info');
+  const uploadBtn = document.getElementById('di-upload-btn');
+  const statusEl = document.getElementById('di-upload-status');
+  statusEl.innerHTML = '';
+  if (!file) {
+    DI_SELECTED_FILE = null;
+    infoEl.textContent = t('di.no_file_selected');
+    uploadBtn.disabled = true;
+    return;
+  }
+  // Client-side precheck only -- convenience, never authoritative
+  // (Step 6). The backend independently re-validates extension,
+  // content-type via Magika, OOXML structure, and size regardless of
+  // what happens here.
+  const ext = diExtensionOf(file.name);
+  if (DI_ALLOWED_EXTENSIONS.indexOf(ext) === -1) {
+    DI_SELECTED_FILE = null;
+    event.target.value = '';
+    infoEl.textContent = t('di.no_file_selected');
+    uploadBtn.disabled = true;
+    statusEl.innerHTML = '<div class="alert alert-danger">' + diEsc(t('di.precheck_unsupported_format')) + '</div>';
+    return;
+  }
+  if (file.size > DI_MAX_UPLOAD_BYTES) {
+    DI_SELECTED_FILE = null;
+    event.target.value = '';
+    infoEl.textContent = t('di.no_file_selected');
+    uploadBtn.disabled = true;
+    statusEl.innerHTML = '<div class="alert alert-danger">' + diEsc(t('di.precheck_too_large')) + '</div>';
+    return;
+  }
+  DI_SELECTED_FILE = file;
+  infoEl.textContent = t('di.selected_file_prefix') + file.name + ' (' + diFormatBytes(file.size) + ')';
+  uploadBtn.disabled = false;
+}
+
+function diResetUploadForm() {
+  DI_SELECTED_FILE = null;
+  const fileInput = document.getElementById('di-file-input');
+  if (fileInput) fileInput.value = '';
+  document.getElementById('di-selected-file-info').textContent = t('di.no_file_selected');
+  document.getElementById('di-upload-btn').disabled = true;
+  document.getElementById('di-upload-status').innerHTML = '';
+}
+
+// Multipart upload helper -- deliberately separate from apiRequest()
+// (which always sets Content-Type: application/json and
+// JSON.stringify()-s the body, both wrong for a file upload). Uses
+// FormData so the browser sets the multipart boundary itself (Step
+// 7's explicit "do not manually construct the multipart boundary").
+// Mirrors apiRequest()'s own auth-header and error-body handling
+// otherwise -- same authentication mechanism, same error extraction.
+async function diUploadRequest(path, formData) {
+  const headers = {};
+  if (AUTH_TOKEN) headers['Authorization'] = 'Bearer ' + AUTH_TOKEN;
+  const res = await fetch(path, { method: 'POST', headers, body: formData });
+  if (!res.ok) {
+    const error = new Error('İstek başarısız');
+    error.status = res.status;
+    try {
+      const d = await res.json();
+      error.detail = d.detail;
+    } catch (e) { /* no JSON body */ }
+    throw error;
+  }
+  return res.json();
+}
+
+// Maps a failed upload's HTTP status to a stable, safe, localized
+// message (Step 15/16) -- never a raw exception string, stack trace,
+// local path, or Magika/MarkItDown internal detail.
+function diMapErrorMessage(err) {
+  const status = err && err.status;
+  if (status === 413) return t('di.error_413');
+  if (status === 415) return t('di.error_415');
+  if (status === 422) return t('di.error_422');
+  if (status === 503) return t('di.error_503');
+  if (status === 500) return t('di.error_500');
+  if (status === 401 || status === 403) return t('errors.unauthorized') || 'Oturum gerekli.';
+  return t('di.error_generic_prefix') + (err && err.message ? err.message : '');
+}
+
+async function diUploadDocument() {
+  if (!DI_SELECTED_FILE) return;
+  const uploadBtn = document.getElementById('di-upload-btn');
+  const clearBtn = document.getElementById('di-clear-btn');
+  const statusEl = document.getElementById('di-upload-status');
+  uploadBtn.disabled = true;
+  clearBtn.disabled = true;
+  statusEl.innerHTML = '<div class="alert alert-info">' + diEsc(t('di.extracting')) + '</div>';
+  const formData = new FormData();
+  // Field name is exactly "file" (Step 7). Ownership is derived by
+  // the backend from the authenticated session; the client sends
+  // only the document file, never any owner-identifying field
+  // (Step 21).
+  formData.append('file', DI_SELECTED_FILE);
+  try {
+    const record = await diUploadRequest('/api/documents/upload', formData);
+    statusEl.innerHTML = '';
+    diRenderResult(record);
+    diResetUploadForm();
+    await diLoadDocumentList();
+  } catch (e) {
+    statusEl.innerHTML = '<div class="alert alert-danger">' + diEsc(diMapErrorMessage(e)) + '</div>';
+  } finally {
+    uploadBtn.disabled = !DI_SELECTED_FILE;
+    clearBtn.disabled = false;
+  }
+}
+
+// ---------------------------------------------------------------
+// Result / provenance / content rendering
+// ---------------------------------------------------------------
+
+function diStatusLabel(status) {
+  if (status === 'extracted') return t('di.status_extracted');
+  if (status === 'processing') return t('di.status_processing');
+  if (status === 'failed') return t('di.status_failed');
+  return diEsc(status);
+}
+
+function diStatusPillClass(status) {
+  if (status === 'extracted') return 'pill-ok';
+  if (status === 'processing') return 'pill-info';
+  if (status === 'failed') return 'pill-nok';
+  return 'pill-info';
+}
+
+function diFieldRow(labelKey, value) {
+  return '<div class="di-field-row"><span class="di-field-key">' + diEsc(t(labelKey)) +
+    '</span><span class="di-field-val">' + diEsc(value) + '</span></div>';
+}
+
+// The one function responsible for putting the untrusted, user-
+// controlled extracted document text into the DOM. This is a HARD
+// SECURITY REQUIREMENT (Step 12): markdown_text is raw content taken
+// from an uploaded document and must never be interpreted as markup.
+// textContent assignment (never innerHTML) into a <pre> container is
+// the entire rendering mechanism -- see
+// tests/documents/js/run_document_intelligence_tests.js for the
+// permanent regression test scoped specifically to this function.
+function diRenderExtractedContent(markdownText) {
+  const viewer = document.getElementById('di-content-viewer');
+  if (!viewer) return;
+  if (markdownText === null || markdownText === undefined || markdownText === '') {
+    viewer.textContent = t('di.content_empty');
+    return;
+  }
+  viewer.textContent = markdownText;
+}
+
+function diRenderResult(record) {
+  DI_LAST_RECORD = record;
+  const resultCard = document.getElementById('di-result-card');
+  const provenanceCard = document.getElementById('di-provenance-card');
+  const contentCard = document.getElementById('di-content-card');
+  const summaryEl = document.getElementById('di-result-summary');
+  const provenanceEl = document.getElementById('di-provenance-fields');
+
+  resultCard.style.display = '';
+  provenanceCard.style.display = '';
+  contentCard.style.display = '';
+
+  const statusPill = '<span class="pill ' + diStatusPillClass(record.status) + '">' + diEsc(diStatusLabel(record.status)) + '</span>';
+
+  summaryEl.innerHTML =
+    diFieldRow('di.field_original_filename', record.original_filename) +
+    diFieldRow('di.field_extension', record.extension) +
+    diFieldRow('di.field_detected_media_type', record.detected_media_type) +
+    diFieldRow('di.field_file_size_bytes', diFormatBytes(record.file_size_bytes)) +
+    '<div class="di-field-row"><span class="di-field-key">' + diEsc(t('di.field_status')) + '</span><span class="di-field-val">' + statusPill + '</span></div>' +
+    diFieldRow('di.field_character_count', record.character_count) +
+    diFieldRow('di.field_extraction_method', record.extraction_method) +
+    diFieldRow('di.field_markitdown_version', record.markitdown_version) +
+    diFieldRow('di.field_request_id', record.request_id) +
+    diFieldRow('di.field_created_at', record.created_at) +
+    // Step 10: original file retention is always visible, never hidden.
+    '<div class="di-field-row"><span class="di-field-key">' + diEsc(t('di.field_original_retained')) +
+    '</span><span class="di-field-val">' + diEsc(record.original_retained ? '—' : t('di.original_retained_no')) + '</span></div>';
+
+  provenanceEl.innerHTML =
+    diFieldRow('di.field_content_sha256', record.content_sha256) +
+    diFieldRow('di.field_markdown_sha256', record.markdown_sha256) +
+    diFieldRow('di.field_extraction_method', record.extraction_method) +
+    diFieldRow('di.field_markitdown_version', record.markitdown_version) +
+    diFieldRow('di.field_request_id', record.request_id) +
+    diFieldRow('di.field_created_at', record.created_at) +
+    '<div class="di-field-row"><span class="di-field-key">' + diEsc(t('di.field_original_retained')) +
+    '</span><span class="di-field-val">' + diEsc(record.original_retained ? '—' : t('di.original_retained_no')) + '</span></div>';
+
+  diRenderExtractedContent(record.markdown_text);
+}
+
+// ---------------------------------------------------------------
+// My Documents (list + detail)
+// ---------------------------------------------------------------
+
+let DI_LAST_DOC_LIST = null;
+
+async function diLoadDocumentList() {
+  const statusEl = document.getElementById('di-mydocs-status');
+  const listEl = document.getElementById('di-mydocs-list');
+  statusEl.textContent = t('di.mydocs_loading');
+  try {
+    const data = await apiRequest('/api/documents');
+    const docs = (data && data.documents) || [];
+    DI_LAST_DOC_LIST = docs;
+    diRenderDocumentList(docs);
+    statusEl.textContent = String(docs.length);
+  } catch (e) {
+    statusEl.textContent = '';
+    listEl.innerHTML = '<div class="alert alert-danger">' + diEsc(t('di.mydocs_error_prefix')) + diEsc(e.message) + '</div>';
+  }
+}
+
+function diRenderDocumentList(docs) {
+  const listEl = document.getElementById('di-mydocs-list');
+  if (!docs.length) {
+    listEl.innerHTML = '<div style="font-size:12px;color:var(--text3)">' + diEsc(t('di.mydocs_empty')) + '</div>';
+    return;
+  }
+  let html = '<table class="table"><tr>' +
+    '<th>' + diEsc(t('di.mydocs_col_filename')) + '</th>' +
+    '<th>' + diEsc(t('di.mydocs_col_format')) + '</th>' +
+    '<th>' + diEsc(t('di.mydocs_col_status')) + '</th>' +
+    '<th>' + diEsc(t('di.mydocs_col_created_at')) + '</th>' +
+    '<th>' + diEsc(t('di.mydocs_col_character_count')) + '</th>' +
+    '<th>' + diEsc(t('di.mydocs_col_request_id')) + '</th>' +
+    '</tr>';
+  docs.forEach(doc => {
+    const pillClass = diStatusPillClass(doc.status);
+    html += '<tr class="di-doc-row" tabindex="0" role="button" ' +
+      'onclick="diSelectDocument(' + doc.id + ')" ' +
+      'onkeydown="if(event.key===\'Enter\'||event.key===\' \'){event.preventDefault();diSelectDocument(' + doc.id + ');}" ' +
+      'style="cursor:pointer">' +
+      '<td>' + diEsc(doc.original_filename) + '</td>' +
+      '<td>' + diEsc(doc.extension) + '</td>' +
+      '<td><span class="pill ' + pillClass + '">' + diEsc(diStatusLabel(doc.status)) + '</span></td>' +
+      '<td>' + diEsc(doc.created_at) + '</td>' +
+      '<td>' + diEsc(doc.character_count) + '</td>' +
+      '<td>' + diEsc(doc.request_id) + '</td>' +
+      '</tr>';
+  });
+  html += '</table>';
+  listEl.innerHTML = html;
+}
+
+async function diSelectDocument(documentId) {
+  const statusEl = document.getElementById('di-upload-status');
+  try {
+    const record = await apiRequest('/api/documents/' + encodeURIComponent(documentId));
+    diRenderResult(record);
+    statusEl.innerHTML = '';
+    document.getElementById('di-result-card').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  } catch (e) {
+    statusEl.innerHTML = '<div class="alert alert-danger">' + diEsc(t('di.mydocs_error_prefix')) + diEsc(e.message) + '</div>';
+  }
 }
 
 // ========== FRICTION CONDITION WORKSPACE (Faz 2.6.6) ==========
