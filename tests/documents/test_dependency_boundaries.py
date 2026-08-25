@@ -64,6 +64,11 @@ FORBIDDEN_IMPORT_PREFIXES = (
 #: ``markitdown`` under backend/documents.
 MARKITDOWN_SANCTIONED_IMPORTER = "backend/documents/markitdown_adapter.py"
 
+#: Stage 2 / Slice 6: the exactly-one sanctioned importer of
+#: ``pytesseract``/``pymupdf`` under backend/documents -- mirrors the
+#: markitdown-import boundary above exactly.
+OCR_SANCTIONED_IMPORTER = "backend/documents/ocr_adapter.py"
+
 
 def _is_forbidden(module_name: str) -> bool:
     return any(
@@ -113,9 +118,9 @@ def test_guarded_directory_actually_exists_and_has_files():
     guarded_path = REPO_ROOT / GUARDED_DIR
     py_files = list(guarded_path.rglob("*.py"))
     assert guarded_path.is_dir()
-    assert len(py_files) >= 7  # __init__, exceptions, content_validation,
+    assert len(py_files) >= 8  # __init__, exceptions, content_validation,
     # markitdown_adapter, models (Slice 2), repository, ingestion_service
-    # (Slice 3)
+    # (Slice 3), ocr_adapter (Slice 6)
 
 
 def test_exactly_one_module_imports_markitdown():
@@ -135,6 +140,38 @@ def test_exactly_one_module_imports_markitdown():
     assert importers == [MARKITDOWN_SANCTIONED_IMPORTER], (
         "Exactly one file may import markitdown "
         f"({MARKITDOWN_SANCTIONED_IMPORTER}); found importers: {importers}"
+    )
+
+
+def test_exactly_one_module_imports_ocr_engine_packages():
+    """Stage 2 / Slice 6: exactly one production module under
+    backend/documents imports pytesseract or pymupdf, and it must be
+    backend/documents/ocr_adapter.py -- mirrors
+    test_exactly_one_module_imports_markitdown's exact technique.
+
+    Note: markitdown_adapter.py legitimately imports ocr_adapter
+    itself (a same-package import, not pytesseract/pymupdf directly)
+    to orchestrate the fallback -- that is not a violation of this
+    boundary, which only concerns direct imports of the two OCR
+    engine packages themselves.
+    """
+    guarded_path = REPO_ROOT / GUARDED_DIR
+    ocr_package_names = ("pytesseract", "pymupdf", "fitz")
+    importers = []
+    for py_file in sorted(guarded_path.rglob("*.py")):
+        source = py_file.read_text(encoding="utf-8")
+        for module_name in _collect_imported_module_names(source):
+            if any(
+                module_name == name or module_name.startswith(name + ".")
+                for name in ocr_package_names
+            ):
+                rel = py_file.relative_to(REPO_ROOT).as_posix()
+                importers.append(rel)
+                break
+
+    assert importers == [OCR_SANCTIONED_IMPORTER], (
+        "Exactly one file may import pytesseract/pymupdf "
+        f"({OCR_SANCTIONED_IMPORTER}); found importers: {importers}"
     )
 
 

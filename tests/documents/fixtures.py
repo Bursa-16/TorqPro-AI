@@ -273,3 +273,89 @@ def build_generic_zip() -> bytes:
     with zipfile.ZipFile(buf, "w", zipfile.ZIP_DEFLATED) as z:
         z.writestr("hello.txt", "hello")
     return buf.getvalue()
+
+
+# ---------------------------------------------------------------------
+# Scanned / image-only PDF (Stage 2 / Slice 6 -- OCR fallback fixtures)
+# ---------------------------------------------------------------------
+
+_SCANNED_PAGE_LINES = [
+    "TorqPro Engineering Document",
+    "Bolted joint torque specification report",
+    "T\u00fcrk\u00e7e karakter testi: g\u00f6vde, c\u0131vata, s\u0131k\u0131\u015ftırma",
+    "\u0130\u011e\u00dc\u015e\u00d6\u00c7 \u0131\u011f\u00fc\u015f\u00f6\u00e7 \u00f6l\u00e7\u00fcm \u015fartname de\u011feri",
+]
+
+_DEJAVU_SANS_PATH = "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf"
+
+
+def build_scanned_pdf(page_count: int = 1, lines=None) -> bytes:
+    """A real, structurally-valid PDF containing only rendered page
+    images (no text layer at all) -- confirmed during Slice 6
+    implementation to: (a) pass content_validation's real Magika +
+    structural checks as a genuine PDF, (b) produce
+    EmptyExtractionError through the real MarkItDown converter (no
+    extractable text layer for MarkItDown to find), and (c) produce
+    real, meaningful OCR text (including correctly-recognized Turkish
+    characters) through the real Tesseract engine via
+    ocr_adapter.ocr_pdf().
+
+    Requires the DejaVu Sans TTF font to be present (used only to
+    *render* the page image via Pillow -- this is a test-fixture
+    concern, unrelated to backend.documents.ocr_adapter, which never
+    renders text itself, only PDF pages). If the font is unavailable,
+    callers should skip rather than fail -- see
+    ``dejavu_font_available()``.
+    """
+    from PIL import Image, ImageDraw, ImageFont
+    import pymupdf
+
+    if lines is None:
+        lines = _SCANNED_PAGE_LINES
+    font = ImageFont.truetype(_DEJAVU_SANS_PATH, 28)
+
+    doc = pymupdf.open()
+    for _ in range(page_count):
+        img = Image.new("RGB", (1600, 500), "white")
+        draw = ImageDraw.Draw(img)
+        y = 40
+        for line in lines:
+            draw.text((40, y), line, fill="black", font=font)
+            y += 80
+        buf = io.BytesIO()
+        img.save(buf, format="PNG")
+        page = doc.new_page(width=1600, height=500)
+        rect = pymupdf.Rect(0, 0, 1600, 500)
+        page.insert_image(rect, stream=buf.getvalue())
+
+    pdf_bytes = doc.tobytes()
+    doc.close()
+    return pdf_bytes
+
+
+def build_blank_scanned_pdf(page_count: int = 1) -> bytes:
+    """A structurally-valid, image-only PDF whose page image is
+    entirely blank (no rendered text at all) -- used to test the OCR
+    meaningful-text threshold (Step 5): real OCR against this fixture
+    should recognize nothing, and the empty/near-empty result must be
+    rejected as OCREmptyExtractionError rather than accepted."""
+    from PIL import Image
+    import pymupdf
+
+    doc = pymupdf.open()
+    for _ in range(page_count):
+        img = Image.new("RGB", (800, 400), "white")
+        buf = io.BytesIO()
+        img.save(buf, format="PNG")
+        page = doc.new_page(width=800, height=400)
+        rect = pymupdf.Rect(0, 0, 800, 400)
+        page.insert_image(rect, stream=buf.getvalue())
+    pdf_bytes = doc.tobytes()
+    doc.close()
+    return pdf_bytes
+
+
+def dejavu_font_available() -> bool:
+    import os
+
+    return os.path.exists(_DEJAVU_SANS_PATH)

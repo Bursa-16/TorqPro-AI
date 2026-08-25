@@ -66,6 +66,11 @@ from backend.documents.exceptions import (
     ExtractionFailedError,
     MalformedOOXMLError,
     MissingDocumentDependencyError,
+    OCREmptyExtractionError,
+    OCRFailedError,
+    OCRPageLimitExceededError,
+    OCRTimeoutError,
+    OCRUnavailableError,
     SuspiciousArchiveError,
     UnsupportedExtensionError,
 )
@@ -85,6 +90,15 @@ from backend.documents.models import DocumentExtractionRecord
 #: mapping (should not happen -- see docstring) falls back to the
 #: generic "extraction_failed" code rather than raising a second,
 #: unrelated exception while already handling a failure.
+#:
+#: Stage 2 / Slice 6: the five OCR-fallback exception types are added
+#: below, mapped to their own distinct "ocr_*" codes -- never
+#: collapsed into the pre-existing non-OCR codes, and never
+#: constructed from the raised exception's own message text (which
+#: could contain a Tesseract stderr fragment or local path -- see
+#: each OCR exception's own docstring in exceptions.py for the
+#: specific leak this guards against). Existing non-OCR codes are
+#: unchanged.
 _ERROR_SUMMARY_BY_EXCEPTION_TYPE = {
     UnsupportedExtensionError: "unsupported_document_format",
     EmptyDocumentError: "empty_document",
@@ -95,6 +109,11 @@ _ERROR_SUMMARY_BY_EXCEPTION_TYPE = {
     ExtractionFailedError: "extraction_failed",
     EmptyExtractionError: "empty_extraction",
     MissingDocumentDependencyError: "missing_document_dependency",
+    OCRUnavailableError: "ocr_unavailable",
+    OCRTimeoutError: "ocr_timeout",
+    OCRFailedError: "ocr_failed",
+    OCREmptyExtractionError: "ocr_empty",
+    OCRPageLimitExceededError: "ocr_page_limit",
 }
 
 _FALLBACK_ERROR_SUMMARY = "extraction_failed"
@@ -168,14 +187,16 @@ def ingest_document(
     created_at: str,
     detector: Optional[ContentTypeDetector] = None,
     converter: Optional[DocumentConverter] = None,
+    ocr_fn=None,
 ) -> DocumentExtractionRecord:
     """Validate, convert, and persist one uploaded document.
 
-    ``detector``/``converter`` are passed through unchanged to
-    :func:`markitdown_adapter.extract_document` (both default to the
-    real Magika/MarkItDown-backed implementations when omitted) --
-    purely so tests can inject fakes, exactly mirroring
-    ``extract_document()``'s own reason for accepting them.
+    ``detector``/``converter``/``ocr_fn`` are passed through unchanged
+    to :func:`markitdown_adapter.extract_document` (all three default
+    to the real Magika/MarkItDown/Tesseract-backed implementations
+    when omitted) -- purely so tests can inject fakes, exactly
+    mirroring ``extract_document()``'s own reason for accepting them.
+    ``ocr_fn`` is Stage 2 / Slice 6's addition, for the same reason.
 
     On success, returns the persisted, ``status="extracted"``
     :class:`~backend.documents.models.DocumentExtractionRecord`.
@@ -212,7 +233,7 @@ def ingest_document(
 
     try:
         result = extract_document(
-            content, filename, detector=detector, converter=converter
+            content, filename, detector=detector, converter=converter, ocr_fn=ocr_fn
         )
     except DocumentIngestionError as exc:
         error_summary = error_summary_for(exc)

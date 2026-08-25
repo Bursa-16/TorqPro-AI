@@ -18,9 +18,9 @@ from backend.app import conn
 from backend.documents import repository
 from backend.documents.exceptions import (
     ContentTypeMismatchError,
-    EmptyExtractionError,
     ExtractionFailedError,
     MalformedOOXMLError,
+    OCREmptyExtractionError,
     UnsupportedExtensionError,
 )
 from backend.documents.ingestion_service import ingest_document
@@ -231,8 +231,23 @@ class TestFailedIngestion:
         assert row["markdown_text"] is None
 
     def test_empty_extraction_creates_failed_record(self, db):
+        # Stage 2 / Slice 6: a .pdf with an empty MarkItDown result
+        # now legitimately routes through the OCR fallback first --
+        # this test's intent (verify the ingestion service persists a
+        # "failed" record with a stable, non-leaky error_summary when
+        # the overall extraction genuinely produces nothing) is
+        # preserved by injecting a fake ocr_fn that also finds no
+        # meaningful text, reproducing "final extraction remains
+        # empty" under the new, correct two-stage contract rather
+        # than calling real Tesseract in what is not an OCR
+        # integration test.
+        def _ocr_also_empty(content):
+            raise OCREmptyExtractionError(
+                "simulated: OCR also found no meaningful text"
+            )
+
         content = fixtures.build_minimal_pdf()
-        with pytest.raises(EmptyExtractionError):
+        with pytest.raises(OCREmptyExtractionError):
             ingest_document(
                 db,
                 content=content,
@@ -242,6 +257,7 @@ class TestFailedIngestion:
                 created_at="2026-08-22T09:40:00+00:00",
                 detector=_AcceptingDetector("pdf"),
                 converter=_EmptyOutputConverter(),
+                ocr_fn=_ocr_also_empty,
             )
         with conn() as c2:
             row = c2.execute(
@@ -249,7 +265,7 @@ class TestFailedIngestion:
                 ("req-fail-empty",),
             ).fetchone()
         assert row["status"] == "failed"
-        assert row["error_summary"] == "empty_extraction"
+        assert row["error_summary"] == "ocr_empty"
         assert row["markdown_text"] is None
 
     def test_failure_error_summary_never_leaks_raw_exception_text(self, db):

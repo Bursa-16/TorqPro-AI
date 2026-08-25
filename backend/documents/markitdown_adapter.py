@@ -286,6 +286,7 @@ def extract_document(
     *,
     detector: Optional[content_validation.ContentTypeDetector] = None,
     converter: Optional[DocumentConverter] = None,
+    ocr_fn=None,
 ) -> ExtractionResult:
     """Validate and convert ``content`` (already-in-memory bytes) to
     an :class:`ExtractionResult`, in the locked order documented in
@@ -300,6 +301,14 @@ def extract_document(
     MarkItDown stack; production callers are expected to call this
     function with no arguments beyond ``content``/``filename``.
 
+    ``ocr_fn`` (Stage 2 / Slice 6) defaults to the real
+    ``ocr_adapter.ocr_pdf`` and is injectable for the same reason --
+    tests can substitute a fake OCR callable (matching
+    ``ocr_pdf(content: bytes) -> OCRResult``) to exercise the
+    fallback-trigger logic and its own error mapping without needing
+    a real Tesseract installation present (Step 18's "unit tests with
+    fake OCR engine, integration test opt-in" split).
+
     Validation
     (``content_validation.validate_document``, which itself runs
     extension -> size -> content-type -> OOXML structure -> archive
@@ -309,17 +318,41 @@ def extract_document(
     never called -- there is no code path in this function that
     reaches conversion without validation having already succeeded.
 
-    ``warnings`` on the returned result is always an empty list in
-    this slice: MarkItDown 0.1.7's public API surface (confirmed in
-    Stage 1's and this slice's own inspection) does not expose any
-    structured warning/diagnostic list of its own to surface here,
-    and this function does not invent one (Step 7's explicit
-    instruction).
+    OCR fallback trigger (Stage 2 / Slice 6, Step 4): MarkItDown is
+    always attempted first, unconditionally, for every format. OCR is
+    considered ONLY if ALL of the following hold:
+      - the validated extension is exactly ``.pdf`` (never .docx/
+        .xlsx/.pptx -- checked directly against ``validation.extension``,
+        which content_validation has already confirmed matches the
+        real detected content type);
+      - MarkItDown's own attempt produced no meaningful text (i.e.
+        ``_is_meaningless_markdown(markdown_text)`` is true) -- OCR is
+        never attempted for a genuine MarkItDown *failure*
+        (``ExtractionFailedError``/``MissingDocumentDependencyError``
+        raised from the ``converter.convert()`` call above propagate
+        immediately, before this OCR-trigger check is even reached).
+    Any OCR-stage exception (unavailable/timeout/page-limit/empty/
+    failed -- see ``backend.documents.ocr_adapter``) propagates
+    unchanged; this function does not collapse OCR-specific failures
+    back into a generic ``EmptyExtractionError``, so callers/tests can
+    distinguish which stage actually failed (Step 20).
+
+    ``warnings`` on a MarkItDown-only result is always an empty list
+    (unchanged from Slice 1/2): MarkItDown 0.1.7's public API surface
+    does not expose any structured warning list of its own to surface
+    here, and this function does not invent one. A successful OCR
+    fallback result instead carries a deterministic warnings list
+    recording that the fallback was used plus OCR engine metadata
+    (Step 10/13) -- see the OCR branch below.
     """
     if detector is None:
         detector = content_validation.MagikaContentTypeDetector()
     if converter is None:
         converter = MarkItDownConverter()
+    if ocr_fn is None:
+        from backend.documents import ocr_adapter
+
+        ocr_fn = ocr_adapter.ocr_pdf
 
     validation = content_validation.validate_document(
         content, filename, detector=detector
@@ -333,7 +366,12 @@ def extract_document(
         # Already one of this package's own exception types (e.g.
         # raised by MarkItDownConverter itself per its documented
         # mapping, or by a well-behaved custom DocumentConverter) --
-        # propagate unchanged, do not double-wrap.
+        # propagate unchanged, do not double-wrap. This includes
+        # ExtractionFailedError/MissingDocumentDependencyError, which
+        # per the OCR trigger contract above must NEVER lead to OCR --
+        # those are genuine conversion failures, not "empty", and
+        # this except-and-reraise happens before the OCR branch below
+        # is ever reached.
         raise
     except Exception as exc:  # noqa: BLE001 - safety net for ANY
         # DocumentConverter implementation, not just MarkItDownConverter.
@@ -351,19 +389,62 @@ def extract_document(
         ) from exc
 
     if _is_meaningless_markdown(markdown_text):
+        if validation.extension == ".pdf":
+            # Stage 2 / Slice 6 OCR fallback. Any exception raised by
+            # ocr_fn (OCRUnavailableError/OCRTimeoutError/
+            # OCRPageLimitExceededError/OCREmptyExtractionError/
+            # OCRFailedError) propagates unchanged -- see this
+            # function's own docstring above.
+            from backend.documents import ocr_adapter
+
+            ocr_result = ocr_fn(content)
+
+            warnings: List[str] = [
+                "ocr_fallback_used",
+                f"ocr_engine={ocr_result.engine}",
+                f"ocr_engine_version={ocr_result.engine_version}",
+                f"ocr_languages={ocr_result.languages}",
+                f"ocr_page_count={ocr_result.page_count}",
+            ]
+
+            return ExtractionResult(
+                original_filename=filename,
+                extension=validation.extension,
+                detected_media_type=validation.content_type_label or "",
+                file_size_bytes=validation.size_bytes,
+                content_sha256=_content_sha256(content),
+                # extraction_method distinguishes the OCR-fallback
+                # path (Step 10); markitdown_version stays populated
+                # below with the real installed version, since
+                # MarkItDown genuinely was attempted first -- together
+                # these two fields let a record show "MarkItDown
+                # attempted first, OCR used only as fallback" without
+                # any new schema column.
+                extraction_method=ocr_adapter.OCR_EXTRACTION_METHOD,
+                markitdown_version=get_markitdown_version(),
+                markdown_text=ocr_result.text,
+                markdown_sha256=_markdown_sha256(ocr_result.text),
+                character_count=len(ocr_result.text),
+                warnings=warnings,
+                original_retained=ORIGINAL_RETAINED,
+            )
+
         # Centralized here (not inside MarkItDownConverter.convert())
         # so the guarantee "a returned ExtractionResult always has
         # meaningful markdown_text" holds for ANY DocumentConverter
         # implementation, not just the real MarkItDown-backed one --
         # see Step 9 and _is_meaningless_markdown()'s own docstring
         # for why the literal string "None" specifically must not be
-        # treated as valid content.
+        # treated as valid content. Non-PDF formats (.docx/.xlsx/
+        # .pptx) never reach the OCR branch above -- this is the only
+        # path for their empty-extraction case, unchanged from
+        # Slice 1/2.
         raise EmptyExtractionError(
             "Document validated successfully but no meaningful text "
             "content could be extracted."
         )
 
-    warnings: List[str] = []
+    warnings = []
 
     return ExtractionResult(
         original_filename=filename,

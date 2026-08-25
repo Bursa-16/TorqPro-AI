@@ -230,6 +230,67 @@ class InvalidDocumentStateTransitionError(DocumentIngestionError):
     """
 
 
+class OCRUnavailableError(DocumentIngestionError):
+    """Stage 2 / Slice 6. The OCR fallback could not run because the
+    Tesseract engine binary is not installed/reachable on this
+    system, or ``pytesseract``/``pymupdf`` are not importable.
+
+    This is a deployment/environment condition (the OCR engine is a
+    system-level dependency, not a pure Python package -- see
+    ``backend.documents.ocr_adapter``'s module docstring), not a
+    property of the uploaded document. TorqPro's existing MarkItDown
+    extraction is unaffected either way -- this exception only fires
+    on the fallback path, after MarkItDown has already run and
+    returned no meaningful text.
+    """
+
+
+class OCRTimeoutError(DocumentIngestionError):
+    """Stage 2 / Slice 6. The OCR engine exceeded
+    ``ocr_adapter.OCR_TIMEOUT_SECONDS`` for a page and was terminated.
+
+    Confirmed in real testing to correspond to an actual killed
+    Tesseract subprocess (``pytesseract``'s own ``timeout=`` parameter
+    terminates the underlying process on expiry), not merely "stopped
+    waiting" -- see ``ocr_adapter.py``'s own docstring for the
+    resource-isolation rationale.
+    """
+
+
+class OCREmptyExtractionError(DocumentIngestionError):
+    """Stage 2 / Slice 6. OCR completed without raising, but the
+    recognized text did not pass the minimum meaningful-content
+    threshold (see ``ocr_adapter.MIN_MEANINGFUL_OCR_CHARS`` and
+    ``ocr_adapter._is_meaningful_ocr_text``) -- e.g. a blank/near-blank
+    scanned page, or recognition noise below the deterministic
+    non-whitespace/printable-ratio bar. Deliberately distinct from the
+    MarkItDown-side :class:`EmptyExtractionError` so callers/logs can
+    tell which stage produced the empty result.
+    """
+
+
+class OCRPageLimitExceededError(DocumentIngestionError):
+    """Stage 2 / Slice 6. The validated PDF's page count exceeds
+    ``ocr_adapter.OCR_MAX_PAGES``. OCR fails closed rather than
+    silently processing only the first N pages or running
+    unboundedly -- per Stage 2/Slice 6 design, a deterministic
+    rejection is preferred over a partial, unlabeled result.
+    """
+
+
+class OCRFailedError(DocumentIngestionError):
+    """Stage 2 / Slice 6. Any other OCR-stage failure -- a page
+    render failure (malformed/corrupt PDF structure that passed
+    initial validation but fails at page-rasterization time), an
+    unexpected Tesseract subprocess failure, or any other exception
+    surfaced during rendering/recognition. Deliberately broad, the
+    same way :class:`ExtractionFailedError` is broad for MarkItDown's
+    own conversion stage -- the message is fixed and non-leaky; the
+    original exception is available only via Python exception
+    chaining, never in the public message text.
+    """
+
+
 __all__ = [
     "DocumentIngestionError",
     "UnsupportedExtensionError",
@@ -244,4 +305,9 @@ __all__ = [
     "DocumentPersistenceError",
     "DocumentRecordNotFoundError",
     "InvalidDocumentStateTransitionError",
+    "OCRUnavailableError",
+    "OCRTimeoutError",
+    "OCREmptyExtractionError",
+    "OCRPageLimitExceededError",
+    "OCRFailedError",
 ]

@@ -3,3 +3,5 @@ uvicorn[standard]>=0.30,<1
 python-multipart>=0.0.9
 PyJWT>=2.8
 markitdown[pdf,docx,xlsx,pptx]==0.1.7
+pytesseract==0.3.13
+pymupdf==1.28.2

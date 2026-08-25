@@ -449,25 +449,37 @@ class TestEmptyExtraction:
         assert markitdown_adapter._is_meaningless_markdown("TorqPro") is False
 
     def test_converter_producing_none_sentinel_raises_empty_extraction_error(self):
+        # Uses .docx rather than .pdf deliberately: this test's intent
+        # is _is_meaningless_markdown()'s sentinel-detection behavior,
+        # which is format-agnostic -- not the OCR fallback contract
+        # (covered separately and exhaustively in
+        # test_ocr_trigger_contract.py). A .pdf here would now
+        # legitimately route through the OCR fallback (Stage 2 /
+        # Slice 6), which is correct new behavior but not what this
+        # test is about; .docx keeps this test fast, deterministic,
+        # and free of any dependency on a real or fake OCR engine.
         class _NoneSentinelConverter:
             def convert(self, content, *, filename, extension):
                 return "None"
 
-        content = fixtures.build_minimal_pdf()
+        content = fixtures.build_minimal_docx()
         with pytest.raises(EmptyExtractionError):
             markitdown_adapter.extract_document(
-                content, "spec_sheet.pdf", converter=_NoneSentinelConverter()
+                content, "report.docx", converter=_NoneSentinelConverter()
             )
 
     def test_converter_producing_empty_string_raises_empty_extraction_error(self):
+        # Same rationale as the sibling test above: .docx, not .pdf,
+        # to keep this test scoped to _is_meaningless_markdown()
+        # itself rather than the separately-tested OCR fallback.
         class _EmptyConverter:
             def convert(self, content, *, filename, extension):
                 return ""
 
-        content = fixtures.build_minimal_pdf()
+        content = fixtures.build_minimal_docx()
         with pytest.raises(EmptyExtractionError):
             markitdown_adapter.extract_document(
-                content, "spec_sheet.pdf", converter=_EmptyConverter()
+                content, "report.docx", converter=_EmptyConverter()
             )
 
 
