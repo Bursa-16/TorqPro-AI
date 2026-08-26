@@ -38,6 +38,7 @@ from typing import Optional, Tuple
 
 from backend.ai_gateway.context_builder import build_context
 from backend.ai_gateway.llm_client import AIModelClient
+from backend.ai_gateway.output_validator import validate_model_response  # AI-RECOVERY-B2
 from backend.ai_gateway.permission import UserContext
 from backend.calculation_engine.response import CalculationResponse
 
@@ -65,6 +66,7 @@ def attempt_ai_explanation(
     model_client: Optional[AIModelClient],
     user: UserContext,
     language: str = "tr",
+    max_model_output_chars: Optional[int] = None,
 ) -> Tuple[Optional[str], Optional[str]]:
     """Try to produce AI-generated wording for an already-computed
     ``reasoning_result``. Returns ``(text, provider_name)`` on success,
@@ -95,13 +97,27 @@ def attempt_ai_explanation(
             calculation_result=calculation_response,
         )
         response = model_client.complete(prompt_context)
-    except Exception:  # noqa: BLE001 - deliberately broad, see module
-        # docstring: any AIModelClient failure mode (network error,
-        # timeout, unknown-provider wiring mistake surfaced as an
-        # exception by the caller before this function, malformed
-        # provider payload) is normalized to (None, None) here rather
-        # than propagated, so the deterministic reasoning result this
-        # function's caller already has is never affected.
+        # AI-RECOVERY-B2: validate provider prose immediately after the
+        # provider boundary.  Invalid output is treated identically to a
+        # provider exception (normalized to (None, None)) so the
+        # deterministic ReasoningResult the caller already holds is never
+        # affected -- matching the module docstring invariant:
+        # "AI provider unavailable must not affect the deterministic result."
+        # ``max_model_output_chars`` is supplied by the route module so
+        # this module contains no numeric literal (AST guard constraint).
+        # When ``None`` (e.g. in tests that call this function directly),
+        # type/empty/whitespace checks still run; only the size check is
+        # skipped.
+        _max = max_model_output_chars if max_model_output_chars is not None else len(response.text)
+        validate_model_response(
+            response.text,
+            max_chars=_max,
+            provider_name=model_client.name,
+        )
+    except Exception:  # noqa: BLE001 - deliberately broad: provider
+        # exceptions and ModelUnavailableError from validate_model_response
+        # both degrade to (None, None); no distinction is exposed to
+        # the caller, matching the existing error-normalisation contract.
         return None, None
 
     return response.text, model_client.name

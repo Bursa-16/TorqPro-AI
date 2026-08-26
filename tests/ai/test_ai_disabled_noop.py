@@ -112,8 +112,16 @@ def test_ai_gateway_package_import_registers_no_extra_routes():
     Engine's sole HTTP entry point) -- it *does* come from
     ``backend.ai_gateway`` (specifically
     ``backend.ai_gateway.reasoning``), unlike
-    ``/api/ai/torque-recommendation`` above. The guarded-path count is
-    now explicitly 6."""
+    ``/api/ai/torque-recommendation`` above.
+
+    AI-RECOVERY-B3 note: one further route added,
+    ``POST /api/ai/question-bank/search`` (retrieval-only, no provider
+    call, publishable-only QB keyword search).
+
+    AI-B5 note: one further route added,
+    ``POST /api/ai/question-bank/explain`` (generative, provider-backed
+    approved-QB-record explain endpoint). The guarded-path count is
+    now explicitly 8."""
     import backend.ai_gateway.orchestrator  # noqa: F401 - import side-effect check only
 
     # openapi() flattens every mounted/included router into a single
@@ -129,4 +137,6 @@ def test_ai_gateway_package_import_registers_no_extra_routes():
         "/api/ai/audit/{audit_id}",
         "/api/ai/torque-recommendation",
         "/api/ai/engineering-reasoning",
+        "/api/ai/question-bank/search",
+        "/api/ai/question-bank/explain",
     }

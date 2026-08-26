@@ -47,6 +47,30 @@ class ModelUnavailableError(AIGatewayError):
     guessed or fabricated answer."""
 
 
+class ModelTimeoutError(ModelUnavailableError):
+    """AI-RECOVERY-B4: the configured ``AIModelClient`` exceeded its
+    caller-supplied ``timeout_seconds`` budget while producing a
+    completion.
+
+    Deliberate subclass of :class:`ModelUnavailableError` (not a
+    sibling) so that all existing ``except ModelUnavailableError``
+    handlers in the orchestrator and route layer catch it without any
+    change -- a timeout is a specific *kind* of provider unavailability,
+    not a new failure category. Callers that need to distinguish a
+    timeout from a generic provider failure can catch
+    ``ModelTimeoutError`` first (Python MRO guarantees that the more
+    specific subclass is matched before the parent).
+
+    No real sleep/thread/process timeout wrapper is introduced in this
+    phase (no network provider exists yet). This class defines the
+    *interface contract* that a future network-calling
+    ``AIModelClient`` would raise; existing non-network clients
+    (``FakeModelClient``, ``RaisingModelClient``,
+    ``DeterministicModelClient``, ``_UnavailableModelClient``)
+    safely ignore ``timeout_seconds`` and never raise this error.
+    """
+
+
 class AIGatewayConfigurationError(AIGatewayError):
     """The gateway was invoked without a required collaborator (e.g.
     no ``AIModelClient`` configured). Distinct from
@@ -75,6 +99,7 @@ __all__ = [
     "AIGatewayError",
     "PermissionDeniedError",
     "ModelUnavailableError",
+    "ModelTimeoutError",
     "AIGatewayConfigurationError",
     "ProviderNotFoundError",
 ]

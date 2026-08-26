@@ -209,4 +209,40 @@ def get_filtered_question_evidence(
     return [_record_to_evidence(record) for record in records]
 
 
-__all__ = ["get_validated_question_evidence", "get_filtered_question_evidence"]
+def get_single_question_evidence(
+    conn: sqlite3.Connection, question_id: str
+) -> EvidenceSource:
+    """Return an :class:`EvidenceSource` for exactly one publishable Question
+    Bank record, identified by ``question_id``.
+
+    AI-B5 governance rule (exact-record binding): this function always
+    resolves to *one* record or raises -- it never searches, never lets
+    the model pick, and never falls back to a different record.
+
+    ``get_question`` (``backend.question_bank.retrieval``) is called with
+    ``publishable_only=True`` (its safe default), which raises
+    ``ContentNotFoundError`` for any of: unknown ``question_id``,
+    ``draft``, ``technical_review``, ``rejected``, ``deprecated``, soft-
+    deleted, and archived records -- raising the same error in all cases
+    so callers cannot distinguish "does not exist" from "exists but
+    hidden" (no unpublished existence leak).
+
+    This function re-raises ``ContentNotFoundError`` unchanged; the caller
+    (``backend.api.routes.ai_gateway._run_qb_explain``) maps it to HTTP 404.
+
+    AI-B5 write-safety rule: this function calls only read-path Question
+    Bank functions -- it never calls ``register_question``,
+    ``validate_question``, ``reject_question``, or any other write/lifecycle
+    function.
+    """
+    from backend.question_bank.retrieval import get_question  # local import avoids
+    # circular dependency if this module is ever imported before retrieval.
+    record = get_question(conn, question_id)
+    return _record_to_evidence(record)
+
+
+__all__ = [
+    "get_validated_question_evidence",
+    "get_filtered_question_evidence",
+    "get_single_question_evidence",
+]

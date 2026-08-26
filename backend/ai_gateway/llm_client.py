@@ -107,8 +107,22 @@ class AIModelClient(abc.ABC):
     name: str
 
     @abc.abstractmethod
-    def complete(self, prompt_context: PromptContext) -> ModelResponse:
+    def complete(
+        self, prompt_context: PromptContext, *, timeout_seconds: Optional[float] = None
+    ) -> ModelResponse:
         """Produce a completion for ``prompt_context``.
+
+        ``timeout_seconds`` (AI-RECOVERY-B4, optional, default ``None``)
+        is the caller-supplied budget in seconds. When ``None``, the
+        client applies its own default (which may be "no timeout" for
+        non-network clients). A concrete, network-calling client that
+        exceeds this budget should raise
+        ``backend.ai_gateway.exceptions.ModelTimeoutError``; existing
+        non-network clients (``FakeModelClient``,
+        ``RaisingModelClient``, ``DeterministicModelClient``,
+        ``_UnavailableModelClient``) safely ignore this parameter and
+        never raise ``ModelTimeoutError`` -- this is deliberate, because
+        no real network call is made in this phase.
 
         Implementations may raise any exception on failure (network
         error, timeout, malformed provider response); callers
@@ -169,7 +183,9 @@ class FakeModelClient(AIModelClient):
         self._fixed_text = fixed_text
         self.calls: list[PromptContext] = []
 
-    def complete(self, prompt_context: PromptContext) -> ModelResponse:
+    def complete(
+        self, prompt_context: PromptContext, *, timeout_seconds: Optional[float] = None
+    ) -> ModelResponse:
         self.calls.append(prompt_context)
         return ModelResponse(text=self._fixed_text, model_name=self.name)
 
@@ -187,7 +203,9 @@ class RaisingModelClient(AIModelClient):
     def __init__(self, error: Exception) -> None:
         self._error = error
 
-    def complete(self, prompt_context: PromptContext) -> ModelResponse:
+    def complete(
+        self, prompt_context: PromptContext, *, timeout_seconds: Optional[float] = None
+    ) -> ModelResponse:
         raise self._error
 
 

@@ -242,7 +242,12 @@ def test_happy_path_response_shape_is_unchanged_by_alpha5(
     )
     assert response.status_code == 200
     body = response.json()
+    # AI-RECOVERY-B1 adds "schema_version" as the one deliberate,
+    # additive field on top of the alpha.5 shape this test otherwise
+    # still guards unchanged -- see tests/ai/test_schema_versioning.py
+    # for the dedicated schema_version coverage.
     assert set(body.keys()) == {
+        "schema_version",
         "text",
         "insufficient_evidence",
         "result_label",

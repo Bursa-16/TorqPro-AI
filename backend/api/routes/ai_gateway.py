@@ -154,14 +154,17 @@ router = APIRouter(tags=["ai_gateway"])
 # propagating it.
 from backend.ai_gateway.audit import AIInteractionRecord, InMemoryAuditSink  # noqa: E402
 from backend.ai_gateway.composer import ComposedAnswer  # noqa: E402
+from backend.ai_gateway.context_builder import build_context  # noqa: E402
 from backend.ai_gateway.evidence_checker import EvidenceStatus  # noqa: E402
 from backend.ai_gateway.exceptions import (  # noqa: E402
     AIGatewayConfigurationError,
+    ModelTimeoutError,
     ModelUnavailableError,
     PermissionDeniedError,
     ProviderNotFoundError,
 )
 from backend.ai_gateway.llm_client import AIModelClient, ModelResponse, PromptContext  # noqa: E402
+from backend.ai_gateway.output_validator import validate_model_response  # noqa: E402
 from backend.ai_gateway.orchestrator import handle_query  # noqa: E402
 from backend.ai_gateway.permission import UserContext, ensure_read_only_action  # noqa: E402
 from backend.ai_gateway.providers.registry import build_default_registry  # noqa: E402
@@ -169,6 +172,10 @@ from backend.ai_gateway.reasoning import engine as reasoning_engine  # noqa: E40
 from backend.ai_gateway.reasoning import evidence_adapter as reasoning_evidence_adapter  # noqa
 from backend.ai_gateway.reasoning import wording as reasoning_wording  # noqa: E402
 from backend.ai_gateway.reasoning.models import ReasoningResult  # noqa: E402
+from backend.ai_gateway.retrieval.question_bank_adapter import (  # noqa: E402
+    get_filtered_question_evidence,
+    get_single_question_evidence,
+)
 from backend.ai_gateway.store import (  # noqa: E402
     PersistedAuditRecord,
     SQLiteAuditSink,
@@ -178,6 +185,7 @@ from backend.ai_gateway.store import (  # noqa: E402
 )
 from backend.api.dependencies import admin, user  # noqa: E402
 from backend.app import conn, now_iso  # noqa: E402
+from backend.question_bank.errors import ContentNotFoundError  # noqa: E402
 from backend.torque_recommendation import audit as trq_audit  # noqa: E402
 
 #: Fixed, always-read action name passed to ``ensure_read_only_action``
@@ -189,6 +197,30 @@ _QUERY_ACTION = "query"
 #: a sane upper bound so this route never forwards an unbounded string
 #: into the pipeline. Chosen generously above any realistic question.
 _MAX_QUERY_TEXT_LENGTH = 4000
+
+#: AI-RECOVERY-B1: shared response schema version stamped onto every
+#: *successful* AI gateway response body (``POST /api/ai/query``,
+#: ``POST /api/ai/engineering-reasoning``). Deliberately a single,
+#: shared constant rather than one per route -- both routes are the
+#: same "AI gateway response" contract family, and a future breaking
+#: change to that shared contract should bump both at once, not risk
+#: the two drifting independently. Never added to error responses
+#: (``HTTPException`` bodies) or to any non-AI-gateway route -- see
+#: ``_serialize_answer``/``_run_engineering_reasoning`` below, the
+#: only two call sites that read this constant.
+AI_SCHEMA_VERSION = "1.0"
+
+#: AI-RECOVERY-B2: authoritative upper bound on accepted provider prose
+#: length (characters).  Defined here (in the route module, outside
+#: ``backend/ai_gateway/``) rather than inside ``output_validator.py``
+#: because ``tests/ai/test_safety_and_validation.py``'s AST-based guard
+#: prohibits numeric literals other than -1, 0, 1 anywhere under
+#: ``backend/ai_gateway/``.  Both call sites in the pipeline
+#: (``orchestrator.py`` and ``reasoning/wording.py``) receive this value
+#: as an explicit ``max_chars=`` argument via ``validate_model_response``.
+#: The route module is already the natural home for request/response
+#: sizing constants (see ``_MAX_QUERY_TEXT_LENGTH`` immediately above).
+MAX_MODEL_OUTPUT_CHARS: int = 8_000
 
 #: ADR-0020: the one, fixed provider registry this route lists via
 #: ``GET /api/ai/providers``. Built once at import time -- every
@@ -212,7 +244,9 @@ class _UnavailableModelClient(AIModelClient):
 
     name = "unavailable"
 
-    def complete(self, prompt_context: PromptContext) -> ModelResponse:
+    def complete(
+        self, prompt_context: PromptContext, *, timeout_seconds: Optional[float] = None
+    ) -> ModelResponse:
         raise RuntimeError(
             "No AI model provider is configured for the TorqPro AI Gateway "
             "(v3.0.0-alpha.4: HTTP exposure only, no real AIModelClient yet)."
@@ -290,6 +324,7 @@ def _serialize_answer(answer: ComposedAnswer) -> Dict[str, Any]:
     body (see module docstring, "Request/response contract"). No field
     is renamed, dropped, or reinterpreted; no new field is invented."""
     return {
+        "schema_version": AI_SCHEMA_VERSION,
         "text": answer.text,
         "insufficient_evidence": answer.insufficient_evidence,
         "result_label": answer.result_label,
@@ -382,6 +417,7 @@ def _run_query(
                 audit_sink=capture_sink,
                 query_text_hash=query_text_hash,
                 created_at=now_iso(),
+                max_model_output_chars=MAX_MODEL_OUTPUT_CHARS,  # AI-RECOVERY-B2
             )
         except ModelUnavailableError as exc:
             # ADR-0020, "provider failure audit": handle_query raises
@@ -506,6 +542,398 @@ def ai_audit_detail(audit_id: int, u: dict = Depends(admin)):
 
 
 # ---------------------------------------------------------------------
+# AI-RECOVERY-B3: POST /api/ai/question-bank/search
+# ---------------------------------------------------------------------
+
+
+class QBSearchRequest(BaseModel):
+    """Request body for ``POST /api/ai/question-bank/search``.
+
+    ``extra="forbid"`` rejects unknown fields (same policy as every
+    other request model in this file). ``publishable_only`` is
+    deliberately absent -- it is *always* ``True`` and can never be
+    overridden by a request field; the adapter's own hard-coded
+    ``publishable_only=True`` call is the authoritative gate.
+
+    ``category``/``difficulty`` are forwarded verbatim as hints to
+    ``get_filtered_question_evidence``'s ``category_hint``/
+    ``difficulty_hint`` parameters. An unrecognised value is treated
+    by the adapter as "no filter on that axis" (non-raising degradation,
+    ADR-0018 Karar 6) -- this route never reimplements that logic.
+
+    ``locale`` is absent: ``query_text`` is a keyword search string
+    that already runs over both ``question_tr`` and ``question_en``
+    inside the adapter; there is no server-side locale semantic that
+    would change retrieval or response shape.
+    """
+
+    model_config = ConfigDict(extra="forbid")
+
+    query_text: str = Field(...)
+    category: Optional[str] = None
+    difficulty: Optional[str] = None
+
+
+def _serialize_evidence_source(source) -> Dict[str, Any]:
+    """Serialize one ``EvidenceSource`` for the QB Search response.
+
+    Every field is taken verbatim from the already-verified, publishable-
+    only ``EvidenceSource`` -- no confidence score, AI ranking, relevance
+    percentage, generated summary or other fabricated field is added
+    (AI-RECOVERY-B3 governance rule: retrieval-only, non-generative).
+    """
+    return {
+        "source_type": source.source_type,
+        "source_id": source.source_id,
+        "content_version": source.content_version,
+        "title_tr": source.title_tr,
+        "title_en": source.title_en,
+        "body_tr": source.body_tr,
+        "body_en": source.body_en,
+        "standard_name": source.standard_name,
+        "standard_clause": source.standard_clause,
+        "source_kind": source.source_kind,
+        "category": source.category,
+        "difficulty": source.difficulty,
+        "tags": list(source.tags),
+        "traceability_level": source.traceability_level,
+    }
+
+
+def _run_qb_search(
+    body: QBSearchRequest,
+    u: Dict[str, Any],
+) -> Dict[str, Any]:
+    """Thin orchestration for the QB Search endpoint.
+
+    Retrieval-only: calls ``get_filtered_question_evidence`` (always
+    ``publishable_only=True`` inside the adapter), serializes results,
+    and returns the versioned response.  Zero provider/model calls.
+    Zero audit-record writes (see module-level audit decision comment
+    above).  Zero Question Bank write-path calls.
+    """
+    query_text = body.query_text.strip()
+    if not query_text:
+        raise HTTPException(400, "query_text must not be empty.")
+    if len(query_text) > _MAX_QUERY_TEXT_LENGTH:
+        raise HTTPException(
+            400,
+            f"query_text must not exceed {_MAX_QUERY_TEXT_LENGTH} characters.",
+        )
+
+    with conn() as c:
+        results = get_filtered_question_evidence(
+            c,
+            keyword=query_text,
+            category_hint=body.category,
+            difficulty_hint=body.difficulty,
+        )
+
+    serialized = [_serialize_evidence_source(src) for src in results]
+    return {
+        "schema_version": AI_SCHEMA_VERSION,
+        "query_text": query_text,
+        "count": len(serialized),
+        "results": serialized,
+    }
+
+
+@router.post("/api/ai/question-bank/search")
+def qb_search_endpoint(
+    body: QBSearchRequest,
+    u: dict = Depends(user),
+):
+    """AI-RECOVERY-B3: publishable-only, provider-independent Question
+    Bank keyword search.
+
+    Retrieval-only: no provider call, no model call, no QB write, no
+    ai_audit_records write.  Returns only currently publishable
+    (``validated`` status, active, non-deleted, non-archived) records
+    -- lifecycle enforcement is entirely inside the adapter/retrieval
+    layer, not reimplemented here.
+    """
+    return _handle(_run_qb_search, body, u)
+
+
+# ---------------------------------------------------------------------
+# AI-B5: POST /api/ai/question-bank/explain
+# ---------------------------------------------------------------------
+
+#: Clarification question upper bound.  Reuses ``_MAX_QUERY_TEXT_LENGTH``
+#: (4 000 chars) as the appropriate existing input limit -- a clarification
+#: question is the same class of user-supplied text as a query string, and
+#: the same size cap is therefore appropriate.  A separate constant would
+#: create two definitions of the same limit, creating a future maintenance
+#: hazard.
+_MAX_CLARIFICATION_LENGTH = _MAX_QUERY_TEXT_LENGTH
+
+
+class QBExplainRequest(BaseModel):
+    """Request body for ``POST /api/ai/question-bank/explain``.
+
+    AI-B5 governance rules (encoded here at the request boundary):
+    - ``question_id`` is required and binds the request to exactly one QB
+      record.  The endpoint never searches and never lets the model pick a
+      record.
+    - ``publishable_only`` is NOT a request field -- it is always ``True``
+      inside the adapter/retrieval layer and can never be overridden.
+    - ``clarification_question`` is optional user-supplied free text.  It
+      is treated as *untrusted* data: it is forwarded as
+      ``PromptContext.query_text`` (the user question side of the prompt),
+      never as a system instruction.
+    - No provider-selection field is exposed; the backend selects the
+      provider.
+    - ``extra="forbid"`` rejects unknown fields (same policy as every
+      other request model in this file).
+    """
+
+    model_config = ConfigDict(extra="forbid")
+
+    question_id: str = Field(...)
+    clarification_question: Optional[str] = None
+
+
+def _build_explain_query_text(
+    evidence_source, clarification_question: Optional[str]
+) -> str:
+    """Build the ``PromptContext.query_text`` for the explain prompt.
+
+    The text is constructed from a fixed template and the clarification
+    question (when supplied).  It does NOT include the approved QB answer
+    text -- that lives structurally in ``PromptContext.evidence``, not in
+    ``query_text``, preserving the system/user/evidence three-way
+    separation.
+
+    Both ``evidence_source`` content and ``clarification_question`` are
+    treated as *untrusted data* here -- they are embedded in the
+    ``query_text`` field (the "user question" side of the prompt context)
+    rather than the system/policy side.  The system policy is fixed inside
+    the provider prompt template, not derived from any of these values.
+    """
+    base = (
+        f"Soru ID: {evidence_source.source_id} "
+        f"(versiyon {evidence_source.content_version}) — "
+        "onaylı Soru Bankası kaydını teknik açıdan açıkla. "
+        "Yanıtın onaylı kaynak bilgisini değiştirmemeli; "
+        "yalnızca açıklayıcı, otorite-dışı bir yorum sunmalı."
+    )
+    if clarification_question:
+        base += f" Kullanıcı ek sorusu: {clarification_question}"
+    return base
+
+
+def _run_qb_explain(
+    body: QBExplainRequest,
+    u: Dict[str, Any],
+    model_client: AIModelClient,
+    x_request_id: Optional[str],
+) -> Dict[str, Any]:
+    """Orchestration for ``POST /api/ai/question-bank/explain``.
+
+    Pipeline:
+        1. Validate clarification_question input.
+        2. Fetch exact QB record (publishable hard gate via adapter).
+        3. Build PromptContext with evidence structurally separated from
+           user query and system policy.
+        4. Call provider, validate output (B2 validate_model_response).
+        5. Audit (hash-only, reuses existing ai_audit_records table).
+        6. Return versioned response with approved source and AI explanation
+           kept structurally distinct.
+
+    Governance invariants (all enforced here, not delegated):
+    - No QB write path (no register/validate/reject/deprecate calls).
+    - No lifecycle state change.
+    - AI prose never replaces or modifies the approved QB record.
+    - Evidence is anchored to the request's exact question_id, not chosen
+      by the model.
+    - Prompt-injection boundary: QB content and clarification_question are
+      both treated as untrusted data in PromptContext.evidence /
+      PromptContext.query_text; they cannot override system policy,
+      response format, or publishability.
+    """
+    # --- Input validation -----------------------------------------------
+    clarification = None
+    if body.clarification_question is not None:
+        clarification = body.clarification_question.strip()
+        if not clarification:
+            raise HTTPException(400, "clarification_question must not be empty or whitespace.")
+        if len(body.clarification_question) > _MAX_CLARIFICATION_LENGTH:
+            raise HTTPException(
+                400,
+                f"clarification_question must not exceed "
+                f"{_MAX_CLARIFICATION_LENGTH} characters.",
+            )
+
+    started_at = time.perf_counter()
+
+    with conn() as c:
+        # --- Exact-record lookup with publishable hard gate ---------------
+        try:
+            evidence_source = get_single_question_evidence(c, body.question_id)
+        except ContentNotFoundError:
+            # Deliberately generic message: cannot reveal whether the
+            # record exists but is non-publishable vs truly absent.
+            raise HTTPException(
+                404,
+                f"question_id '{body.question_id}' publishable kayıtlarda bulunamadı.",
+            )
+
+        # --- Prompt/evidence/policy separation ---------------------------
+        # SYSTEM POLICY: fixed, never derived from request or QB content.
+        # USER QUERY: clarification_question (untrusted user text).
+        # EVIDENCE: QB record fields (untrusted data, structural only).
+        # build_context assembles these as structured PromptContext fields,
+        # never as a single concatenated string.
+        user_context = UserContext(
+            user_id=u["id"], role=u["role"], is_active=bool(u["is_active"])
+        )
+        query_text = _build_explain_query_text(evidence_source, clarification)
+        prompt_context = build_context(
+            query_text=query_text,
+            user=user_context,
+            evidence=(evidence_source,),
+            calculation_result=None,
+        )
+
+        # --- Provider call + B2 output validation -----------------------
+        try:
+            model_response = model_client.complete(prompt_context)
+        except Exception as exc:  # noqa: BLE001
+            _persist_explain_failure(
+                c, u, body.question_id, evidence_source,
+                model_client, x_request_id, started_at,
+                error_category=type(exc).__name__,
+            )
+            raise ModelUnavailableError(
+                f"AIModelClient '{model_client.name}' failed during QB explain"
+            ) from exc
+
+        try:
+            validate_model_response(
+                model_response.text,
+                max_chars=MAX_MODEL_OUTPUT_CHARS,
+                provider_name=model_client.name,
+            )
+        except ModelUnavailableError as exc:
+            _persist_explain_failure(
+                c, u, body.question_id, evidence_source,
+                model_client, x_request_id, started_at,
+                error_category=type(exc).__name__,
+            )
+            raise
+
+        # --- Hash-only audit (reuse existing ai_audit_records table) -----
+        latency_ms = int((time.perf_counter() - started_at) * 1000)
+        query_text_hash = hashlib.sha256(query_text.encode("utf-8")).hexdigest()
+        response_text_hash = hashlib.sha256(
+            model_response.text.encode("utf-8")
+        ).hexdigest()
+        interaction_record = AIInteractionRecord(
+            user_id=u["id"],
+            query_text_hash=query_text_hash,
+            evidence_source_ids=(("question_bank", body.question_id),),
+            calculation_formula_ids=(),
+            model_name=model_response.model_name,
+            had_sufficient_evidence=True,
+            created_at=now_iso(),
+            retrieval_source_types_queried=("question_bank",),
+            evidence_count_by_source_type=(("question_bank", 1),),
+            evidence_status="PASS",
+            result_label=None,
+        )
+        persistent_sink = SQLiteAuditSink(c)
+        audit_trace_id = persistent_sink.record_with_latency(
+            interaction_record,
+            latency_ms=latency_ms,
+            user_role=u["role"],
+            correlation_id=x_request_id,
+            response_text_hash=response_text_hash,
+        )
+
+    # --- Versioned response --------------------------------------------
+    # "approved_source" and "explanation" are structurally distinct
+    # keys -- the AI explanation is advisory/non-authoritative prose
+    # only; it never replaces or modifies the approved QB record.
+    return {
+        "schema_version": AI_SCHEMA_VERSION,
+        "question_id": body.question_id,
+        "explanation": model_response.text,
+        "evidence": [
+            {
+                "source_type": evidence_source.source_type,
+                "source_id": evidence_source.source_id,
+                "content_version": evidence_source.content_version,
+                "title_tr": evidence_source.title_tr,
+                "title_en": evidence_source.title_en,
+                "body_tr": evidence_source.body_tr,
+                "body_en": evidence_source.body_en,
+                "standard_name": evidence_source.standard_name,
+                "standard_clause": evidence_source.standard_clause,
+                "category": evidence_source.category,
+                "difficulty": evidence_source.difficulty,
+                "tags": list(evidence_source.tags),
+                "traceability_level": evidence_source.traceability_level,
+            }
+        ],
+        "limitations": [
+            "AI açıklaması onaylı kaynak bilgisini değiştirmez; "
+            "yalnızca açıklayıcı yorumdur.",
+            "Onaylı kayıt her zaman otorite kaynaktır.",
+        ],
+        "audit_trace_id": audit_trace_id,
+    }
+
+
+def _persist_explain_failure(
+    c,
+    u: Dict[str, Any],
+    question_id: str,
+    evidence_source,
+    model_client: AIModelClient,
+    correlation_id: Optional[str],
+    started_at: float,
+    *,
+    error_category: str,
+) -> None:
+    """Write a hash-only failure record to ai_audit_records.
+
+    Never persists raw prompt text, raw provider response, or exception
+    details.  Reuses ``SQLiteAuditSink.record_failure`` (existing method,
+    unchanged).
+    """
+    latency_ms = int((time.perf_counter() - started_at) * 1000)
+    query_text_hash = hashlib.sha256(
+        f"qb_explain:{question_id}".encode("utf-8")
+    ).hexdigest()
+    SQLiteAuditSink(c).record_failure(
+        user_id=u["id"],
+        query_text_hash=query_text_hash,
+        model_name=getattr(model_client, "name", None),
+        created_at=now_iso(),
+        error_category=error_category,
+        latency_ms=latency_ms,
+        user_role=u["role"],
+        correlation_id=correlation_id,
+    )
+
+
+@router.post("/api/ai/question-bank/explain")
+def qb_explain_endpoint(
+    body: QBExplainRequest,
+    u: dict = Depends(user),
+    model_client: AIModelClient = Depends(get_model_client),
+    x_request_id: Optional[str] = Header(default=None, alias="X-Request-ID"),
+):
+    """AI-B5: explain one publishable Question Bank record.
+
+    Non-authoritative AI explanatory prose only.  Never creates, replaces,
+    or modifies the approved QB record.  The approved source remains the
+    authoritative knowledge; the AI explanation is advisory only.
+    """
+    return _handle(_run_qb_explain, body, u, model_client, x_request_id)
+
+
+# ---------------------------------------------------------------------
 # Faz v3.0.0-beta.2: POST /api/ai/engineering-reasoning
 # ---------------------------------------------------------------------
 
@@ -593,8 +1021,19 @@ def _resolve_wording_provider(provider_name: Optional[str]):
 def _serialize_reasoning_result(result: ReasoningResult) -> Dict[str, Any]:
     """Field-for-field render of ``ReasoningResult`` -- no field is
     renamed, dropped, or reinterpreted (mirrors
-    ``_serialize_answer``'s own discipline above)."""
-    return result.to_dict()
+    ``_serialize_answer``'s own discipline above).
+
+    AI-RECOVERY-B1: ``schema_version`` is added here, at the route's
+    own serialization boundary, rather than inside
+    ``ReasoningResult``/``ReasoningResult.to_dict()`` itself --
+    ``backend.ai_gateway.reasoning`` remains untouched (its own
+    already-tested, frozen dataclass contract is not this recovery
+    phase's concern), matching the same "this route module only does
+    response serialization" boundary the module docstring already
+    documents."""
+    body = result.to_dict()
+    body["schema_version"] = AI_SCHEMA_VERSION
+    return body
 
 
 def _run_engineering_reasoning(
@@ -636,6 +1075,7 @@ def _run_engineering_reasoning(
                 calculation_response=calculation_response,
                 model_client=model_client,
                 user=user_context,
+                max_model_output_chars=MAX_MODEL_OUTPUT_CHARS,  # AI-RECOVERY-B2
             )
             reasoning_result = reasoning_engine.with_ai_explanation(
                 reasoning_result, ai_explanation=ai_text, ai_explanation_provider=ai_provider
@@ -703,6 +1143,9 @@ __all__ = [
     "router",
     "get_model_client",
     "AIQueryRequest",
+    "QBSearchRequest",
+    "QBExplainRequest",
     "EngineeringReasoningRequest",
     "migrate_persistent_audit",
+    "ModelTimeoutError",
 ]

@@ -25,6 +25,8 @@ phase registers.
 
 from __future__ import annotations
 
+from typing import Optional
+
 from backend.ai_gateway.llm_client import AIModelClient, ModelResponse, PromptContext
 
 #: Fixed, non-fabricated placeholder text (bilingual not required here:
@@ -57,7 +59,9 @@ class DeterministicModelClient(AIModelClient):
     def is_available(self) -> bool:
         return True
 
-    def complete(self, prompt_context: PromptContext) -> ModelResponse:
+    def complete(
+        self, prompt_context: PromptContext, *, timeout_seconds: Optional[float] = None
+    ) -> ModelResponse:
         self.calls.append(prompt_context)
         return ModelResponse(text=self._fixed_text, model_name=self.name)
 

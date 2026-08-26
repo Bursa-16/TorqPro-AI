@@ -51,6 +51,7 @@ from backend.ai_gateway.context_builder import build_context
 from backend.ai_gateway.evidence_checker import check_evidence
 from backend.ai_gateway.exceptions import ModelUnavailableError
 from backend.ai_gateway.llm_client import AIModelClient
+from backend.ai_gateway.output_validator import validate_model_response  # AI-RECOVERY-B2
 from backend.ai_gateway.permission import UserContext, ensure_active_user
 from backend.ai_gateway.retrieval.question_bank_adapter import (
     get_filtered_question_evidence,
@@ -81,6 +82,7 @@ def handle_query(
     category_hint: Optional[str] = None,
     difficulty_hint: Optional[str] = None,
     tags: Optional[Sequence[str]] = None,
+    max_model_output_chars: Optional[int] = None,
 ) -> composer_module.ComposedAnswer:
     """Run one full AI-gateway interaction and return a
     :class:`~backend.ai_gateway.composer.ComposedAnswer`.
@@ -140,6 +142,34 @@ def handle_query(
         raise ModelUnavailableError(
             f"AIModelClient '{model_client.name}' failed to produce a completion"
         ) from exc
+
+    # AI-RECOVERY-B2: validate provider prose immediately after the
+    # provider boundary and before any trusted-prose consumer
+    # (evidence_checker / composer).  Invalid output raises
+    # ModelUnavailableError here; the same _handle() -> HTTPException 503
+    # mapping the route already applies for provider failures catches it,
+    # so no new HTTP-mapping branch is needed.
+    #
+    # ``max_model_output_chars`` is supplied by the route module
+    # (``backend.api.routes.ai_gateway.MAX_MODEL_OUTPUT_CHARS``) so that
+    # this module contains no numeric literal (AST guard constraint).
+    # ``None`` is treated as "no size limit" -- this path is only
+    # reachable in tests that call ``handle_query`` directly without
+    # passing ``max_model_output_chars``; the route module always
+    # supplies the real limit.
+    if max_model_output_chars is not None:
+        try:
+            validate_model_response(
+                model_response.text,
+                max_chars=max_model_output_chars,
+                provider_name=model_client.name,
+            )
+        except ModelUnavailableError:
+            raise
+        except Exception as exc:  # noqa: BLE001
+            raise ModelUnavailableError(
+                f"AIModelClient '{model_client.name}' output validation raised unexpectedly"
+            ) from exc
 
     evidence_check = check_evidence(evidence, calculation_result)
     answer = composer_module.compose(
