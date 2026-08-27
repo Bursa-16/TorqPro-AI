@@ -186,6 +186,9 @@ from backend.ai_gateway.store import (  # noqa: E402
 # AI-P1: Anthropic adapter -- imported lazily-at-startup, never at request time.
 from backend.ai_gateway.providers.anthropic_adapter import AnthropicModelClient  # noqa: E402
 from backend.ai_gateway.providers.config import load_from_env as _load_anthropic_config  # noqa
+# AI-P2L: Ollama local adapter -- conditional registration, same pattern as Anthropic.
+from backend.ai_gateway.providers.ollama_adapter import OllamaModelClient  # noqa: E402
+from backend.ai_gateway.providers.ollama_config import load_from_env as _load_ollama_config  # noqa
 from backend.api.dependencies import admin, user  # noqa: E402
 from backend.app import conn, now_iso  # noqa: E402
 from backend.question_bank.errors import ContentNotFoundError  # noqa: E402
@@ -281,6 +284,56 @@ def _maybe_register_anthropic() -> None:
 
 
 _maybe_register_anthropic()
+
+
+# --- AI-P2L numeric config defaults (outside backend/ai_gateway/, AST guard)
+#: Default Ollama server base URL. Port 11434 is Ollama's standard.
+#: Configurable via TORQPRO_OLLAMA_BASE_URL env var.
+_OLLAMA_DEFAULT_BASE_URL: str = "http://127.0.0.1:11434"
+
+#: Default per-request timeout for Ollama (seconds).  Local inference
+#: can be slow on CPU; 120s gives a reasonable ceiling without hanging
+#: forever.  Configurable via TORQPRO_OLLAMA_TIMEOUT_SECONDS env var.
+_OLLAMA_DEFAULT_TIMEOUT_SECONDS: float = 120.0
+
+#: Default Ollama model tag.
+#: Qwen3 8B is the recommended first model for TorqPro:
+#:   - strong multilingual reasoning including Turkish
+#:   - good technical/engineering explanation quality
+#:   - 8B parameter size runs on mid-range CPU/GPU hardware
+#:   - actively maintained by Alibaba Cloud
+#: Override via TORQPRO_OLLAMA_MODEL env var.
+_OLLAMA_DEFAULT_MODEL: str = "qwen3:8b"
+
+
+def _maybe_register_ollama() -> None:
+    """Load Ollama provider config from environment and, if enabled,
+    register an ``OllamaModelClient`` in ``_PROVIDER_REGISTRY``.
+
+    Called once at module import time.  Never called per-request.
+
+    PAID_CLOUD_AUTO_FALLBACK = NO: Ollama failure raises
+    ``ModelUnavailableError`` and stops there -- it NEVER silently
+    forwards to the Anthropic adapter.  The two providers are
+    independent registry entries; the caller selects explicitly via
+    ``provider_name`` or accepts the default.
+    """
+    cfg = _load_ollama_config(
+        default_timeout_seconds=_OLLAMA_DEFAULT_TIMEOUT_SECONDS,
+        default_base_url=_OLLAMA_DEFAULT_BASE_URL,
+        default_model=_OLLAMA_DEFAULT_MODEL,
+    )
+    if cfg.is_enabled():
+        _PROVIDER_REGISTRY.register(
+            OllamaModelClient(
+                model_id=cfg.model,
+                base_url=cfg.base_url,
+                default_timeout_seconds=cfg.timeout_seconds,
+            )
+        )
+
+
+_maybe_register_ollama()
 
 
 class _UnavailableModelClient(AIModelClient):
