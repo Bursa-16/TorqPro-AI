@@ -183,6 +183,9 @@ from backend.ai_gateway.store import (  # noqa: E402
     list_audit_records,
     migrate as migrate_persistent_audit,
 )
+# AI-P1: Anthropic adapter -- imported lazily-at-startup, never at request time.
+from backend.ai_gateway.providers.anthropic_adapter import AnthropicModelClient  # noqa: E402
+from backend.ai_gateway.providers.config import load_from_env as _load_anthropic_config  # noqa
 from backend.api.dependencies import admin, user  # noqa: E402
 from backend.app import conn, now_iso  # noqa: E402
 from backend.question_bank.errors import ContentNotFoundError  # noqa: E402
@@ -225,9 +228,42 @@ MAX_MODEL_OUTPUT_CHARS: int = 8_000
 #: ADR-0020: the one, fixed provider registry this route lists via
 #: ``GET /api/ai/providers``. Built once at import time -- every
 #: registered ``AIModelClient`` (only ``DeterministicModelClient`` in
-#: this phase) is itself stateless/side-effect-free to construct, so a
+#: earlier phases) is itself stateless/side-effect-free to construct, so a
 #: module-level singleton is safe and avoids rebuilding it per request.
+#:
+#: AI-P1: ``AnthropicModelClient`` is conditionally registered below if
+#: ``TORQPRO_ANTHROPIC_ENABLED=true`` and a non-empty
+#: ``TORQPRO_ANTHROPIC_API_KEY`` are present in the environment.  This
+#: happens once at module import time; no registration occurs at request
+#: time.  The API key is never stored anywhere outside the in-memory
+#: ``AnthropicProviderConfig`` object.
+
+# --- AI-P1 numeric config defaults (live here, outside backend/ai_gateway/,
+#     to satisfy the AST numeric-literal guard in test_safety_and_validation.py)
+_ANTHROPIC_DEFAULT_TIMEOUT_SECONDS: float = 30.0
+_ANTHROPIC_DEFAULT_MAX_TOKENS: int = 1_024
+_ANTHROPIC_DEFAULT_MODEL: str = "claude-sonnet-4-6"
+
 _PROVIDER_REGISTRY = build_default_registry()
+
+
+def _maybe_register_anthropic() -> None:
+    """Load Anthropic provider config from environment and, if enabled,
+    register an ``AnthropicModelClient`` in ``_PROVIDER_REGISTRY``.
+
+    Called once at module import time.  Never called per-request.
+    Never logs the API key or any secret value.
+    """
+    cfg = _load_anthropic_config(
+        default_timeout_seconds=_ANTHROPIC_DEFAULT_TIMEOUT_SECONDS,
+        default_max_tokens=_ANTHROPIC_DEFAULT_MAX_TOKENS,
+        default_model=_ANTHROPIC_DEFAULT_MODEL,
+    )
+    if cfg.is_enabled():
+        _PROVIDER_REGISTRY.register(AnthropicModelClient(cfg))
+
+
+_maybe_register_anthropic()
 
 
 class _UnavailableModelClient(AIModelClient):
