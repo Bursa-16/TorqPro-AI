@@ -240,9 +240,26 @@ MAX_MODEL_OUTPUT_CHARS: int = 8_000
 
 # --- AI-P1 numeric config defaults (live here, outside backend/ai_gateway/,
 #     to satisfy the AST numeric-literal guard in test_safety_and_validation.py)
+#: AI-P1: per-request HTTP timeout supplied to httpx.Timeout and forwarded
+#: to AnthropicModelClient.  Configurable via TORQPRO_ANTHROPIC_TIMEOUT_SECONDS.
 _ANTHROPIC_DEFAULT_TIMEOUT_SECONDS: float = 30.0
-_ANTHROPIC_DEFAULT_MAX_TOKENS: int = 1_024
-_ANTHROPIC_DEFAULT_MODEL: str = "claude-sonnet-4-6"
+
+#: AI-P1A: default model updated to claude-sonnet-5 (Anthropic's direct
+#: migration target from claude-sonnet-4-6; adaptive thinking is enabled
+#: by default on Sonnet 5 -- this model string activates it automatically
+#: without any request-body change).  Configurable via
+#: TORQPRO_ANTHROPIC_MODEL env var.
+_ANTHROPIC_DEFAULT_MODEL: str = "claude-sonnet-5"
+
+#: AI-P1A: raised from 1_024 to 16_000 for Sonnet 5 adaptive thinking
+#: compatibility.  On Sonnet 5, max_tokens covers thinking tokens PLUS
+#: final output tokens combined.  At 1_024 the thinking budget alone
+#: could exhaust the limit before any final prose is produced.
+#: 16_000 gives ample thinking headroom while the B2 output-char gate
+#: (MAX_MODEL_OUTPUT_CHARS = 8_000 chars ≈ 6_000 tokens) still rejects
+#: runaway prose before it reaches the user.
+#: Operators may override via TORQPRO_ANTHROPIC_MAX_TOKENS env var.
+_ANTHROPIC_DEFAULT_MAX_TOKENS: int = 16_000
 
 _PROVIDER_REGISTRY = build_default_registry()
 

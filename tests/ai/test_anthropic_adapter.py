@@ -141,7 +141,7 @@ def test_load_from_env_disabled_by_default(monkeypatch):
     cfg = load_from_env(
         default_timeout_seconds=30.0,
         default_max_tokens=1024,
-        default_model="claude-sonnet-4-6",
+        default_model="claude-sonnet-5",
     )
     assert cfg.is_enabled() is False
 
@@ -153,7 +153,7 @@ def test_load_from_env_enabled_with_key(monkeypatch):
     cfg = load_from_env(
         default_timeout_seconds=30.0,
         default_max_tokens=1024,
-        default_model="claude-sonnet-4-6",
+        default_model="claude-sonnet-5",
     )
     assert cfg.is_enabled() is True
     assert cfg.model == "claude-test-model"
@@ -176,7 +176,7 @@ def test_load_from_env_invalid_timeout_falls_back_to_default(monkeypatch):
     cfg = load_from_env(
         default_timeout_seconds=25.0,
         default_max_tokens=1024,
-        default_model="claude-sonnet-4-6",
+        default_model="claude-sonnet-5",
     )
     assert cfg.timeout_seconds == 25.0
 
