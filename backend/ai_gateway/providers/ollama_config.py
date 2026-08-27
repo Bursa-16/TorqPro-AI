@@ -35,10 +35,11 @@ import os
 from dataclasses import dataclass
 from typing import Optional
 
-_ENV_ENABLED  = "TORQPRO_OLLAMA_ENABLED"
-_ENV_BASE_URL = "TORQPRO_OLLAMA_BASE_URL"
-_ENV_MODEL    = "TORQPRO_OLLAMA_MODEL"
-_ENV_TIMEOUT  = "TORQPRO_OLLAMA_TIMEOUT_SECONDS"
+_ENV_ENABLED    = "TORQPRO_OLLAMA_ENABLED"
+_ENV_BASE_URL   = "TORQPRO_OLLAMA_BASE_URL"
+_ENV_MODEL      = "TORQPRO_OLLAMA_MODEL"
+_ENV_TIMEOUT    = "TORQPRO_OLLAMA_TIMEOUT_SECONDS"
+_ENV_KEEP_ALIVE = "TORQPRO_OLLAMA_KEEP_ALIVE"
 
 
 @dataclass(frozen=True)
@@ -59,6 +60,7 @@ class OllamaProviderConfig:
     base_url: str
     model: str
     timeout_seconds: float
+    keep_alive: str
 
     def is_enabled(self) -> bool:
         """Return ``True`` iff the adapter is both enabled and has a
@@ -71,12 +73,13 @@ def load_from_env(
     default_timeout_seconds: float,
     default_base_url: str,
     default_model: str,
+    default_keep_alive: str,
 ) -> OllamaProviderConfig:
     """Read Ollama provider configuration from environment variables.
 
-    ``default_timeout_seconds``, ``default_base_url``, and
-    ``default_model`` are supplied by the caller (the route module) so
-    that no numeric/string literal lives inside ``backend/ai_gateway/``
+    ``default_timeout_seconds``, ``default_base_url``, ``default_model``,
+    and ``default_keep_alive`` are supplied by the caller (the route module)
+    so that no numeric/string literal lives inside ``backend/ai_gateway/``
     (AST guard constraint).
 
     Never raises: missing or malformed env vars always fall back to the
@@ -95,11 +98,14 @@ def load_from_env(
     except ValueError:
         timeout_seconds = default_timeout_seconds
 
+    keep_alive = os.getenv(_ENV_KEEP_ALIVE, "").strip() or default_keep_alive
+
     return OllamaProviderConfig(
         enabled=enabled,
         base_url=base_url,
         model=model,
         timeout_seconds=timeout_seconds,
+        keep_alive=keep_alive,
     )
 
 

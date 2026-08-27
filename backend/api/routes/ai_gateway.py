@@ -305,6 +305,11 @@ _OLLAMA_DEFAULT_TIMEOUT_SECONDS: float = 120.0
 #: Override via TORQPRO_OLLAMA_MODEL env var.
 _OLLAMA_DEFAULT_MODEL: str = "qwen3:8b"
 
+#: AI-P2L-R: keep_alive default -- Ollama Go duration string.
+#: "10m" keeps the model loaded for 10 minutes after the last request.
+#: Configurable via TORQPRO_OLLAMA_KEEP_ALIVE env var.
+_OLLAMA_DEFAULT_KEEP_ALIVE: str = "10m"
+
 
 def _maybe_register_ollama() -> None:
     """Load Ollama provider config from environment and, if enabled,
@@ -322,6 +327,7 @@ def _maybe_register_ollama() -> None:
         default_timeout_seconds=_OLLAMA_DEFAULT_TIMEOUT_SECONDS,
         default_base_url=_OLLAMA_DEFAULT_BASE_URL,
         default_model=_OLLAMA_DEFAULT_MODEL,
+        default_keep_alive=_OLLAMA_DEFAULT_KEEP_ALIVE,
     )
     if cfg.is_enabled():
         _PROVIDER_REGISTRY.register(
@@ -329,6 +335,7 @@ def _maybe_register_ollama() -> None:
                 model_id=cfg.model,
                 base_url=cfg.base_url,
                 default_timeout_seconds=cfg.timeout_seconds,
+                keep_alive=cfg.keep_alive,
             )
         )
 

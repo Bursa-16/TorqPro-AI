@@ -97,6 +97,7 @@ def _make_client(transport: httpx.MockTransport) -> OllamaModelClient:
         model_id=_MODEL,
         base_url=_BASE_URL,
         default_timeout_seconds=30.0,
+        keep_alive="10m",
         http_client=injected,
     )
 
@@ -115,6 +116,7 @@ def test_ollama_disabled_not_registered(monkeypatch):
         default_timeout_seconds=30.0,
         default_base_url=_BASE_URL,
         default_model=_MODEL,
+        default_keep_alive="10m",
     )
     assert not cfg.is_enabled()
 
@@ -129,6 +131,7 @@ def test_ollama_enabled_config_is_enabled(monkeypatch):
         default_timeout_seconds=30.0,
         default_base_url=_BASE_URL,
         default_model=_MODEL,
+        default_keep_alive="10m",
     )
     assert cfg.is_enabled()
 
@@ -143,12 +146,14 @@ def test_ollama_enabled_registers_in_registry(monkeypatch):
         default_timeout_seconds=30.0,
         default_base_url=_BASE_URL,
         default_model=_MODEL,
+        default_keep_alive="10m",
     )
     if cfg.is_enabled():
         registry.register(OllamaModelClient(
             model_id=cfg.model,
             base_url=cfg.base_url,
             default_timeout_seconds=cfg.timeout_seconds,
+            keep_alive="10m",
         ))
     client = registry.get("ollama")
     assert client.name == "ollama"
@@ -164,6 +169,7 @@ def test_configurable_model_respected(monkeypatch):
         default_timeout_seconds=30.0,
         default_base_url=_BASE_URL,
         default_model=_MODEL,
+        default_keep_alive="10m",
     )
     assert cfg.model == "llama3.2:3b"
 
@@ -182,6 +188,7 @@ def test_configurable_base_url_respected(monkeypatch):
         default_timeout_seconds=30.0,
         default_base_url=_BASE_URL,
         default_model=_MODEL,
+        default_keep_alive="10m",
     )
     assert cfg.base_url == "http://192.168.1.10:11434"
 
@@ -221,6 +228,7 @@ def test_empty_response_fails_closed():
         }).encode())
     client = OllamaModelClient(
         model_id=_MODEL, base_url=_BASE_URL, default_timeout_seconds=30.0,
+        keep_alive="10m",
         http_client=httpx.Client(transport=httpx.MockTransport(handler)),
     )
     with pytest.raises(ModelUnavailableError):
@@ -256,6 +264,7 @@ def test_timeout_raises_model_timeout_error():
     injected = httpx.Client(transport=httpx.MockTransport(timeout_handler))
     client = OllamaModelClient(
         model_id=_MODEL, base_url=_BASE_URL, default_timeout_seconds=1.0,
+        keep_alive="10m",
         http_client=injected,
     )
     with pytest.raises(ModelTimeoutError):
@@ -268,6 +277,7 @@ def test_connect_timeout_raises_model_timeout_error():
     injected = httpx.Client(transport=httpx.MockTransport(handler))
     client = OllamaModelClient(
         model_id=_MODEL, base_url=_BASE_URL, default_timeout_seconds=1.0,
+        keep_alive="10m",
         http_client=injected,
     )
     with pytest.raises(ModelTimeoutError):
@@ -287,6 +297,7 @@ def test_connection_error_raises_model_unavailable():
         raise httpx.ConnectError("connection refused")
     client = OllamaModelClient(
         model_id=_MODEL, base_url=_BASE_URL, default_timeout_seconds=5.0,
+        keep_alive="10m",
         http_client=httpx.Client(transport=httpx.MockTransport(handler)),
     )
     with pytest.raises(ModelUnavailableError):
@@ -296,6 +307,7 @@ def test_connection_error_raises_model_unavailable():
 def test_500_error_raises_model_unavailable():
     client = OllamaModelClient(
         model_id=_MODEL, base_url=_BASE_URL, default_timeout_seconds=5.0,
+        keep_alive="10m",
         http_client=httpx.Client(transport=httpx.MockTransport(
             lambda r: httpx.Response(500, content=b"internal server error")
         )),
@@ -311,6 +323,7 @@ def test_500_error_raises_model_unavailable():
 def test_malformed_json_raises_model_unavailable():
     client = OllamaModelClient(
         model_id=_MODEL, base_url=_BASE_URL, default_timeout_seconds=5.0,
+        keep_alive="10m",
         http_client=httpx.Client(transport=_bad_json_transport()),
     )
     with pytest.raises(ModelUnavailableError):
@@ -326,6 +339,7 @@ def test_raw_server_error_not_leaked_in_exception():
     canary = "CANARY_SECRET_SERVER_ERROR_12345"
     client = OllamaModelClient(
         model_id=_MODEL, base_url=_BASE_URL, default_timeout_seconds=5.0,
+        keep_alive="10m",
         http_client=httpx.Client(transport=httpx.MockTransport(
             lambda r: httpx.Response(500, content=canary.encode())
         )),
@@ -351,6 +365,7 @@ def test_system_user_evidence_separation_in_payload():
 
     client = OllamaModelClient(
         model_id=_MODEL, base_url=_BASE_URL, default_timeout_seconds=5.0,
+        keep_alive="10m",
         http_client=httpx.Client(transport=httpx.MockTransport(handler)),
     )
     from backend.ai_gateway.llm_client import PromptContext
@@ -412,6 +427,7 @@ def test_backend_controls_provider_name():
     registry keyed by the backend-assigned name 'ollama'."""
     client = OllamaModelClient(
         model_id=_MODEL, base_url=_BASE_URL, default_timeout_seconds=5.0,
+        keep_alive="10m",
     )
     assert client.name == "ollama"
     assert client.model_identifier == _MODEL
@@ -444,6 +460,7 @@ def test_no_automatic_fallback_to_anthropic():
         raise httpx.ConnectError("refused")
     client = OllamaModelClient(
         model_id=_MODEL, base_url=_BASE_URL, default_timeout_seconds=5.0,
+        keep_alive="10m",
         http_client=httpx.Client(transport=httpx.MockTransport(handler)),
     )
     with pytest.raises(ModelUnavailableError) as exc_info:
@@ -469,6 +486,7 @@ def test_paid_cloud_auto_fallback_is_no():
     injected = httpx.Client(transport=httpx.MockTransport(handler))
     client = OllamaModelClient(
         model_id=_MODEL, base_url=_BASE_URL, default_timeout_seconds=5.0,
+        keep_alive="10m",
         http_client=injected,
     )
     with pytest.raises(ModelUnavailableError) as exc_info:
@@ -632,6 +650,7 @@ def test_qb_search_makes_zero_ollama_calls(client, auth_headers):
 
     fake_ollama = OllamaModelClient(
         model_id=_MODEL, base_url=_BASE_URL, default_timeout_seconds=5.0,
+        keep_alive="10m",
         http_client=httpx.Client(transport=httpx.MockTransport(raising_handler)),
     )
     app_module.app.dependency_overrides[route_module.get_model_client] = lambda: fake_ollama
@@ -684,7 +703,8 @@ def test_ollama_and_anthropic_are_independent_registry_entries():
     """Both providers register under distinct names -- no collision."""
     from backend.ai_gateway.providers.anthropic_adapter import AnthropicModelClient
     ollama_client = OllamaModelClient(
-        model_id=_MODEL, base_url=_BASE_URL, default_timeout_seconds=5.0
+        model_id=_MODEL, base_url=_BASE_URL, default_timeout_seconds=5.0,
+        keep_alive="10m",
     )
     assert ollama_client.name == "ollama"
     # AnthropicModelClient.name is a class attribute == "anthropic".
