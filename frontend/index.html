@@ -408,6 +408,92 @@ html{scrollbar-width:thin;scrollbar-color:var(--neutral) var(--surface)}
   .fc-field-value{max-width:100%}
 }
 
+/* ===== UX-P3: RESPONSIVE TABLES, FORMS & LAYOUT ===== */
+
+/* Global: inputs/selects never exceed container width */
+.form-input,.form-select,.form-textarea,
+input[type="text"],input[type="number"],input[type="password"],
+input[type="email"],input[type="search"],input[type="file"],
+select,textarea{max-width:100%;box-sizing:border-box}
+
+/* Responsive table wrapper applied via CSS:
+   All core engineering/data tables are wrapped in div.table-responsive
+   (applied in Python below). The wrapper scrolls; the <table> keeps
+   display:table so native table role, row/column relationships, and
+   th scope attributes (UX-P2) are all preserved in the accessibility tree.
+   DO NOT apply display:block to <div class="table-responsive"><table> directly. */
+.table-responsive{width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch}
+.table-responsive table,.table-responsive .source-table,.table-responsive .sc-table,
+.table-responsive .trace-table,.table-responsive .cal-table,.table-responsive .eng-table{
+  display:table  /* preserve native table role — no display:block */
+}
+
+/* Long engineering strings: allow wrap without breaking numbers */
+.question-id,.audit-id,.source-ref,.tech-string,
+.sc-result,.standard-ref,.trace-id{overflow-wrap:anywhere;word-break:break-word}
+
+/* Modals: fit viewport at all widths */
+.tp-alert-box,.equip-modal-box,.confirm-box{max-width:min(92vw,520px)!important;box-sizing:border-box}
+.tp-alert-box{width:min(340px,92vw)!important}
+
+/* === 768px: tablet breakpoint === */
+@media(max-width:768px){
+  /* Multi-column form grids collapse to 1-2 columns */
+  .form-grid,.form-grid-2,.calc-grid,
+  [style*="grid-template-columns:repeat(3"],[style*="grid-template-columns:repeat(4"],
+  [style*="grid-template-columns:1fr 1fr 1fr"],[style*="grid-template-columns:1fr 1fr 1fr 1fr"]{
+    grid-template-columns:1fr 1fr!important
+  }
+
+  /* Card/result panels respect viewport */
+  .result-card,.calc-card,.evidence-card,.kb-card{max-width:100%;box-sizing:border-box}
+
+  /* QB and AI panels */
+  .qb-ai-search-card,.qb-ai-explain-section,#qb-ai-search-card,#qb-ai-explain-section{
+    padding:8px!important
+  }
+
+  /* Action bars allow wrap */
+  .action-bar,.form-actions,.toolbar-row{flex-wrap:wrap;gap:6px}
+  .action-bar .btn,.form-actions .btn{min-width:0;flex-shrink:1}
+}
+
+/* === 430px: mobile breakpoint === */
+@media(max-width:430px){
+  /* Engineering forms: single column */
+  .form-grid,.form-grid-2,.calc-grid,
+  [style*="grid-template-columns"]{
+    grid-template-columns:1fr!important
+  }
+
+  /* Buttons: allow shrink but not full-width by default */
+  .btn{font-size:12px;padding:6px 10px}
+
+  /* Section headers stay readable */
+  .section-title{font-size:16px!important}
+
+  /* Sidebar: content uses full width when closed */
+  .content{min-width:0}
+
+  /* Topbar remains single row */
+  .topbar{flex-wrap:nowrap;overflow:hidden}
+
+  /* QB/AI panels: more compact */
+  #qb-ai-explain-section .card{padding:8px!important}
+  .ai-disclosure{font-size:11px}
+}
+
+/* === 375px: small mobile === */
+@media(max-width:375px){
+  /* tables must not cause horizontal page scroll */
+  .source-table,.sc-table,.trace-table,.cal-table,.eng-table,
+  table.table{font-size:11px}
+
+  /* Prevent topbar overflow */
+  .mobile-topbar strong{font-size:13px}
+  .mobile-menu-btn{padding:4px 8px;font-size:13px}
+}
+
 /* ===== UX-P2: GLOBAL ACCESSIBILITY ===== */
 
 /* Focus-visible: all interactive controls get a consistent outline.
@@ -617,11 +703,11 @@ textarea:focus-visible,
     </div>
     <div class="card">
       <div class="card-title" data-i18n="dashboard.recent_nok_title">Son NOK Kayıtlar</div><div class="card-sub" data-i18n="dashboard.recent_nok_sub">Müdahale gerektiren ölçümler</div>
-      <table class="table"><tr><th data-i18n="dashboard.th_operation" scope="col">Operasyon</th><th data-i18n="dashboard.th_chassis" scope="col">Şase</th><th data-i18n="dashboard.th_value" scope="col">Değer</th><th data-i18n="dashboard.th_status" scope="col">Durum</th></tr>
+      <div class="table-responsive"><table class="table"><tr><th data-i18n="dashboard.th_operation" scope="col">Operasyon</th><th data-i18n="dashboard.th_chassis" scope="col">Şase</th><th data-i18n="dashboard.th_value" scope="col">Değer</th><th data-i18n="dashboard.th_status" scope="col">Durum</th></tr>
       <tr><td data-i18n="dashboard.op_front_susp_crossmember">Ön süsp. travers</td><td>YH24-001823</td><td style="color:var(--danger)">87 Nm</td><td><span class="pill pill-nok" data-i18n="dashboard.status_nok">NOK</span></td></tr>
       <tr><td data-i18n="dashboard.op_seatbelt">Emniyet kemeri</td><td>YH24-001819</td><td style="color:var(--warning)">31 Nm</td><td><span class="pill pill-warn" data-i18n="dashboard.status_borderline">SINIRDA</span></td></tr>
       <tr><td data-i18n="dashboard.op_engine_mount">Motor takozu</td><td>YH24-001804</td><td style="color:var(--danger)">42 Nm</td><td><span class="pill pill-nok" data-i18n="dashboard.status_nok">NOK</span></td></tr>
-      <tr><td data-i18n="dashboard.op_brake_fitting">Fren rekoru</td><td>YH24-001797</td><td style="color:var(--success)">16 Nm ✓</td><td><span class="pill pill-ok" data-i18n="dashboard.status_resolved">Çözüldü</span></td></tr></table>
+      <tr><td data-i18n="dashboard.op_brake_fitting">Fren rekoru</td><td>YH24-001797</td><td style="color:var(--success)">16 Nm ✓</td><td><span class="pill pill-ok" data-i18n="dashboard.status_resolved">Çözüldü</span></td></tr></table></div>
     </div>
   </div>
 </div>
@@ -896,11 +982,11 @@ textarea:focus-visible,
   <div class="section-header"><span class="section-icon">🔩</span><div><div class="section-title">Sıkıcı Takip Listesi</div><div class="section-sub"><span class="norm-badge">Örnek norma göre periyotlar</span></div></div></div>
   <div class="alert alert-warn">⚠️ 3 sıkıcının yetenek çalışması süresi dolmuş.</div>
   <div class="card"><div class="card-header"><div class="card-title">Sıkıcı Envanteri</div><button class="btn btn-primary btn-sm">+ Yeni Ekle</button></div>
-    <table class="table"><tr><th scope="col">Sicil</th><th scope="col">Model</th><th scope="col">Operasyon</th><th scope="col">Nom.(Nm)</th><th scope="col">Sınıf</th><th scope="col">Cm/Cmk</th><th scope="col">Son Yetenek</th><th scope="col">Durum</th></tr>
+    <div class="table-responsive"><table class="table"><tr><th scope="col">Sicil</th><th scope="col">Model</th><th scope="col">Operasyon</th><th scope="col">Nom.(Nm)</th><th scope="col">Sınıf</th><th scope="col">Cm/Cmk</th><th scope="col">Son Yetenek</th><th scope="col">Durum</th></tr>
     <tr><td>G278</td><td>EXACT 12</td><td>Güneşlik mont.</td><td>15</td><td>C</td><td style="color:var(--success)">2.34/2.18</td><td>20.06.2024</td><td><span class="pill pill-ok">OK</span></td></tr>
     <tr><td>S1823</td><td>SEC EXACT</td><td>Braket mont.</td><td>28</td><td>B</td><td style="color:var(--warning)">1.71/1.42</td><td>15.05.2024</td><td><span class="pill pill-warn">KONTROL</span></td></tr>
     <tr><td>S1109</td><td>EXACT 15</td><td>Kutup başı mont.</td><td>5</td><td>C</td><td style="color:var(--danger)">1.28/1.10</td><td>02.04.2024</td><td><span class="pill pill-nok">YETERSİZ</span></td></tr>
-    <tr><td>ST22</td><td>SEC EXACT</td><td>Arkalık ayarı</td><td>28</td><td>B</td><td style="color:var(--danger)">1.45/1.31</td><td>01.03.2024</td><td><span class="pill pill-nok">SÜRESİ DOLMUŞ</span></td></tr></table>
+    <tr><td>ST22</td><td>SEC EXACT</td><td>Arkalık ayarı</td><td>28</td><td>B</td><td style="color:var(--danger)">1.45/1.31</td><td>01.03.2024</td><td><span class="pill pill-nok">SÜRESİ DOLMUŞ</span></td></tr></table></div>
   </div>
 </div>
 
@@ -2130,12 +2216,12 @@ textarea:focus-visible,
 
     <div class="card">
       <div class="card-title">Onay Politikası</div>
-      <table class="source-table">
+      <div class="table-responsive"><table class="source-table">
         <tr><th scope="col">Güven 1</th><td>Taslak, üretimde kullanılamaz</td></tr>
         <tr><th scope="col">Güven 2</th><td>İkincil kaynak, ön değerlendirme</td></tr>
         <tr><th scope="col">Güven 3</th><td>Çapraz kontrollü, mühendislik kullanımı</td></tr>
         <tr><th scope="col">Güven 4</th><td>Birincil standart veya onaylı test</td></tr>
-      </table>
+      </table></div>
       <div class="alert alert-warn" style="margin-top:12px">Güven 4 tek başına yeterli değildir; kayıt ayrıca yönetici tarafından “Onaylı” durumuna alınmalıdır.</div>
     </div>
   </div>
@@ -2168,7 +2254,7 @@ textarea:focus-visible,
 
   <div class="card">
     <div class="card-header"><div><div class="card-title" data-i18n="calibration.results_title">Kalibrasyon Sonuçları</div></div><button class="btn btn-secondary btn-sm" onclick="loadCalibrationCases()" data-i18n="calibration.refresh_btn">Yenile</button></div>
-    <table class="cal-table"><thead><tr><th data-i18n="calibration.th_thread" scope="col">Diş</th><th data-i18n="calibration.th_program" scope="col">Program</th><th data-i18n="calibration.th_reference" scope="col">Referans</th><th data-i18n="calibration.th_error" scope="col">Hata</th><th data-i18n="calibration.th_tolerance" scope="col">Tolerans</th><th data-i18n="calibration.th_decision" scope="col">Karar</th><th data-i18n="calibration.th_source" scope="col">Kaynak</th></tr></thead><tbody id="calibrationBody"></tbody></table>
+    <div class="table-responsive"><table class="cal-table"><thead><tr><th data-i18n="calibration.th_thread" scope="col">Diş</th><th data-i18n="calibration.th_program" scope="col">Program</th><th data-i18n="calibration.th_reference" scope="col">Referans</th><th data-i18n="calibration.th_error" scope="col">Hata</th><th data-i18n="calibration.th_tolerance" scope="col">Tolerans</th><th data-i18n="calibration.th_decision" scope="col">Karar</th><th data-i18n="calibration.th_source" scope="col">Kaynak</th></tr></thead><tbody id="calibrationBody"></tbody></table></div>
   </div>
 </div>
 
@@ -2180,7 +2266,7 @@ textarea:focus-visible,
     <div class="validation-card"><div class="card-title" data-i18n="validation.overall_decision">Genel Karar</div><div class="stat-val yellow" data-i18n="validation.preliminary_assessment">Ön değerlendirme</div><div class="stat-sub" data-i18n="validation.overall_decision_note">Güven 4 olmayan kayıt seri üretim onayı oluşturmaz.</div></div>
   </div>
   <div class="card"><div class="card-header"><div><div class="card-title" data-i18n="validation.current_traceability">Mevcut Hesabın İzlenebilirliği</div></div><button class="btn btn-secondary btn-sm" onclick="refreshValidationPanel()" data-i18n="validation.refresh_btn">Yenile</button></div><div id="validationCurrent"></div></div>
-  <div class="card"><div class="card-title" data-i18n="validation.dataset_status_title">Veri Seti Durumu</div><table class="source-table"><thead><tr><th data-i18n="validation.th_dataset" scope="col">Veri Seti</th><th data-i18n="validation.th_status" scope="col">Durum</th><th data-i18n="validation.th_record" scope="col">Kayıt</th><th data-i18n="validation.th_production" scope="col">Üretim</th><th data-i18n="validation.th_action" scope="col">Aksiyon</th></tr></thead><tbody id="validationDatasets"></tbody></table></div>
+  <div class="card"><div class="card-title" data-i18n="validation.dataset_status_title">Veri Seti Durumu</div><div class="table-responsive"><table class="source-table"><thead><tr><th data-i18n="validation.th_dataset" scope="col">Veri Seti</th><th data-i18n="validation.th_status" scope="col">Durum</th><th data-i18n="validation.th_record" scope="col">Kayıt</th><th data-i18n="validation.th_production" scope="col">Üretim</th><th data-i18n="validation.th_action" scope="col">Aksiyon</th></tr></thead><tbody id="validationDatasets"></tbody></table></div></div>
   <div class="alert alert-warn" data-i18n="validation.footer_warning">Doğrulanmış standart veya test raporu olmadan taslak veri seri üretim torku olarak kullanılmamalıdır.</div>
 </div>
 
@@ -7493,7 +7579,7 @@ function wrrRenderQueueTable(records) {
     <td>${scEsc(wrrBoolLabel(r.is_terminal))}</td>
     <td><button class="btn btn-secondary" onclick="wrrLoadResolutionDetail('${scEsc(r.resolution_id)}')" data-i18n="wrr.queue.detail_button">Detail</button></td>
   </tr>`).join('');
-  el.innerHTML = `<div class="sc-table-wrap"><table class="sc-table"><thead><tr>
+  el.innerHTML = `<div class="sc-table-wrap"><div class="table-responsive"><table class="sc-table"><thead><tr>
     <th scope="col">${scEsc(t('wrr.col.resolution_id'))}</th>
     <th scope="col">${scEsc(t('wrr.queue.col.washer_record_id'))}</th>
     <th scope="col">${scEsc(t('wrr.queue.col.issue_type'))}</th>
@@ -7503,7 +7589,7 @@ function wrrRenderQueueTable(records) {
     <th scope="col">${scEsc(t('wrr.queue.col.is_blocked'))}</th>
     <th scope="col">${scEsc(t('wrr.queue.col.is_terminal'))}</th>
     <th scope="col"></th>
-  </tr></thead><tbody>${body}</tbody></table></div>`;
+  </tr></thead><tbody>${body}</tbody></table></div></div>`;
 }
 
 async function wrrLoadResolutionDetail(resolutionId) {
@@ -7797,7 +7883,7 @@ function wrrRenderHistoryTable(decisions) {
     <td>${scEsc(d.decided_at)}</td>
     <td>${scEsc(d.confidence_level === null || d.confidence_level === undefined ? '—' : String(d.confidence_level))}</td>
   </tr>`).join('');
-  el.innerHTML = `<div class="sc-table-wrap"><table class="sc-table"><thead><tr>
+  el.innerHTML = `<div class="sc-table-wrap"><div class="table-responsive"><table class="sc-table"><thead><tr>
     <th scope="col">${scEsc(t('wrr.history.col.decision_id'))}</th>
     <th scope="col">${scEsc(t('wrr.history.col.previous_status'))}</th>
     <th scope="col">${scEsc(t('wrr.history.col.new_status'))}</th>
@@ -7806,7 +7892,7 @@ function wrrRenderHistoryTable(decisions) {
     <th scope="col">${scEsc(t('wrr.history.col.resolved_by'))}</th>
     <th scope="col">${scEsc(t('wrr.history.col.decided_at'))}</th>
     <th scope="col">${scEsc(t('wrr.history.col.confidence_level'))}</th>
-  </tr></thead><tbody>${rows}</tbody></table></div>`;
+  </tr></thead><tbody>${rows}</tbody></table></div></div>`;
 }
 
 // ---------------------------------------------------------------
@@ -7918,7 +8004,7 @@ function wrrRenderEvidenceTable(records) {
     <td>${scEsc(r.created_by)}</td>
     <td>${scEsc(r.created_at)}</td>
   </tr>`).join('');
-  el.innerHTML = `<div class="sc-table-wrap"><table class="sc-table"><thead><tr>
+  el.innerHTML = `<div class="sc-table-wrap"><div class="table-responsive"><table class="sc-table"><thead><tr>
     <th scope="col">${scEsc(t('wrr.evidence.col.evidence_id'))}</th>
     <th scope="col">${scEsc(t('wrr.evidence.col.evidence_type'))}</th>
     <th scope="col">${scEsc(t('wrr.evidence.col.title'))}</th>
@@ -7926,7 +8012,7 @@ function wrrRenderEvidenceTable(records) {
     <th scope="col">${scEsc(t('wrr.evidence.col.verification_status'))}</th>
     <th scope="col">${scEsc(t('wrr.evidence.col.created_by'))}</th>
     <th scope="col">${scEsc(t('wrr.evidence.col.created_at'))}</th>
-  </tr></thead><tbody>${rows}</tbody></table></div>`;
+  </tr></thead><tbody>${rows}</tbody></table></div></div>`;
 }
 
 function wrrShowEvidenceFormForDetail(detail) {
@@ -8906,7 +8992,7 @@ function diRenderDocumentList(docs) {
     listEl.innerHTML = '<div style="font-size:12px;color:var(--text3)">' + diEsc(t('di.mydocs_empty')) + '</div>';
     return;
   }
-  let html = '<table class="table"><tr>' +
+  let html = '<div class="table-responsive"><table class="table"><tr>' +
     '<th scope="col">' + diEsc(t('di.mydocs_col_filename')) + '</th>' +
     '<th scope="col">' + diEsc(t('di.mydocs_col_format')) + '</th>' +
     '<th scope="col">' + diEsc(t('di.mydocs_col_status')) + '</th>' +
@@ -8928,7 +9014,7 @@ function diRenderDocumentList(docs) {
       '<td>' + diEsc(doc.request_id) + '</td>' +
       '</tr>';
   });
-  html += '</table>';
+  html += '</table></div>';
   listEl.innerHTML = html;
 }
 
@@ -9681,14 +9767,14 @@ function hesapla(){
       <div class="eng-card"><div class="calc-box-label">${t('hizli.eng_external_thread_capacity')}</div><div class="eng-value ${sfExt>=1.2?'green':sfExt>=1?'yellow':'red'}">${Math.round(stripCapExt).toLocaleString('tr-TR')} N</div><div class="stat-sub">SF ${sfExt.toFixed(2)} · ${t('hizli.model_status_provisional')}</div></div>
     </div>
 
-    <table class="eng-table">
+    <div class="table-responsive"><table class="eng-table">
       <thead><tr><th scope="col">${t('hizli.eng_table_scenario')}</th><th scope="col">μthread</th><th scope="col">μbearing</th><th scope="col">${t('hizli.eng_table_torque')}</th><th scope="col">${t('hizli.eng_table_preload')}</th></tr></thead>
       <tbody>
         <tr><td>${t('hizli.scenario_min_friction')}</td><td>${mtMin.toFixed(3)}</td><td>${mbMin.toFixed(3)}</td><td>${tMin.total.toFixed(1)} Nm</td><td>${Math.round(Ftarget).toLocaleString('tr-TR')} N</td></tr>
         <tr><td>${t('hizli.scenario_nominal')}</td><td>${mtNom.toFixed(3)}</td><td>${mbNom.toFixed(3)}</td><td>${tNom.total.toFixed(1)} Nm</td><td>${Math.round(Ftarget).toLocaleString('tr-TR')} N</td></tr>
         <tr><td>${t('hizli.scenario_max_friction')}</td><td>${mtMax.toFixed(3)}</td><td>${mbMax.toFixed(3)}</td><td>${tMax.total.toFixed(1)} Nm</td><td>${Math.round(Ftarget).toLocaleString('tr-TR')} N</td></tr>
       </tbody>
-    </table>
+    </table></div>
 
     <div class="alert ${liveSources.length?'alert-success':'alert-warn'}"><strong>${t('hizli.active_standard_data_used')}</strong> ${liveSources.length?liveSources.join(', '):t('hizli.no_active_data_fallback')}<br><span style="font-size:11px">${ACTIVE_STANDARD_LIBRARY.version_signature||t('hizli.no_active_data_version')}</span></div>
     ${!prodAllowed?'<div class="alert alert-warn">' + t('hizli.confidence_insufficient') + '</div>':''}
@@ -10367,9 +10453,9 @@ async function generateProjectRelease(){
       <div class="release-card"><div class="stat-label">${t('release.open_revisions_label')}</div><div class="stat-val yellow">${p.summary.open_revisions}</div></div>
       <div class="release-card"><div class="stat-label">${t('release.decision_label')}</div><div class="stat-val ${p.summary.release_ready?'green':'red'}">${p.summary.release_ready?t('release.ready'):t('release.not_ready')}</div></div>
     </div>
-    <table class="trace-table"><thead><tr><th scope="col">${t('release.th_calculation')}</th><th scope="col">${t('release.th_thread')}</th><th scope="col">${t('release.th_class')}</th><th scope="col">${t('release.th_torque')}</th><th scope="col">${t('release.th_revision')}</th><th scope="col">${t('release.th_status')}</th><th scope="col">${t('release.th_data_version')}</th><th scope="col">${t('release.th_approver')}</th></tr></thead><tbody>
+    <div class="table-responsive"><table class="trace-table"><thead><tr><th scope="col">${t('release.th_calculation')}</th><th scope="col">${t('release.th_thread')}</th><th scope="col">${t('release.th_class')}</th><th scope="col">${t('release.th_torque')}</th><th scope="col">${t('release.th_revision')}</th><th scope="col">${t('release.th_status')}</th><th scope="col">${t('release.th_data_version')}</th><th scope="col">${t('release.th_approver')}</th></tr></thead><tbody>
       ${p.items.map(x=>`<tr><td>${x.record_no}</td><td>${x.thread||'—'}</td><td>${x.property_class||'—'}</td><td>${x.torque_nm??'—'} Nm</td><td>${x.revision_no!=null?'R'+x.revision_no:'—'}</td><td>${x.revision_status||'—'}</td><td>${x.version_signature||'—'}</td><td>${x.reviewer_name||'—'}</td></tr>`).join('')}
-    </tbody></table>
+    </tbody></table></div>
     <div class="alert ${p.summary.release_ready?'alert-success':'alert-warn'}"><strong>${t('release.decision_prefix')}:</strong> ${p.decision}</div>`;
 }
 function printProjectRelease(){if(!CURRENT_RELEASE_PACKAGE){tpAlert(t('release.create_package_first_warning'),'warn');return;}const w=window.open('','_blank');w.document.write('<html><body>'+document.getElementById('releasePackageView').innerHTML+'</body></html>');w.document.close();w.print();}
