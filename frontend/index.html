@@ -2502,6 +2502,7 @@ const I18N = {
     'checklist.btn_ok_label': 'OK — Pass',
     'checklist.btn_nok_label': 'NOK — Fail',
     'checklist.btn_na_label': 'N/A — Not applicable',
+    'admin.user_role_label': 'User role',
 
 
 
@@ -5490,6 +5491,7 @@ const I18N = {
     'checklist.btn_ok_label': 'OK — Geçti',
     'checklist.btn_nok_label': 'NOK — Başarısız',
     'checklist.btn_na_label': 'N/A — Uygulanamaz',
+    'admin.user_role_label': 'Kullanıcı rolü',
 
 
 
@@ -10052,7 +10054,7 @@ async function adminCreateUser(){
 async function loadAdminUsers(){
   if(CURRENT_ROLE!=='admin')return;
   const rows=await apiRequest('/api/admin/users');
-  document.getElementById('adminUsers').innerHTML=rows.length?rows.map(u=>`<div class="admin-row"><div><strong>${u.display_name}</strong><div style="font-size:11px;color:var(--text3)">${u.username}</div></div><select class="form-select" onchange="adminUpdateUser(${u.id},{role:this.value})"><option ${u.role==='viewer'?'selected':''} value="viewer">${t('admin.role_viewer')}</option><option ${u.role==='engineer'?'selected':''} value="engineer">${t('admin.role_engineer')}</option><option ${u.role==='admin'?'selected':''} value="admin">${t('admin.role_admin')}</option></select><span class="pill ${u.is_active?'pill-ok':'pill-nok'}">${u.is_active?t('admin.status_active'):t('admin.status_inactive')}</span><button class="btn btn-secondary btn-sm" onclick="adminUpdateUser(${u.id},{is_active:${u.is_active?0:1}})">${u.is_active?t('admin.deactivate_btn'):t('admin.activate_btn')}</button><button class="btn btn-danger btn-sm" onclick="adminResetPassword(${u.id})">${t('admin.reset_password_btn')}</button></div>`).join(''):t('admin.no_users_found');
+  document.getElementById('adminUsers').innerHTML=rows.length?rows.map(u=>`<div class="admin-row"><div><strong>${u.display_name}</strong><div style="font-size:11px;color:var(--text3)">${u.username}</div></div><select class="form-select" aria-label="${t('admin.user_role_label')}" onchange="adminUpdateUser(${u.id},{role:this.value})"><option ${u.role==='viewer'?'selected':''} value="viewer">${t('admin.role_viewer')}</option><option ${u.role==='engineer'?'selected':''} value="engineer">${t('admin.role_engineer')}</option><option ${u.role==='admin'?'selected':''} value="admin">${t('admin.role_admin')}</option></select><span class="pill ${u.is_active?'pill-ok':'pill-nok'}">${u.is_active?t('admin.status_active'):t('admin.status_inactive')}</span><button class="btn btn-secondary btn-sm" onclick="adminUpdateUser(${u.id},{is_active:${u.is_active?0:1}})">${u.is_active?t('admin.deactivate_btn'):t('admin.activate_btn')}</button><button class="btn btn-danger btn-sm" onclick="adminResetPassword(${u.id})">${t('admin.reset_password_btn')}</button></div>`).join(''):t('admin.no_users_found');
 }
 async function adminUpdateUser(id,patch){try{await apiRequest('/api/admin/users/'+id,{method:'PATCH',body:JSON.stringify(patch)});await loadAdminUsers();}catch(e){tpAlert(t('ui.operation_failed'),'error');}}
 async function adminResetPassword(id){
@@ -10471,7 +10473,7 @@ async function loadGoLiveProfile(){
 }
 function renderGoLiveChecklist(d){
   const items=[[t('golive.item_server_ip_set'),!!d.server_ip],[t('golive.item_domain_set'),!!d.domain],[t('golive.item_dns_planned'),!!d.dns_planned],[t('golive.item_https_ready'),d.https_status==='ready'],[t('golive.item_docker_ready'),!!d.docker_ready],[t('golive.item_health_check_passed'),!!d.health_ready]];
-  document.getElementById('goLiveChecklist').innerHTML=items.map(x=>`<div class="checklist-item"><input type="checkbox" ${x[1]?'checked':''} disabled><div><strong>${x[0]}</strong><div style="color:var(--text3)">${x[1]?t('golive.completed'):t('golive.pending')}</div></div></div>`).join('');
+  document.getElementById('goLiveChecklist').innerHTML=items.map(x=>`<div class="checklist-item"><input type="checkbox" aria-label="${x[0]}" ${x[1]?'checked':''} disabled><div><strong>${x[0]}</strong><div style="color:var(--text3)">${x[1]?t('golive.completed'):t('golive.pending')}</div></div></div>`).join('');
   const steps=[!!d.server_ip,!!d.domain,!!d.dns_planned,d.https_status==='ready',!!d.health_ready];
   document.querySelectorAll('#wizardSteps .wizard-step').forEach((el,i)=>{el.classList.toggle('done',steps[i]);el.classList.toggle('active',!steps[i]&&steps.slice(0,i).every(Boolean));});
 }
@@ -11703,7 +11705,7 @@ function qbRenderList() {
     const truncated = qText.length > 90 ? qText.slice(0, 90) + '…' : qText;
     const checked = QB_BULK_SELECTED.has(r.question_id) ? 'checked' : '';
     return `<tr style="cursor:pointer" onclick="qbOpenDetail('${qbEsc(r.question_id)}')">
-      <td onclick="event.stopPropagation()"><input type="checkbox" class="qb-row-select" data-qid="${qbEsc(r.question_id)}" ${checked} onchange="qbToggleRowSelect('${qbEsc(r.question_id)}', this.checked)"></td>
+      <td onclick="event.stopPropagation()"><input type="checkbox" class="qb-row-select" aria-label="${qbEsc(r.question_id)}" data-qid="${qbEsc(r.question_id)}" ${checked} onchange="qbToggleRowSelect('${qbEsc(r.question_id)}', this.checked)"></td>
       <td>${qbEsc(r.question_id)}</td>
       <td>${qbEsc(truncated)}</td>
       <td>${qbEsc(qbCategoryLabel(r.category))}</td>
