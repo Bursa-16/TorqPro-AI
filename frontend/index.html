@@ -458,12 +458,12 @@ textarea:focus-visible,
     <div class="login-field">
       <label class="login-label" data-i18n="login.username_label">Kullanıcı Adı</label>
       <input class="login-input" type="text" id="loginUser" data-i18n-placeholder="login.username_placeholder" placeholder="Kullanıcı adınız"
-        autocomplete="username" onkeydown="if(event.key==='Enter')doLogin()">
+        autocomplete="username" onkeydown="if(event.key==='Enter')doLogin()" aria-label="Kullanıcı adı / Username">
     </div>
     <div class="login-field">
       <label class="login-label" data-i18n="login.password_label">Şifre</label>
       <input class="login-input" type="password" id="loginPass" placeholder="••••••••"
-        autocomplete="current-password" onkeydown="if(event.key==='Enter')doLogin()">
+        autocomplete="current-password" onkeydown="if(event.key==='Enter')doLogin()" aria-label="Parola / Password">
     </div>
     <button class="login-btn" onclick="doLogin()" data-i18n="login.submit">Giriş Yap</button>
     <div class="login-error" id="loginError"></div>
@@ -646,7 +646,7 @@ textarea:focus-visible,
       <div class="card-sub" data-i18n="sampleTorqueStudy.param_selection_sub">Seçili veri setinde tanımlı ölçüler listelenmiştir</div>
       <div class="form-row">
         <div class="form-group">
-          <label class="form-label" data-i18n="sampleTorqueStudy.thread_size">Diş Ölçüsü</label>
+          <label class="form-label" data-i18n="sampleTorqueStudy.thread_size" for="n_dis">Diş Ölçüsü</label>
           <select class="form-select" id="n_dis" onchange="sampleTorqueStudyHesapla()">
             <option value="M5">M5</option>
             <option value="M6">M6</option>
@@ -660,7 +660,7 @@ textarea:focus-visible,
           </select>
         </div>
         <div class="form-group">
-          <label class="form-label" data-i18n="sampleTorqueStudy.connection_type">Bağlantı Tipi</label>
+          <label class="form-label" data-i18n="sampleTorqueStudy.connection_type" for="n_flans">Bağlantı Tipi</label>
           <select class="form-select" id="n_flans" onchange="sampleTorqueStudyHesapla()">
             <option value="no" data-i18n="sampleTorqueStudy.no_flange">Flanşsız</option>
             <option value="yes" selected data-i18n="sampleTorqueStudy.with_flange">Flanşlı</option>
@@ -669,14 +669,14 @@ textarea:focus-visible,
       </div>
       <div class="form-row">
         <div class="form-group">
-          <label class="form-label" data-i18n="sampleTorqueStudy.bolt_strength_class">Cıvata Dayanım Sınıfı</label>
+          <label class="form-label" data-i18n="sampleTorqueStudy.bolt_strength_class" for="n_civata">Cıvata Dayanım Sınıfı</label>
           <select class="form-select" id="n_civata" onchange="sampleTorqueStudyHesapla()">
             <option value="8.8">8.8</option>
             <option value="10.9" selected>10.9</option>
           </select>
         </div>
         <div class="form-group">
-          <label class="form-label" data-i18n="sampleTorqueStudy.nut_strength_class">Somun Dayanım Sınıfı</label>
+          <label class="form-label" data-i18n="sampleTorqueStudy.nut_strength_class" for="n_somun">Somun Dayanım Sınıfı</label>
           <select class="form-select" id="n_somun" onchange="sampleTorqueStudyHesapla()">
             <option value="8">8</option>
             <option value="10" selected>10</option>
@@ -714,25 +714,25 @@ textarea:focus-visible,
           <span class="pill pill-info" id="libStatus" data-i18n="hizli.library_loaded">Kütüphane yüklendi</span>
         </div>
         <div class="library-grid">
-          <div class="form-group"><label class="form-label" data-i18n="hizli.product_family">Ürün Ailesi</label><select class="form-select" id="lib_family" onchange="libraryFamilyChanged()"></select></div>
-          <div class="form-group"><label class="form-label" data-i18n="hizli.standard">Standart</label><select class="form-select" id="lib_standard" onchange="libraryStandardChanged()"></select></div>
-          <div class="form-group"><label class="form-label" data-i18n="hizli.thread_pitch">Diş / Hatve</label><select class="form-select" id="lib_thread" onchange="libraryThreadChanged()"></select></div>
-          <div class="form-group"><label class="form-label" data-i18n="hizli.nut">Somun</label><select class="form-select" id="lib_nut" onchange="libraryCompatibilityChanged()"></select></div>
-          <div class="form-group"><label class="form-label" data-i18n="hizli.washer">Pul</label><select class="form-select" id="lib_washer" onchange="libraryCompatibilityChanged()"></select></div>
-          <div class="form-group"><label class="form-label" data-i18n="hizli.coating_mu_record">Kaplama / μ Kaydı</label><select class="form-select" id="lib_coating" onchange="libraryCoatingChanged()"></select></div>
-          <div class="form-group"><label class="form-label" data-i18n="hizli.data_usage">Veri Kullanımı</label><select class="form-select" id="lib_policy" onchange="libraryRenderMeta()"><option value="engineering" data-i18n="hizli.data_usage_engineering">Mühendislik — Güven ≥3</option><option value="all" data-i18n="hizli.data_usage_all">Taslaklar dahil</option></select></div>
-          <div class="form-group"><label class="form-label" data-i18n="hizli.calc_data_source">Hesap Veri Kaynağı</label><input class="form-input" id="lib_mode" value="Kütüphane" readonly></div>
+          <div class="form-group"><label class="form-label" data-i18n="hizli.product_family" for="lib_family">Ürün Ailesi</label><select class="form-select" id="lib_family" onchange="libraryFamilyChanged()"></select></div>
+          <div class="form-group"><label class="form-label" data-i18n="hizli.standard" for="lib_standard">Standart</label><select class="form-select" id="lib_standard" onchange="libraryStandardChanged()"></select></div>
+          <div class="form-group"><label class="form-label" data-i18n="hizli.thread_pitch" for="lib_thread">Diş / Hatve</label><select class="form-select" id="lib_thread" onchange="libraryThreadChanged()"></select></div>
+          <div class="form-group"><label class="form-label" data-i18n="hizli.nut" for="lib_nut">Somun</label><select class="form-select" id="lib_nut" onchange="libraryCompatibilityChanged()"></select></div>
+          <div class="form-group"><label class="form-label" data-i18n="hizli.washer" for="lib_washer">Pul</label><select class="form-select" id="lib_washer" onchange="libraryCompatibilityChanged()"></select></div>
+          <div class="form-group"><label class="form-label" data-i18n="hizli.coating_mu_record" for="lib_coating">Kaplama / μ Kaydı</label><select class="form-select" id="lib_coating" onchange="libraryCoatingChanged()"></select></div>
+          <div class="form-group"><label class="form-label" data-i18n="hizli.data_usage" for="lib_policy">Veri Kullanımı</label><select class="form-select" id="lib_policy" onchange="libraryRenderMeta()"><option value="engineering" data-i18n="hizli.data_usage_engineering">Mühendislik — Güven ≥3</option><option value="all" data-i18n="hizli.data_usage_all">Taslaklar dahil</option></select></div>
+          <div class="form-group"><label class="form-label" data-i18n="hizli.calc_data_source" for="lib_mode">Hesap Veri Kaynağı</label><input class="form-input" id="lib_mode" value="Kütüphane" readonly></div>
         </div>
         <div class="library-meta" id="libraryMeta"></div>
         <div class="compat-list" id="compatibilityBox"></div>
       </div>
       <div class="form-row">
-        <div class="form-group"><label class="form-label" data-i18n="hizli.bolt_diameter">Cıvata Çapı</label><select class="form-select" id="cap" onchange="hesapla()"><option>M6</option><option>M8</option><option selected>M10</option><option>M12</option><option>M14</option><option>M16</option><option>M18</option><option>M20</option><option>M24</option></select></div>
-        <div class="form-group"><label class="form-label" data-i18n="hizli.quality_class">Kalite Sınıfı</label><select class="form-select" id="kalite" onchange="hesapla()"><option>4.6</option><option>5.6</option><option>6.8</option><option>8.8</option><option selected>10.9</option><option>12.9</option></select></div>
+        <div class="form-group"><label class="form-label" data-i18n="hizli.bolt_diameter" for="cap">Cıvata Çapı</label><select class="form-select" id="cap" onchange="hesapla()"><option>M6</option><option>M8</option><option selected>M10</option><option>M12</option><option>M14</option><option>M16</option><option>M18</option><option>M20</option><option>M24</option></select></div>
+        <div class="form-group"><label class="form-label" data-i18n="hizli.quality_class" for="kalite">Kalite Sınıfı</label><select class="form-select" id="kalite" onchange="hesapla()"><option>4.6</option><option>5.6</option><option>6.8</option><option>8.8</option><option selected>10.9</option><option>12.9</option></select></div>
       </div>
       <div class="form-row">
         <div class="form-group">
-          <label class="form-label" style="display:flex;align-items:center;gap:6px"><span data-i18n="hizli.friction_surface_condition">Bağlantı Elemanı Sürtünme / Yüzey Durumu (μ)</span> <span id="surtunme-uyari-info"></span></label>
+          <label class="form-label" style="display:flex;align-items:center;gap:6px" for="surtunme"><span data-i18n="hizli.friction_surface_condition">Bağlantı Elemanı Sürtünme / Yüzey Durumu (μ)</span> <span id="surtunme-uyari-info"></span></label>
           <select class="form-select" id="surtunme" onchange="hesapla()">
             <option value="0.08" data-i18n="hizli.friction_opt_008">0.08 — Önceden uygulanmış kontrollü yağlayıcı (MoS₂)</option>
             <option value="0.10" data-i18n="hizli.friction_opt_010">0.10 — Üretici kontrollü kaplama (Fosfat + kontrollü yağlayıcı)</option>
@@ -743,40 +743,40 @@ textarea:focus-visible,
           </select>
           <div class="form-hint" data-i18n="hizli.friction_hint">Değer, bağlantı elemanının üretici tanımlı yüzey/kaplama durumuna göre seçilmelidir — bkz. uyarı ikonu.</div>
         </div>
-        <div class="form-group"><label class="form-label" data-i18n="hizli.preload_ratio">Ön Yük Oranı</label><select class="form-select" id="onYuk" onchange="hesapla()"><option value="70" data-i18n="hizli.preload_general">%70 — Genel</option><option value="75" selected data-i18n="hizli.preload_standard">%75 — Standart</option><option value="80" data-i18n="hizli.preload_critical">%80 — Kritik</option><option value="90" data-i18n="hizli.preload_high">%90 — Yüksek</option></select></div>
+        <div class="form-group"><label class="form-label" data-i18n="hizli.preload_ratio" for="onYuk">Ön Yük Oranı</label><select class="form-select" id="onYuk" onchange="hesapla()"><option value="70" data-i18n="hizli.preload_general">%70 — Genel</option><option value="75" selected data-i18n="hizli.preload_standard">%75 — Standart</option><option value="80" data-i18n="hizli.preload_critical">%80 — Kritik</option><option value="90" data-i18n="hizli.preload_high">%90 — Yüksek</option></select></div>
       </div>
       <div class="form-row">
-        <div class="form-group"><label class="form-label" data-i18n="hizli.mu_thread">Diş Sürtünmesi μthread</label><input class="form-input" type="number" id="mu_thread" value="0.12" min="0.03" max="0.40" step="0.01" oninput="hesapla()"><div class="form-hint" data-i18n="hizli.mu_thread_hint">ISO 16047 test verisi yoksa yaklaşık kabul</div></div>
-        <div class="form-group"><label class="form-label" data-i18n="hizli.mu_bearing">Baş/Somun Altı μbearing</label><input class="form-input" type="number" id="mu_bearing" value="0.12" min="0.03" max="0.40" step="0.01" oninput="hesapla()"><div class="form-hint" data-i18n="hizli.mu_bearing_hint">Kaplama ve oturma yüzeyine bağlıdır</div></div>
+        <div class="form-group"><label class="form-label" data-i18n="hizli.mu_thread" for="mu_thread">Diş Sürtünmesi μthread</label><input class="form-input" type="number" id="mu_thread" value="0.12" min="0.03" max="0.40" step="0.01" oninput="hesapla()"><div class="form-hint" data-i18n="hizli.mu_thread_hint">ISO 16047 test verisi yoksa yaklaşık kabul</div></div>
+        <div class="form-group"><label class="form-label" data-i18n="hizli.mu_bearing" for="mu_bearing">Baş/Somun Altı μbearing</label><input class="form-input" type="number" id="mu_bearing" value="0.12" min="0.03" max="0.40" step="0.01" oninput="hesapla()"><div class="form-hint" data-i18n="hizli.mu_bearing_hint">Kaplama ve oturma yüzeyine bağlıdır</div></div>
       </div>
       <div class="form-row3">
-        <div class="form-group"><label class="form-label" data-i18n="hizli.mu_thread_min">μthread Min</label><input class="form-input" type="number" id="mu_thread_min" value="0.10" min="0.03" max="0.40" step="0.01" oninput="hesapla()"></div>
-        <div class="form-group"><label class="form-label" data-i18n="hizli.mu_thread_nom">μthread Nom</label><input class="form-input" type="number" id="mu_thread_nom" value="0.12" min="0.03" max="0.40" step="0.01" oninput="hesapla()"></div>
-        <div class="form-group"><label class="form-label" data-i18n="hizli.mu_thread_max">μthread Max</label><input class="form-input" type="number" id="mu_thread_max" value="0.14" min="0.03" max="0.40" step="0.01" oninput="hesapla()"></div>
+        <div class="form-group"><label class="form-label" data-i18n="hizli.mu_thread_min" for="mu_thread_min">μthread Min</label><input class="form-input" type="number" id="mu_thread_min" value="0.10" min="0.03" max="0.40" step="0.01" oninput="hesapla()"></div>
+        <div class="form-group"><label class="form-label" data-i18n="hizli.mu_thread_nom" for="mu_thread_nom">μthread Nom</label><input class="form-input" type="number" id="mu_thread_nom" value="0.12" min="0.03" max="0.40" step="0.01" oninput="hesapla()"></div>
+        <div class="form-group"><label class="form-label" data-i18n="hizli.mu_thread_max" for="mu_thread_max">μthread Max</label><input class="form-input" type="number" id="mu_thread_max" value="0.14" min="0.03" max="0.40" step="0.01" oninput="hesapla()"></div>
       </div>
       <div class="form-row3">
-        <div class="form-group"><label class="form-label" data-i18n="hizli.mu_bearing_min">μbearing Min</label><input class="form-input" type="number" id="mu_bearing_min" value="0.10" min="0.03" max="0.40" step="0.01" oninput="hesapla()"></div>
-        <div class="form-group"><label class="form-label" data-i18n="hizli.mu_bearing_nom">μbearing Nom</label><input class="form-input" type="number" id="mu_bearing_nom" value="0.12" min="0.03" max="0.40" step="0.01" oninput="hesapla()"></div>
-        <div class="form-group"><label class="form-label" data-i18n="hizli.mu_bearing_max">μbearing Max</label><input class="form-input" type="number" id="mu_bearing_max" value="0.14" min="0.03" max="0.40" step="0.01" oninput="hesapla()"></div>
+        <div class="form-group"><label class="form-label" data-i18n="hizli.mu_bearing_min" for="mu_bearing_min">μbearing Min</label><input class="form-input" type="number" id="mu_bearing_min" value="0.10" min="0.03" max="0.40" step="0.01" oninput="hesapla()"></div>
+        <div class="form-group"><label class="form-label" data-i18n="hizli.mu_bearing_nom" for="mu_bearing_nom">μbearing Nom</label><input class="form-input" type="number" id="mu_bearing_nom" value="0.12" min="0.03" max="0.40" step="0.01" oninput="hesapla()"></div>
+        <div class="form-group"><label class="form-label" data-i18n="hizli.mu_bearing_max" for="mu_bearing_max">μbearing Max</label><input class="form-input" type="number" id="mu_bearing_max" value="0.14" min="0.03" max="0.40" step="0.01" oninput="hesapla()"></div>
       </div>
       <div class="form-row3">
-        <div class="form-group"><label class="form-label" data-i18n="hizli.internal_rm">İç Diş Çekme Dayanımı Rm (MPa)</label><input class="form-input" type="number" id="internal_rm" value="500" min="50" step="10" oninput="hesapla()"></div>
-        <div class="form-group"><label class="form-label" data-i18n="hizli.bolt_rm">Civata Çekme Dayanımı Rm (MPa)</label><input class="form-input" type="number" id="bolt_rm" value="1000" min="100" step="10" oninput="hesapla()"></div>
-        <div class="form-group"><label class="form-label" data-i18n="hizli.nut_proof">Somun Proof-Load (MPa)</label><input class="form-input" type="number" id="nut_proof" value="830" min="0" step="10" oninput="hesapla()"><div class="form-hint" data-i18n="hizli.nut_proof_hint">ISO 898-2 tablosu tamamlanana kadar kullanıcı girdisi</div></div>
+        <div class="form-group"><label class="form-label" data-i18n="hizli.internal_rm" for="internal_rm">İç Diş Çekme Dayanımı Rm (MPa)</label><input class="form-input" type="number" id="internal_rm" value="500" min="50" step="10" oninput="hesapla()"></div>
+        <div class="form-group"><label class="form-label" data-i18n="hizli.bolt_rm" for="bolt_rm">Civata Çekme Dayanımı Rm (MPa)</label><input class="form-input" type="number" id="bolt_rm" value="1000" min="100" step="10" oninput="hesapla()"></div>
+        <div class="form-group"><label class="form-label" data-i18n="hizli.nut_proof" for="nut_proof">Somun Proof-Load (MPa)</label><input class="form-input" type="number" id="nut_proof" value="830" min="0" step="10" oninput="hesapla()"><div class="form-hint" data-i18n="hizli.nut_proof_hint">ISO 898-2 tablosu tamamlanana kadar kullanıcı girdisi</div></div>
       </div>
       <div class="form-row3">
-        <div class="form-group"><label class="form-label" data-i18n="hizli.target_yield">Hedef Akma Kullanımı (%)</label><input class="form-input" type="number" id="target_yield" value="75" min="10" max="95" step="1" oninput="hesapla()"></div>
-        <div class="form-group"><label class="form-label" data-i18n="hizli.hole_type">Delik Tipi</label><select class="form-select" id="hole_type" onchange="hesapla()"><option value="nut" data-i18n="hizli.hole_type_nut">Somunlu bağlantı</option><option value="through" data-i18n="hizli.hole_type_through">Geçme delik + iç diş</option><option value="blind" data-i18n="hizli.hole_type_blind">Kör delik</option></select></div>
-        <div class="form-group"><label class="form-label" data-i18n="hizli.surface_material">Yüzey Malzemesi</label><select class="form-select" id="surface_material" onchange="hesapla()"><option value="steel" data-i18n="hizli.material_steel">Çelik</option><option value="aluminum" data-i18n="hizli.material_aluminum">Alüminyum</option><option value="castiron" data-i18n="hizli.material_castiron">Dökme demir</option></select></div>
+        <div class="form-group"><label class="form-label" data-i18n="hizli.target_yield" for="target_yield">Hedef Akma Kullanımı (%)</label><input class="form-input" type="number" id="target_yield" value="75" min="10" max="95" step="1" oninput="hesapla()"></div>
+        <div class="form-group"><label class="form-label" data-i18n="hizli.hole_type" for="hole_type">Delik Tipi</label><select class="form-select" id="hole_type" onchange="hesapla()"><option value="nut" data-i18n="hizli.hole_type_nut">Somunlu bağlantı</option><option value="through" data-i18n="hizli.hole_type_through">Geçme delik + iç diş</option><option value="blind" data-i18n="hizli.hole_type_blind">Kör delik</option></select></div>
+        <div class="form-group"><label class="form-label" data-i18n="hizli.surface_material" for="surface_material">Yüzey Malzemesi</label><select class="form-select" id="surface_material" onchange="hesapla()"><option value="steel" data-i18n="hizli.material_steel">Çelik</option><option value="aluminum" data-i18n="hizli.material_aluminum">Alüminyum</option><option value="castiron" data-i18n="hizli.material_castiron">Dökme demir</option></select></div>
       </div>
       <div class="form-row3">
-        <div class="form-group"><label class="form-label" data-i18n="hizli.engagement_len">Diş Kavrama Boyu Le (mm)</label><input class="form-input" type="number" id="engagement_len" value="10" min="0" step="0.1" oninput="hesapla()"></div>
-        <div class="form-group"><label class="form-label" data-i18n="hizli.internal_material">İç Diş Malzemesi</label><select class="form-select" id="internal_material" onchange="hesapla()"><option value="steel" selected data-i18n="hizli.material_steel">Çelik</option><option value="aluminum" data-i18n="hizli.material_aluminum">Alüminyum</option><option value="castiron" data-i18n="hizli.material_castiron">Dökme demir</option></select></div>
-        <div class="form-group"><label class="form-label" data-i18n="hizli.bearing_limit">Yüzey Basınç Sınırı (MPa)</label><input class="form-input" type="number" id="bearing_limit" value="300" min="1" step="10" oninput="hesapla()"></div>
+        <div class="form-group"><label class="form-label" data-i18n="hizli.engagement_len" for="engagement_len">Diş Kavrama Boyu Le (mm)</label><input class="form-input" type="number" id="engagement_len" value="10" min="0" step="0.1" oninput="hesapla()"></div>
+        <div class="form-group"><label class="form-label" data-i18n="hizli.internal_material" for="internal_material">İç Diş Malzemesi</label><select class="form-select" id="internal_material" onchange="hesapla()"><option value="steel" selected data-i18n="hizli.material_steel">Çelik</option><option value="aluminum" data-i18n="hizli.material_aluminum">Alüminyum</option><option value="castiron" data-i18n="hizli.material_castiron">Dökme demir</option></select></div>
+        <div class="form-group"><label class="form-label" data-i18n="hizli.bearing_limit" for="bearing_limit">Yüzey Basınç Sınırı (MPa)</label><input class="form-input" type="number" id="bearing_limit" value="300" min="1" step="10" oninput="hesapla()"></div>
       </div>
       <div class="form-row">
-        <div class="form-group"><label class="form-label"><span data-i18n="hizli.tightening_class">Sıkma Sınıfı</span> <span class="norm-badge" data-i18n="hizli.per_sample_norm">Örnek norma göre</span></label><select class="form-select" id="sinif" onchange="hesapla()"><option value="A" data-i18n="hizli.class_a_opt">A — ±%5 (Kritik güvenlik)</option><option value="B" selected data-i18n="hizli.class_b_opt">B — ±%10 (Önemli)</option><option value="C" data-i18n="hizli.class_c_opt">C — ±%20 (Standart)</option><option value="D" data-i18n="hizli.class_d_opt">D — ±%30 (Genel)</option></select></div>
-        <div class="form-group"><label class="form-label" data-i18n="hizli.control_method">Kontrol Yöntemi</label><select class="form-select" id="yontem" onchange="hesapla()"><option value="system_a" data-i18n="hizli.method_system_a">Sistem A (Dinamik)</option><option value="method_c" data-i18n="hizli.method_c">C Metodu (Statik)</option><option value="torque_angle" data-i18n="hizli.method_torque_angle">Tork + Açı</option><option value="tty" data-i18n="hizli.method_tty">Akma Kontrollü (TTY)</option></select></div>
+        <div class="form-group"><label class="form-label" for="sinif"><span data-i18n="hizli.tightening_class">Sıkma Sınıfı</span> <span class="norm-badge" data-i18n="hizli.per_sample_norm">Örnek norma göre</span></label><select class="form-select" id="sinif" onchange="hesapla()"><option value="A" data-i18n="hizli.class_a_opt">A — ±%5 (Kritik güvenlik)</option><option value="B" selected data-i18n="hizli.class_b_opt">B — ±%10 (Önemli)</option><option value="C" data-i18n="hizli.class_c_opt">C — ±%20 (Standart)</option><option value="D" data-i18n="hizli.class_d_opt">D — ±%30 (Genel)</option></select></div>
+        <div class="form-group"><label class="form-label" data-i18n="hizli.control_method" for="yontem">Kontrol Yöntemi</label><select class="form-select" id="yontem" onchange="hesapla()"><option value="system_a" data-i18n="hizli.method_system_a">Sistem A (Dinamik)</option><option value="method_c" data-i18n="hizli.method_c">C Metodu (Statik)</option><option value="torque_angle" data-i18n="hizli.method_torque_angle">Tork + Açı</option><option value="tty" data-i18n="hizli.method_tty">Akma Kontrollü (TTY)</option></select></div>
       </div>
       <div class="btn-group"><button class="btn btn-primary" onclick="hesapla()"><span data-i18n="hizli.calculate_btn">🔧 Hesapla</span></button><button class="btn btn-secondary" onclick="resetForm()" data-i18n="hizli.clear_btn">Temizle</button></div>
     </div>
@@ -800,9 +800,9 @@ textarea:focus-visible,
   <div class="grid2">
     <div class="card">
       <div class="card-title" data-i18n="vdi.flange_geometry_title">Flanş Geometrisi</div>
-      <div class="form-row"><div class="form-group"><label class="form-label" data-i18n="vdi.plate_thickness">Plaka kalınlığı (mm)</label><input class="form-input" type="number" value="10" id="v_plaka"></div><div class="form-group"><label class="form-label" data-i18n="vdi.plate_material">Plaka malzemesi</label><select class="form-select" id="v_malzeme"><option value="steel" data-i18n="vdi.material_steel">Çelik (E=210 GPa)</option><option value="aluminum" data-i18n="vdi.material_aluminum">Alüminyum (E=70 GPa)</option><option value="castiron" data-i18n="vdi.material_castiron">Dökme demir</option></select></div></div>
-      <div class="form-row"><div class="form-group"><label class="form-label" data-i18n="vdi.bolt_length">Cıvata boyu (mm)</label><input class="form-input" type="number" value="40" id="v_boy"></div><div class="form-group"><label class="form-label" data-i18n="vdi.load_intro_factor">Yük giriş faktörü (n)</label><input class="form-input" type="number" value="0.5" step="0.1" id="v_n"></div></div>
-      <div class="form-row"><div class="form-group"><label class="form-label" data-i18n="vdi.operating_load">İşletme yükü FA (kN)</label><input class="form-input" type="number" value="15" id="v_FA"></div><div class="form-group"><label class="form-label">ΔT (°C)</label><input class="form-input" type="number" value="0" id="v_dT"></div></div>
+      <div class="form-row"><div class="form-group"><label class="form-label" data-i18n="vdi.plate_thickness" for="v_plaka">Plaka kalınlığı (mm)</label><input class="form-input" type="number" value="10" id="v_plaka"></div><div class="form-group"><label class="form-label" data-i18n="vdi.plate_material" for="v_malzeme">Plaka malzemesi</label><select class="form-select" id="v_malzeme"><option value="steel" data-i18n="vdi.material_steel">Çelik (E=210 GPa)</option><option value="aluminum" data-i18n="vdi.material_aluminum">Alüminyum (E=70 GPa)</option><option value="castiron" data-i18n="vdi.material_castiron">Dökme demir</option></select></div></div>
+      <div class="form-row"><div class="form-group"><label class="form-label" data-i18n="vdi.bolt_length" for="v_boy">Cıvata boyu (mm)</label><input class="form-input" type="number" value="40" id="v_boy"></div><div class="form-group"><label class="form-label" data-i18n="vdi.load_intro_factor" for="v_n">Yük giriş faktörü (n)</label><input class="form-input" type="number" value="0.5" step="0.1" id="v_n"></div></div>
+      <div class="form-row"><div class="form-group"><label class="form-label" data-i18n="vdi.operating_load" for="v_FA">İşletme yükü FA (kN)</label><input class="form-input" type="number" value="15" id="v_FA"></div><div class="form-group"><label class="form-label" for="v_dT">ΔT (°C)</label><input class="form-input" type="number" value="0" id="v_dT"></div></div>
       <button class="btn btn-primary" onclick="vdiHesapla()" style="width:100%" data-i18n="vdi.run_button">VDI 2230 Çalıştır</button>
     </div>
     <div class="card" id="vdi-sonuc"><div class="card-title" data-i18n="vdi.results_title">Analiz Sonuçları</div><div style="text-align:center;padding:30px;color:var(--text3)"><div style="font-size:36px;margin-bottom:8px">🔬</div><div data-i18n="vdi.enter_parameters">Parametreleri girin</div></div></div>
@@ -813,9 +813,9 @@ textarea:focus-visible,
 <div id="page-checklist" class="page">
   <div class="section-header"><span class="section-icon">✅</span><div><div class="section-title" data-i18n="checklist.title">Torklama Proses Check-List</div><div class="section-sub"><span data-i18n="checklist.subtitle">5 kategori · 20 madde</span> <span class="norm-badge" data-i18n="checklist.per_sample_norm">Örnek norma göre</span></div></div></div>
   <div class="card" style="margin-bottom:12px"><div class="form-row3">
-    <div class="form-group"><label class="form-label" data-i18n="checklist.operation">Operasyon</label><input class="form-input" id="cl_op" data-i18n-placeholder="checklist.operation_placeholder" placeholder="Ön süspansiyon travers"></div>
-    <div class="form-group"><label class="form-label" data-i18n="checklist.chassis_part_no">Şase / Parça No</label><input class="form-input" id="cl_sase" placeholder="YH24-001234"></div>
-    <div class="form-group"><label class="form-label" data-i18n="checklist.inspector">Denetçi</label><input class="form-input" id="cl_den" data-i18n-placeholder="checklist.name_placeholder" placeholder="Ad Soyad"></div>
+    <div class="form-group"><label class="form-label" data-i18n="checklist.operation" for="cl_op">Operasyon</label><input class="form-input" id="cl_op" data-i18n-placeholder="checklist.operation_placeholder" placeholder="Ön süspansiyon travers"></div>
+    <div class="form-group"><label class="form-label" data-i18n="checklist.chassis_part_no" for="cl_sase">Şase / Parça No</label><input class="form-input" id="cl_sase" placeholder="YH24-001234"></div>
+    <div class="form-group"><label class="form-label" data-i18n="checklist.inspector" for="cl_den">Denetçi</label><input class="form-input" id="cl_den" data-i18n-placeholder="checklist.name_placeholder" placeholder="Ad Soyad"></div>
   </div></div>
   <div id="checklist-items"></div>
   <div class="btn-group" style="margin-top:12px"><button class="btn btn-primary" onclick="checklistSonuc()"><span data-i18n="checklist.evaluate_btn">📊 Değerlendir</span></button><button class="btn btn-secondary" onclick="resetChecklist()" data-i18n="checklist.reset_btn">Sıfırla</button></div>
@@ -833,8 +833,8 @@ textarea:focus-visible,
     <div class="card">
       <div class="card-title" data-i18n="yetenek.measurement_limit_title">Ölçüm ve Limit Girişi</div>
       <div class="form-row">
-        <div class="form-group"><label class="form-label" data-i18n="yetenek.nominal_torque">Nominal Tork (Nm)</label><input class="form-input" type="number" id="y_nom" value="28"></div>
-        <div class="form-group"><label class="form-label" data-i18n="yetenek.limit_source">Limit Kaynağı</label>
+        <div class="form-group"><label class="form-label" data-i18n="yetenek.nominal_torque" for="y_nom">Nominal Tork (Nm)</label><input class="form-input" type="number" id="y_nom" value="28"></div>
+        <div class="form-group"><label class="form-label" data-i18n="yetenek.limit_source" for="y_kaynakMod">Limit Kaynağı</label>
           <select class="form-select" id="y_kaynakMod" onchange="toggleLimitKaynak()">
             <option value="manuel" data-i18n="yetenek.manual_lsl_usl">Manuel LSL/USL</option>
             <option value="oem" data-i18n="yetenek.oem_tmin_tmax">OEM t_min / t_max</option>
@@ -843,26 +843,26 @@ textarea:focus-visible,
       </div>
       <div id="y_manuelAlani">
         <div class="form-row">
-          <div class="form-group"><label class="form-label" data-i18n="yetenek.lsl">LSL — Alt Kontrol Limiti (Nm)</label><input class="form-input" type="number" id="y_lsl" value="25.2"></div>
-          <div class="form-group"><label class="form-label" data-i18n="yetenek.usl">USL — Üst Kontrol Limiti (Nm)</label><input class="form-input" type="number" id="y_usl" value="30.8"></div>
+          <div class="form-group"><label class="form-label" data-i18n="yetenek.lsl" for="y_lsl">LSL — Alt Kontrol Limiti (Nm)</label><input class="form-input" type="number" id="y_lsl" value="25.2"></div>
+          <div class="form-group"><label class="form-label" data-i18n="yetenek.usl" for="y_usl">USL — Üst Kontrol Limiti (Nm)</label><input class="form-input" type="number" id="y_usl" value="30.8"></div>
         </div>
       </div>
       <div id="y_oemAlani" style="display:none">
         <div class="form-row">
-          <div class="form-group"><label class="form-label">OEM T' min (Nm)</label><input class="form-input" type="number" id="y_oemlsl" data-i18n-placeholder="yetenek.take_from_norm" placeholder="Normdan al"></div>
-          <div class="form-group"><label class="form-label">OEM T' max (Nm)</label><input class="form-input" type="number" id="y_oemusl" data-i18n-placeholder="yetenek.take_from_norm" placeholder="Normdan al"></div>
+          <div class="form-group"><label class="form-label" for="y_oemlsl">OEM T' min (Nm)</label><input class="form-input" type="number" id="y_oemlsl" data-i18n-placeholder="yetenek.take_from_norm" placeholder="Normdan al"></div>
+          <div class="form-group"><label class="form-label" for="y_oemusl">OEM T' max (Nm)</label><input class="form-input" type="number" id="y_oemusl" data-i18n-placeholder="yetenek.take_from_norm" placeholder="Normdan al"></div>
         </div>
         <div class="alert alert-info" style="font-size:12px" data-i18n="yetenek.oem_copy_note">OEM limitlerini "OEM Norm Sorgu" modülünden kopyalayarak buraya girin.</div>
       </div>
       <div class="form-row">
-        <div class="form-group"><label class="form-label" data-i18n="yetenek.measurement_method">Ölçüm Yöntemi</label>
+        <div class="form-group"><label class="form-label" data-i18n="yetenek.measurement_method" for="y_olcumYontemi">Ölçüm Yöntemi</label>
           <select class="form-select" id="y_olcumYontemi">
             <option value="A" data-i18n="yetenek.method_system_a">Sistem A — Dinamik (sıkma anında)</option>
             <option value="C" data-i18n="yetenek.method_c">C Metodu — Statik (oturma sonrası)</option>
           </select>
           <div class="form-hint" data-i18n="yetenek.method_hint">Limitler bu yönteme uygun seçilmelidir</div>
         </div>
-        <div class="form-group"><label class="form-label" data-i18n="yetenek.analysis_type">Analiz Türü</label>
+        <div class="form-group"><label class="form-label" data-i18n="yetenek.analysis_type" for="y_analizTur">Analiz Türü</label>
           <select class="form-select" id="y_analizTur">
             <option value="cm" data-i18n="yetenek.analysis_cm">Cm / Cmk — Makine yeteneği</option>
             <option value="cp" data-i18n="yetenek.analysis_cp">Cp / Cpk — Proses yeteneği</option>
@@ -872,7 +872,7 @@ textarea:focus-visible,
       <div class="form-group" style="margin-bottom:12px">
         <label class="form-label" data-i18n="yetenek.measurement_values">Ölçüm Değerleri (virgülle ayırın, min 30 adet)</label>
         <textarea class="form-input" id="y_olcumler" rows="5" style="resize:none;font-family:monospace;font-size:12px"
-          placeholder="27.2, 28.1, 27.8, 28.4, 27.6, 28.0, 28.2, 27.9, 28.3, 27.7, 28.1, 28.0, 27.5, 28.2, 27.8, 28.1, 27.9, 28.4, 28.0, 27.8, 28.2, 27.6, 28.1, 27.9, 28.3, 28.0, 27.8, 28.1, 28.2, 27.9"></textarea>
+          placeholder="27.2, 28.1, 27.8, 28.4, 27.6, 28.0, 28.2, 27.9, 28.3, 27.7, 28.1, 28.0, 27.5, 28.2, 27.8, 28.1, 27.9, 28.4, 28.0, 27.8, 28.2, 27.6, 28.1, 27.9, 28.3, 28.0, 27.8, 28.1, 28.2, 27.9" aria-label="Ölçüm değerleri / Measurement values"></textarea>
       </div>
       <button class="btn btn-primary" onclick="yetenekHesapla()" style="width:100%"><span data-i18n="yetenek.calculate_btn">📈 Yetenek Hesapla</span></button>
     </div>
@@ -884,8 +884,8 @@ textarea:focus-visible,
 <div id="page-problem" class="page">
   <div class="section-header"><span class="section-icon">⚠️</span><div><div class="section-title" data-i18n="problem.title">Problem Tanımlama ve Kök Neden</div><div class="section-sub" data-i18n="problem.subtitle">5N1K + Ishikawa · Otomatik müdahale planı</div></div></div>
   <div class="card"><div class="card-title" data-i18n="problem.step1_title">Adım 1 — Problem Tanımı</div>
-    <div class="form-row3"><div class="form-group"><label class="form-label" data-i18n="problem.field_what">NE</label><input class="form-input" id="p_ne" data-i18n-placeholder="problem.placeholder_what" placeholder="Tork limit dışı"></div><div class="form-group"><label class="form-label" data-i18n="problem.field_where">NEREDE</label><input class="form-input" id="p_nerede" data-i18n-placeholder="problem.placeholder_where" placeholder="Ön süspansiyon"></div><div class="form-group"><label class="form-label" data-i18n="problem.field_when">NE ZAMAN</label><input class="form-input" id="p_nezaman" data-i18n-placeholder="problem.placeholder_when" placeholder="10.01.2024 / Sabah"></div></div>
-    <div class="form-row3"><div class="form-group"><label class="form-label" data-i18n="problem.field_how">NASIL</label><input class="form-input" id="p_nasil" data-i18n-placeholder="problem.placeholder_how" placeholder="SPC kontrolü"></div><div class="form-group"><label class="form-label" data-i18n="problem.field_how_much">NE KADAR</label><input class="form-input" id="p_nekdar" data-i18n-placeholder="problem.placeholder_how_much" placeholder="5 araç etkilendi"></div><div class="form-group"><label class="form-label" data-i18n="problem.field_who">KİM</label><input class="form-input" id="p_kim" data-i18n-placeholder="problem.placeholder_who" placeholder="Ad Soyad"></div></div>
+    <div class="form-row3"><div class="form-group"><label class="form-label" data-i18n="problem.field_what" for="p_ne">NE</label><input class="form-input" id="p_ne" data-i18n-placeholder="problem.placeholder_what" placeholder="Tork limit dışı"></div><div class="form-group"><label class="form-label" data-i18n="problem.field_where" for="p_nerede">NEREDE</label><input class="form-input" id="p_nerede" data-i18n-placeholder="problem.placeholder_where" placeholder="Ön süspansiyon"></div><div class="form-group"><label class="form-label" data-i18n="problem.field_when" for="p_nezaman">NE ZAMAN</label><input class="form-input" id="p_nezaman" data-i18n-placeholder="problem.placeholder_when" placeholder="10.01.2024 / Sabah"></div></div>
+    <div class="form-row3"><div class="form-group"><label class="form-label" data-i18n="problem.field_how" for="p_nasil">NASIL</label><input class="form-input" id="p_nasil" data-i18n-placeholder="problem.placeholder_how" placeholder="SPC kontrolü"></div><div class="form-group"><label class="form-label" data-i18n="problem.field_how_much" for="p_nekdar">NE KADAR</label><input class="form-input" id="p_nekdar" data-i18n-placeholder="problem.placeholder_how_much" placeholder="5 araç etkilendi"></div><div class="form-group"><label class="form-label" data-i18n="problem.field_who" for="p_kim">KİM</label><input class="form-input" id="p_kim" data-i18n-placeholder="problem.placeholder_who" placeholder="Ad Soyad"></div></div>
   </div>
   <div class="card"><div class="card-title" data-i18n="problem.step2_title">Adım 2 — Ishikawa Kök Neden</div><div class="card-sub" data-i18n="problem.step2_sub">Olası nedenleri işaretleyin</div><div id="ishikawa-cats"></div><button class="btn btn-primary" style="margin-top:12px" onclick="problemAnaliz()">🔍 <span data-i18n="problem.analyze_btn">Analiz Et</span></button></div>
   <div id="mudahale-sonuc"></div>
@@ -915,7 +915,7 @@ textarea:focus-visible,
     <div class="card" style="padding:14px"><div style="font-size:11px;color:var(--text3);margin-bottom:8px;text-transform:uppercase;letter-spacing:.5px" data-i18n="oem.norm_info_title">Norm Bilgisi</div><div id="oem-meta"></div></div>
     <div class="card" style="padding:14px">
       <div style="font-size:11px;color:var(--text3);margin-bottom:8px;text-transform:uppercase;letter-spacing:.5px" data-i18n="oem.search_title">Ara</div>
-      <input class="form-input" id="oem-search" data-i18n-placeholder="oem.search_placeholder" placeholder="Madde no, sistem, diş ölçüsü, sınıf..." oninput="oemRenderList()" style="margin-bottom:8px">
+      <input class="form-input" id="oem-search" data-i18n-placeholder="oem.search_placeholder" placeholder="Madde no, sistem, diş ölçüsü, sınıf..." oninput="oemRenderList()" style="margin-bottom:8px" aria-label="OEM norm ara / Search OEM norm">
       <div style="display:flex;gap:6px;flex-wrap:wrap" id="oem-filter-btns">
         <button class="oem-filter-btn active" onclick="oemFilter('',this)" data-i18n="oem.filter_all">Tümü</button>
         <button class="oem-filter-btn" onclick="oemFilter('sinif:A',this)" data-i18n="oem.filter_class_a">Sınıf A</button>
@@ -946,16 +946,16 @@ textarea:focus-visible,
     <div class="card-title" data-i18n="fc.condition_selection_title">Condition Selection</div>
     <div class="card-sub" data-i18n="fc.condition_selection_sub">Select a Friction Condition record to see its Overview, Friction Range, Readiness, Engineering Warnings, Source &amp; Traceability and Report Preview.</div>
     <div class="fc-toolbar">
-      <input class="form-input" id="fc-search" data-i18n-placeholder="fc.search_placeholder" placeholder="Search by ID, coating or lubricant reference..." oninput="renderFrictionConditionList()">
-      <select class="form-select" id="fc-filter-group" onchange="renderFrictionConditionList()">
+      <input class="form-input" id="fc-search" data-i18n-placeholder="fc.search_placeholder" placeholder="Search by ID, coating or lubricant reference..." oninput="renderFrictionConditionList()" aria-label="Sürtünme ara / Search friction">
+      <select class="form-select" id="fc-filter-group" onchange="renderFrictionConditionList()" aria-label="Grup filtresi / Group filter">
         <option value="" data-i18n="fc.filter_group_all">All groups</option>
         <option value="coating_based" data-i18n="fc.filter_group_coating">Coating-based conditions</option>
         <option value="lubricant_based" data-i18n="fc.filter_group_lubricant">Lubricant-based conditions</option>
       </select>
-      <select class="form-select" id="fc-filter-verification" onchange="renderFrictionConditionList()">
+      <select class="form-select" id="fc-filter-verification" onchange="renderFrictionConditionList()" aria-label="Doğrulama filtresi / Verification filter">
         <option value="" data-i18n="fc.filter_verification_any">Any verification status</option>
       </select>
-      <select class="form-select" id="fc-filter-source-type" onchange="renderFrictionConditionList()">
+      <select class="form-select" id="fc-filter-source-type" onchange="renderFrictionConditionList()" aria-label="Kaynak tipi filtresi / Source type filter">
         <option value="" data-i18n="fc.filter_source_any">Any source type</option>
       </select>
     </div>
@@ -979,7 +979,7 @@ textarea:focus-visible,
       <div class="card">
         <div class="card-title" data-i18n="fc.readiness_title">Recommendation Readiness</div>
         <div class="card-sub" style="margin-bottom:8px" data-i18n="fc.intended_use_card_sub">Selecting an intended use does not change the data or unlock a capability -- it only adds a gap warning below if the requested use exceeds what the current data supports.</div>
-        <select class="form-select" id="fc-intended-use" style="margin-bottom:10px" onchange="loadFrictionConditionSelection()">
+        <select class="form-select" id="fc-intended-use" style="margin-bottom:10px" onchange="loadFrictionConditionSelection()" aria-label="Kullanım amacı / Intended use">
           <option value="" data-i18n="fc.intended_use_none">No intended use selected</option>
           <option value="reference_comparison" data-i18n="fc.intended_use_reference_comparison">Reference comparison</option>
           <option value="engineering_calculation" data-i18n="fc.intended_use_engineering_calculation">Engineering calculation</option>
@@ -1000,7 +1000,7 @@ textarea:focus-visible,
           <div class="card-sub" data-i18n="fc.comparison_sub">Compare against a second Friction Condition. Comparisons are descriptive only.</div></div>
       </div>
       <div class="fc-toolbar">
-        <select class="form-select" id="fc-compare-select"><option value="" data-i18n="fc.compare_select_placeholder">Select a condition to compare...</option></select>
+        <select class="form-select" id="fc-compare-select" aria-label="Karşılaştırma seçimi / Comparison selection"><option value="" data-i18n="fc.compare_select_placeholder">Select a condition to compare...</option></select>
         <button class="btn btn-secondary btn-sm" onclick="clearFrictionComparison()" data-i18n="fc.compare_clear">Clear</button>
       </div>
       <div id="fc-comparison"></div>
@@ -1054,15 +1054,15 @@ textarea:focus-visible,
     <div class="card-title" data-i18n="sc.compat_section_title">Compatibility Checker</div>
     <div class="card-sub" data-i18n="sc.compat_section_sub">Select a bolt strength class and a nut property class to check strength-class compatibility.</div>
     <div class="sc-toolbar">
-      <select class="form-select" id="sc-compat-bolt"></select>
-      <select class="form-select" id="sc-compat-nut"></select>
-      <input class="form-input" id="sc-compat-diameter" type="number" min="0" step="0.1" data-i18n-placeholder="sc.diameter_placeholder" placeholder="Nominal diameter (mm, optional)">
-      <select class="form-select" id="sc-compat-standard">
+      <select class="form-select" id="sc-compat-bolt" aria-label="Cıvata seç / Select bolt"></select>
+      <select class="form-select" id="sc-compat-nut" aria-label="Somun seç / Select nut"></select>
+      <input class="form-input" id="sc-compat-diameter" type="number" min="0" step="0.1" data-i18n-placeholder="sc.diameter_placeholder" placeholder="Nominal diameter (mm, optional)" aria-label="Çap / Diameter">
+      <select class="form-select" id="sc-compat-standard" aria-label="Standart / Standard">
         <option value="" data-i18n="sc.standard_any">Any standard</option>
         <option value="ISO 898">ISO 898</option>
         <option value="ISO 3506">ISO 3506</option>
       </select>
-      <select class="form-select" id="sc-compat-material-family">
+      <select class="form-select" id="sc-compat-material-family" aria-label="Malzeme ailesi / Material family">
         <option value="" data-i18n="sc.material_family_any">Any material family</option>
         <option value="carbon_alloy_steel" data-i18n="sc.material_family_carbon">Carbon/alloy steel</option>
         <option value="stainless_a2" data-i18n="sc.material_family_a2">Stainless A2</option>
@@ -1089,37 +1089,37 @@ textarea:focus-visible,
     <div class="card-title" data-i18n="ai.input_title">Assembly Inputs</div>
     <div class="card-sub" data-i18n="ai.input_sub">All fields are optional. Leave a field empty if you do not have that information.</div>
     <div class="ai-form-grid">
-      <div class="form-group"><label class="form-label" data-i18n="ai.field.bolt_designation">Bolt designation</label>
+      <div class="form-group"><label class="form-label" data-i18n="ai.field.bolt_designation" for="ai-bolt-designation">Bolt designation</label>
         <input class="form-input" id="ai-bolt-designation" type="text"></div>
-      <div class="form-group"><label class="form-label" data-i18n="ai.field.nut_designation">Nut designation</label>
+      <div class="form-group"><label class="form-label" data-i18n="ai.field.nut_designation" for="ai-nut-designation">Nut designation</label>
         <input class="form-input" id="ai-nut-designation" type="text"></div>
-      <div class="form-group"><label class="form-label" data-i18n="ai.field.bolt_strength_class">Bolt strength class</label>
+      <div class="form-group"><label class="form-label" data-i18n="ai.field.bolt_strength_class" for="ai-bolt-strength-class">Bolt strength class</label>
         <input class="form-input" id="ai-bolt-strength-class" type="text"></div>
-      <div class="form-group"><label class="form-label" data-i18n="ai.field.nut_property_class">Nut property class</label>
+      <div class="form-group"><label class="form-label" data-i18n="ai.field.nut_property_class" for="ai-nut-property-class">Nut property class</label>
         <input class="form-input" id="ai-nut-property-class" type="text"></div>
-      <div class="form-group"><label class="form-label" data-i18n="ai.field.nominal_diameter_mm">Nominal diameter (mm)</label>
+      <div class="form-group"><label class="form-label" data-i18n="ai.field.nominal_diameter_mm" for="ai-nominal-diameter">Nominal diameter (mm)</label>
         <input class="form-input" id="ai-nominal-diameter" type="number" min="0" step="0.1"></div>
-      <div class="form-group"><label class="form-label" data-i18n="ai.field.thread_designation">Thread designation</label>
+      <div class="form-group"><label class="form-label" data-i18n="ai.field.thread_designation" for="ai-thread-designation">Thread designation</label>
         <input class="form-input" id="ai-thread-designation" type="text"></div>
-      <div class="form-group"><label class="form-label" data-i18n="ai.field.bolt_size">Bolt size</label>
+      <div class="form-group"><label class="form-label" data-i18n="ai.field.bolt_size" for="ai-bolt-size">Bolt size</label>
         <input class="form-input" id="ai-bolt-size" type="text"></div>
-      <div class="form-group"><label class="form-label" data-i18n="ai.field.washer_standard">Washer standard</label>
+      <div class="form-group"><label class="form-label" data-i18n="ai.field.washer_standard" for="ai-washer-standard">Washer standard</label>
         <input class="form-input" id="ai-washer-standard" type="text"></div>
-      <div class="form-group"><label class="form-label" data-i18n="ai.field.friction_condition_id">Friction condition ID</label>
+      <div class="form-group"><label class="form-label" data-i18n="ai.field.friction_condition_id" for="ai-friction-condition-id">Friction condition ID</label>
         <input class="form-input" id="ai-friction-condition-id" type="text"></div>
-      <div class="form-group"><label class="form-label" data-i18n="ai.field.standard_name">Standard name</label>
+      <div class="form-group"><label class="form-label" data-i18n="ai.field.standard_name" for="ai-standard-name">Standard name</label>
         <input class="form-input" id="ai-standard-name" type="text"></div>
-      <div class="form-group"><label class="form-label" data-i18n="ai.field.oem_reference">OEM reference</label>
+      <div class="form-group"><label class="form-label" data-i18n="ai.field.oem_reference" for="ai-oem-reference">OEM reference</label>
         <input class="form-input" id="ai-oem-reference" type="text"></div>
-      <div class="form-group"><label class="form-label" data-i18n="ai.field.automotive_reference">Automotive reference</label>
+      <div class="form-group"><label class="form-label" data-i18n="ai.field.automotive_reference" for="ai-automotive-reference">Automotive reference</label>
         <input class="form-input" id="ai-automotive-reference" type="text"></div>
-      <div class="form-group"><label class="form-label" data-i18n="ai.field.intended_operating_temperature_c">Intended operating temperature (°C)</label>
+      <div class="form-group"><label class="form-label" data-i18n="ai.field.intended_operating_temperature_c" for="ai-intended-operating-temperature">Intended operating temperature (°C)</label>
         <input class="form-input" id="ai-intended-operating-temperature" type="number" step="0.1"></div>
-      <div class="form-group"><label class="form-label" data-i18n="ai.field.intended_coating">Intended coating</label>
+      <div class="form-group"><label class="form-label" data-i18n="ai.field.intended_coating" for="ai-intended-coating">Intended coating</label>
         <input class="form-input" id="ai-intended-coating" type="text"></div>
     </div>
     <label style="display:flex;align-items:center;gap:8px;margin-top:12px;cursor:pointer;font-size:13px;color:var(--text2)">
-      <input type="checkbox" id="ai-include-report" style="accent-color:var(--accent)">
+      <input type="checkbox" id="ai-include-report" style="accent-color:var(--accent)" aria-label="Raporu dahil et / Include report">
       <span data-i18n="ai.field.include_report">Include report</span>
     </label>
     <div style="margin-top:14px">
@@ -1146,53 +1146,53 @@ textarea:focus-visible,
     <div class="card-title" data-i18n="ja.input_title">Joint Inputs</div>
     <div class="card-sub" data-i18n="ja.input_sub">All fields are optional. Leave a field empty if you do not have that information -- coverage/readiness will reflect what could be evaluated.</div>
     <div class="ai-form-grid">
-      <div class="form-group"><label class="form-label" data-i18n="ja.field.diameter_mm">Nominal diameter (mm)</label>
+      <div class="form-group"><label class="form-label" data-i18n="ja.field.diameter_mm" for="ja-diameter-mm">Nominal diameter (mm)</label>
         <input class="form-input" id="ja-diameter-mm" type="number" min="0" step="0.1"></div>
-      <div class="form-group"><label class="form-label" data-i18n="ja.field.pitch_mm">Thread pitch (mm)</label>
+      <div class="form-group"><label class="form-label" data-i18n="ja.field.pitch_mm" for="ja-pitch-mm">Thread pitch (mm)</label>
         <input class="form-input" id="ja-pitch-mm" type="number" min="0" step="0.05"></div>
-      <div class="form-group"><label class="form-label" data-i18n="ja.field.rp02_mpa">Yield/proof strength Rp0.2 (MPa)</label>
+      <div class="form-group"><label class="form-label" data-i18n="ja.field.rp02_mpa" for="ja-rp02-mpa">Yield/proof strength Rp0.2 (MPa)</label>
         <input class="form-input" id="ja-rp02-mpa" type="number" min="0" step="1"></div>
-      <div class="form-group"><label class="form-label" data-i18n="ja.field.target_yield_ratio">Target yield utilization ratio (0-1)</label>
+      <div class="form-group"><label class="form-label" data-i18n="ja.field.target_yield_ratio" for="ja-target-yield-ratio">Target yield utilization ratio (0-1)</label>
         <input class="form-input" id="ja-target-yield-ratio" type="number" min="0" max="1" step="0.01"></div>
-      <div class="form-group"><label class="form-label" data-i18n="ja.field.max_utilization_ratio">Max allowed utilization ratio (0-1)</label>
+      <div class="form-group"><label class="form-label" data-i18n="ja.field.max_utilization_ratio" for="ja-max-utilization-ratio">Max allowed utilization ratio (0-1)</label>
         <input class="form-input" id="ja-max-utilization-ratio" type="number" min="0" max="1" step="0.01"></div>
-      <div class="form-group"><label class="form-label" data-i18n="ja.field.mu_thread_nom">Thread friction coefficient (nominal)</label>
+      <div class="form-group"><label class="form-label" data-i18n="ja.field.mu_thread_nom" for="ja-mu-thread-nom">Thread friction coefficient (nominal)</label>
         <input class="form-input" id="ja-mu-thread-nom" type="number" min="0" max="1" step="0.01"></div>
-      <div class="form-group"><label class="form-label" data-i18n="ja.field.mu_bearing_nom">Bearing friction coefficient (nominal)</label>
+      <div class="form-group"><label class="form-label" data-i18n="ja.field.mu_bearing_nom" for="ja-mu-bearing-nom">Bearing friction coefficient (nominal)</label>
         <input class="form-input" id="ja-mu-bearing-nom" type="number" min="0" max="1" step="0.01"></div>
-      <div class="form-group"><label class="form-label" data-i18n="ja.field.effective_bearing_diameter_mm">Effective bearing diameter (mm)</label>
+      <div class="form-group"><label class="form-label" data-i18n="ja.field.effective_bearing_diameter_mm" for="ja-effective-bearing-diameter">Effective bearing diameter (mm)</label>
         <input class="form-input" id="ja-effective-bearing-diameter" type="number" min="0" step="0.1"></div>
-      <div class="form-group"><label class="form-label" data-i18n="ja.field.external_axial_load_n">External axial load (N)</label>
+      <div class="form-group"><label class="form-label" data-i18n="ja.field.external_axial_load_n" for="ja-external-axial-load">External axial load (N)</label>
         <input class="form-input" id="ja-external-axial-load" type="number" step="1"></div>
-      <div class="form-group"><label class="form-label" data-i18n="ja.field.minimum_required_clamp_load_n">Minimum required clamp load (N)</label>
+      <div class="form-group"><label class="form-label" data-i18n="ja.field.minimum_required_clamp_load_n" for="ja-min-clamp-load">Minimum required clamp load (N)</label>
         <input class="form-input" id="ja-min-clamp-load" type="number" min="0" step="1"></div>
-      <div class="form-group"><label class="form-label" data-i18n="ja.field.applied_torque_nm">Applied torque (Nm)</label>
+      <div class="form-group"><label class="form-label" data-i18n="ja.field.applied_torque_nm" for="ja-applied-torque">Applied torque (Nm)</label>
         <input class="form-input" id="ja-applied-torque" type="number" min="0" step="0.1"></div>
-      <div class="form-group"><label class="form-label" data-i18n="ja.field.fail_threshold">Fail utilization threshold (0-1)</label>
+      <div class="form-group"><label class="form-label" data-i18n="ja.field.fail_threshold" for="ja-fail-threshold">Fail utilization threshold (0-1)</label>
         <input class="form-input" id="ja-fail-threshold" type="number" min="0" max="1" step="0.01"></div>
-      <div class="form-group"><label class="form-label" data-i18n="ja.field.warn_threshold">Warn utilization threshold (0-1)</label>
+      <div class="form-group"><label class="form-label" data-i18n="ja.field.warn_threshold" for="ja-warn-threshold">Warn utilization threshold (0-1)</label>
         <input class="form-input" id="ja-warn-threshold" type="number" min="0" max="1" step="0.01"></div>
     </div>
 
     <div class="card-title" style="margin-top:18px" data-i18n="ja.bolt_segment_title">Bolt Stiffness Segment</div>
     <div class="card-sub" data-i18n="ja.segment_sub">One representative series-compliance segment (length, modulus, area). The API supports several segments per stack; this quick form covers the common single-segment case.</div>
     <div class="ai-form-grid">
-      <div class="form-group"><label class="form-label" data-i18n="ja.field.segment_length_mm">Length (mm)</label>
+      <div class="form-group"><label class="form-label" data-i18n="ja.field.segment_length_mm" for="ja-bolt-seg-length">Length (mm)</label>
         <input class="form-input" id="ja-bolt-seg-length" type="number" min="0" step="0.1"></div>
-      <div class="form-group"><label class="form-label" data-i18n="ja.field.segment_modulus_mpa">Elastic modulus (MPa)</label>
+      <div class="form-group"><label class="form-label" data-i18n="ja.field.segment_modulus_mpa" for="ja-bolt-seg-modulus">Elastic modulus (MPa)</label>
         <input class="form-input" id="ja-bolt-seg-modulus" type="number" min="0" step="100"></div>
-      <div class="form-group"><label class="form-label" data-i18n="ja.field.segment_area_mm2">Cross-section area (mm²)</label>
+      <div class="form-group"><label class="form-label" data-i18n="ja.field.segment_area_mm2" for="ja-bolt-seg-area">Cross-section area (mm²)</label>
         <input class="form-input" id="ja-bolt-seg-area" type="number" min="0" step="0.1"></div>
     </div>
 
     <div class="card-title" style="margin-top:18px" data-i18n="ja.joint_segment_title">Clamped-Part (Joint) Stiffness Segment</div>
     <div class="card-sub" data-i18n="ja.segment_sub">One representative series-compliance segment (length, modulus, area). The API supports several segments per stack; this quick form covers the common single-segment case.</div>
     <div class="ai-form-grid">
-      <div class="form-group"><label class="form-label" data-i18n="ja.field.segment_length_mm">Length (mm)</label>
+      <div class="form-group"><label class="form-label" data-i18n="ja.field.segment_length_mm" for="ja-joint-seg-length">Length (mm)</label>
         <input class="form-input" id="ja-joint-seg-length" type="number" min="0" step="0.1"></div>
-      <div class="form-group"><label class="form-label" data-i18n="ja.field.segment_modulus_mpa">Elastic modulus (MPa)</label>
+      <div class="form-group"><label class="form-label" data-i18n="ja.field.segment_modulus_mpa" for="ja-joint-seg-modulus">Elastic modulus (MPa)</label>
         <input class="form-input" id="ja-joint-seg-modulus" type="number" min="0" step="100"></div>
-      <div class="form-group"><label class="form-label" data-i18n="ja.field.segment_area_mm2">Cross-section area (mm²)</label>
+      <div class="form-group"><label class="form-label" data-i18n="ja.field.segment_area_mm2" for="ja-joint-seg-area">Cross-section area (mm²)</label>
         <input class="form-input" id="ja-joint-seg-area" type="number" min="0" step="0.1"></div>
     </div>
 
@@ -1286,23 +1286,23 @@ textarea:focus-visible,
     <div id="wrr-decide-blocked-notice" class="alert alert-warning" style="display:none" data-i18n="wrr.decide.blocked_notice">This record is blocked_authoritative_source. The backend does not permit a decision on it through this workflow; the form is disabled.</div>
     <div id="wrr-decide-terminal-notice" class="alert alert-info" style="display:none" data-i18n="wrr.decide.terminal_notice">This record's effective status is already terminal (resolved, accepted-as-is, or rejected). The backend does not permit a further decision; the form is disabled.</div>
     <div class="form-group">
-      <label class="form-label" data-i18n="wrr.decide.new_status_label">New Status</label>
+      <label class="form-label" data-i18n="wrr.decide.new_status_label" for="wrr-decide-new-status">New Status</label>
       <select class="form-select" id="wrr-decide-new-status"><option value="" data-i18n="wrr.decide.select_placeholder">-- select --</option></select>
     </div>
     <div class="form-group">
-      <label class="form-label" data-i18n="wrr.decide.resolution_note_label">Resolution Note</label>
+      <label class="form-label" data-i18n="wrr.decide.resolution_note_label" for="wrr-decide-resolution-note">Resolution Note</label>
       <textarea class="form-input" id="wrr-decide-resolution-note" rows="3"></textarea>
     </div>
     <div class="form-group">
-      <label class="form-label" data-i18n="wrr.decide.evidence_reference_label">Evidence Reference</label>
+      <label class="form-label" data-i18n="wrr.decide.evidence_reference_label" for="wrr-decide-evidence-reference">Evidence Reference</label>
       <textarea class="form-input" id="wrr-decide-evidence-reference" rows="2"></textarea>
     </div>
     <div class="form-group">
-      <label class="form-label" data-i18n="wrr.decide.resolved_by_label">Resolved By</label>
+      <label class="form-label" data-i18n="wrr.decide.resolved_by_label" for="wrr-decide-resolved-by">Resolved By</label>
       <input class="form-input" id="wrr-decide-resolved-by">
     </div>
     <div class="form-group">
-      <label class="form-label" data-i18n="wrr.decide.confidence_level_label">Confidence Level (optional)</label>
+      <label class="form-label" data-i18n="wrr.decide.confidence_level_label" for="wrr-decide-confidence-level">Confidence Level (optional)</label>
       <select class="form-select" id="wrr-decide-confidence-level">
         <option value="" data-i18n="wrr.decide.confidence_none">-- none --</option>
         <option value="1">G1</option>
@@ -1350,7 +1350,7 @@ textarea:focus-visible,
     <div class="card-title" data-i18n="wrr.evidence.add_title">Add Evidence</div>
     <div class="card-sub" data-i18n="wrr.evidence.add_subtitle">Submits the evidence you provide to the existing evidence record endpoint. Nothing here is inferred, suggested, or generated automatically.</div>
     <div class="form-group">
-      <label class="form-label" data-i18n="wrr.evidence.type_label">Evidence Type</label>
+      <label class="form-label" data-i18n="wrr.evidence.type_label" for="wrr-evidence-type">Evidence Type</label>
       <select class="form-select" id="wrr-evidence-type">
         <option value="" data-i18n="wrr.decide.select_placeholder">-- select --</option>
         <option value="authoritative_standard" data-i18n="wrr.evidence.type.authoritative_standard">Authoritative Standard</option>
@@ -1363,31 +1363,31 @@ textarea:focus-visible,
       </select>
     </div>
     <div class="form-group">
-      <label class="form-label" data-i18n="wrr.evidence.title_label">Title</label>
+      <label class="form-label" data-i18n="wrr.evidence.title_label" for="wrr-evidence-title">Title</label>
       <input class="form-input" id="wrr-evidence-title">
     </div>
     <div class="form-group">
-      <label class="form-label" data-i18n="wrr.evidence.description_label">Description</label>
+      <label class="form-label" data-i18n="wrr.evidence.description_label" for="wrr-evidence-description">Description</label>
       <textarea class="form-input" id="wrr-evidence-description" rows="3"></textarea>
     </div>
     <div class="form-group">
-      <label class="form-label" data-i18n="wrr.evidence.source_reference_label">Source Reference</label>
+      <label class="form-label" data-i18n="wrr.evidence.source_reference_label" for="wrr-evidence-source-reference">Source Reference</label>
       <textarea class="form-input" id="wrr-evidence-source-reference" rows="2"></textarea>
     </div>
     <div class="form-group">
-      <label class="form-label" data-i18n="wrr.evidence.source_locator_label">Source Locator (optional)</label>
+      <label class="form-label" data-i18n="wrr.evidence.source_locator_label" for="wrr-evidence-source-locator">Source Locator (optional)</label>
       <input class="form-input" id="wrr-evidence-source-locator">
     </div>
     <div class="form-group">
-      <label class="form-label" data-i18n="wrr.evidence.source_url_label">Source URL (optional)</label>
+      <label class="form-label" data-i18n="wrr.evidence.source_url_label" for="wrr-evidence-source-url">Source URL (optional)</label>
       <input class="form-input" id="wrr-evidence-source-url">
     </div>
     <div class="form-group">
-      <label class="form-label" data-i18n="wrr.evidence.source_standard_label">Source Standard</label>
+      <label class="form-label" data-i18n="wrr.evidence.source_standard_label" for="wrr-evidence-source-standard">Source Standard</label>
       <input class="form-input" id="wrr-evidence-source-standard">
     </div>
     <div class="form-group">
-      <label class="form-label" data-i18n="wrr.evidence.created_by_label">Created By</label>
+      <label class="form-label" data-i18n="wrr.evidence.created_by_label" for="wrr-evidence-created-by">Created By</label>
       <input class="form-input" id="wrr-evidence-created-by">
     </div>
     <div id="wrr-evidence-validation-error" class="alert alert-danger" style="display:none"></div>
@@ -1408,11 +1408,11 @@ textarea:focus-visible,
     <div class="card-title" data-i18n="wrr.closure.close_title">Close Resolution</div>
     <div class="card-sub" data-i18n="wrr.closure.close_subtitle">Submits the closure rationale and closer you provide to the existing controlled closure endpoint. Enabled only when the resolution is ready for closure.</div>
     <div class="form-group">
-      <label class="form-label" data-i18n="wrr.closure.rationale_label">Closure Rationale</label>
+      <label class="form-label" data-i18n="wrr.closure.rationale_label" for="wrr-close-rationale">Closure Rationale</label>
       <textarea class="form-input" id="wrr-close-rationale" rows="3"></textarea>
     </div>
     <div class="form-group">
-      <label class="form-label" data-i18n="wrr.closure.closed_by_label">Closed By</label>
+      <label class="form-label" data-i18n="wrr.closure.closed_by_label" for="wrr-close-closed-by">Closed By</label>
       <input class="form-input" id="wrr-close-closed-by">
     </div>
     <div id="wrr-close-validation-error" class="alert alert-danger" style="display:none"></div>
@@ -1445,8 +1445,8 @@ textarea:focus-visible,
   <div class="card">
     <div class="card-title" data-i18n="gov.lookup_title">Aggregate Lookup</div>
     <div class="form-row3">
-      <div class="form-group"><label class="form-label" data-i18n="gov.aggregate_id_label">Record ID</label><input class="form-input" id="gov_aggregate_id"></div>
-      <div class="form-group"><label class="form-label" data-i18n="gov.aggregate_type_label">Record Type</label><input class="form-input" id="gov_aggregate_type"></div>
+      <div class="form-group"><label class="form-label" data-i18n="gov.aggregate_id_label" for="gov_aggregate_id">Record ID</label><input class="form-input" id="gov_aggregate_id"></div>
+      <div class="form-group"><label class="form-label" data-i18n="gov.aggregate_type_label" for="gov_aggregate_type">Record Type</label><input class="form-input" id="gov_aggregate_type"></div>
       <div class="form-group" style="display:flex;align-items:flex-end"><button class="btn btn-primary" onclick="govLoad()" data-i18n="gov.load_button">Load</button></div>
     </div>
   </div>
@@ -1469,7 +1469,7 @@ textarea:focus-visible,
     <div class="card-title" data-i18n="gov.jr.section_title">Joint Revision Compatibility View (read-only)</div>
     <div class="card-sub" data-i18n="gov.jr.section_sub">Read-only compatibility view of an existing joint revision's review status. Never edits, approves, rejects or resolves anything.</div>
     <div class="form-row3">
-      <div class="form-group"><label class="form-label" data-i18n="gov.jr.revision_id_label">Joint Revision ID</label><input class="form-input" id="gov_jr_revision_id"></div>
+      <div class="form-group"><label class="form-label" data-i18n="gov.jr.revision_id_label" for="gov_jr_revision_id">Joint Revision ID</label><input class="form-input" id="gov_jr_revision_id"></div>
       <div class="form-group" style="display:flex;align-items:flex-end"><button class="btn btn-primary" onclick="govLoadJointRevision()" data-i18n="gov.jr.lookup_button">Look Up</button></div>
     </div>
     <div id="gov-jr-result"></div>
@@ -1479,15 +1479,15 @@ textarea:focus-visible,
     <div class="card-title" data-i18n="gov.jrlist.section_title">Joint Revision List (read-only)</div>
     <div class="card-sub" data-i18n="gov.jrlist.section_sub">Read-only bulk view of joint revision compatibility records, optionally filtered by joint ID. Never edits, approves, rejects or resolves anything.</div>
     <div class="form-row">
-      <div class="form-group"><label class="form-label" data-i18n="gov.jrlist.joint_id_label">Joint ID (optional)</label><input class="form-input" id="gov_jrlist_joint_id" data-i18n-placeholder="gov.jrlist.joint_id_placeholder" placeholder="Leave empty to list all revisions"></div>
+      <div class="form-group"><label class="form-label" data-i18n="gov.jrlist.joint_id_label" for="gov_jrlist_joint_id">Joint ID (optional)</label><input class="form-input" id="gov_jrlist_joint_id" data-i18n-placeholder="gov.jrlist.joint_id_placeholder" placeholder="Leave empty to list all revisions"></div>
       <div class="form-group" style="display:flex;align-items:flex-end"><button class="btn btn-primary" onclick="govLoadJointRevisions()" data-i18n="gov.jrlist.load_button">List</button></div>
     </div>
     <div id="gov-jrlist-result"></div>
 
     <div class="card-sub" style="margin-top:16px" data-i18n="gov.jrlist.query_section_sub">Search, sort, page, and export the same read-only data. Uses the same Joint ID filter above.</div>
     <div class="form-row3">
-      <div class="form-group"><label class="form-label" data-i18n="gov.jrlist.searchLabel">Search</label><input class="form-input" id="gov_jrlist_query_search" data-i18n-placeholder="gov.jrlist.searchPlaceholder" placeholder="Search results" onkeydown="if(event.key==='Enter'){event.preventDefault();govJointRevisionQuerySearch();}"></div>
-      <div class="form-group"><label class="form-label" data-i18n="gov.jrlist.sortBy">Sort by</label>
+      <div class="form-group"><label class="form-label" data-i18n="gov.jrlist.searchLabel" for="gov_jrlist_query_search">Search</label><input class="form-input" id="gov_jrlist_query_search" data-i18n-placeholder="gov.jrlist.searchPlaceholder" placeholder="Search results" onkeydown="if(event.key==='Enter'){event.preventDefault();govJointRevisionQuerySearch();}"></div>
+      <div class="form-group"><label class="form-label" data-i18n="gov.jrlist.sortBy" for="gov_jrlist_query_sort_by">Sort by</label>
         <select class="form-select" id="gov_jrlist_query_sort_by" onchange="govJointRevisionQuerySortChange()">
           <option value="joint_revision_id" data-i18n="gov.jrlist.sortJointRevisionId">Revision ID</option>
           <option value="source_status" data-i18n="gov.jrlist.sortSourceStatus">Source status</option>
@@ -1495,7 +1495,7 @@ textarea:focus-visible,
           <option value="outcome" data-i18n="gov.jrlist.sortOutcome">Outcome</option>
         </select>
       </div>
-      <div class="form-group"><label class="form-label" data-i18n="gov.jrlist.sortOrder">Order</label>
+      <div class="form-group"><label class="form-label" data-i18n="gov.jrlist.sortOrder" for="gov_jrlist_query_sort_order">Order</label>
         <select class="form-select" id="gov_jrlist_query_sort_order" onchange="govJointRevisionQueryOrderChange()">
           <option value="asc" data-i18n="gov.jrlist.ascending">Ascending</option>
           <option value="desc" data-i18n="gov.jrlist.descending">Descending</option>
@@ -1507,7 +1507,7 @@ textarea:focus-visible,
         <button class="btn btn-primary" id="gov_jrlist_query_search_btn" onclick="govJointRevisionQuerySearch()" data-i18n="gov.jrlist.searchButton">Search</button>
         <button class="btn btn-secondary" id="gov_jrlist_query_clear_btn" onclick="govJointRevisionQueryClearSearch()" data-i18n="gov.jrlist.clearButton">Clear</button>
       </div>
-      <div class="form-group"><label class="form-label" data-i18n="gov.jrlist.pageSize">Page size</label>
+      <div class="form-group"><label class="form-label" data-i18n="gov.jrlist.pageSize" for="gov_jrlist_query_page_size">Page size</label>
         <select class="form-select" id="gov_jrlist_query_page_size" onchange="govJointRevisionQueryPageSizeChange()">
           <option value="10">10</option>
           <option value="25" selected>25</option>
@@ -1525,14 +1525,14 @@ textarea:focus-visible,
   <div class="card">
     <div class="card-title" data-i18n="gov.command_title">Record a Decision</div>
     <div class="form-row3">
-      <div class="form-group"><label class="form-label" data-i18n="gov.action_label">Action</label><select class="form-input" id="gov_action" onchange="govOnActionChange()"></select></div>
-      <div class="form-group"><label class="form-label" data-i18n="gov.decision_id_label">Decision ID</label><input class="form-input" id="gov_decision_id"></div>
-      <div class="form-group"><label class="form-label" data-i18n="gov.idempotency_key_label">Idempotency Key</label><input class="form-input" id="gov_idempotency_key"></div>
+      <div class="form-group"><label class="form-label" data-i18n="gov.action_label" for="gov_action">Action</label><select class="form-input" id="gov_action" onchange="govOnActionChange()"></select></div>
+      <div class="form-group"><label class="form-label" data-i18n="gov.decision_id_label" for="gov_decision_id">Decision ID</label><input class="form-input" id="gov_decision_id"></div>
+      <div class="form-group"><label class="form-label" data-i18n="gov.idempotency_key_label" for="gov_idempotency_key">Idempotency Key</label><input class="form-input" id="gov_idempotency_key"></div>
     </div>
     <div class="form-row3">
-      <div class="form-group"><label class="form-label" data-i18n="gov.occurred_at_label">Occurred At (UTC ISO-8601)</label><input class="form-input" id="gov_occurred_at" placeholder="2026-07-30T10:00:00Z"></div>
-      <div class="form-group" id="gov-superseded-by-group" style="display:none"><label class="form-label" data-i18n="gov.superseded_by_id_label">Superseded By ID</label><input class="form-input" id="gov_superseded_by_id"></div>
-      <div class="form-group"><label class="form-label" data-i18n="gov.metadata_label">Metadata (JSON, optional)</label><input class="form-input" id="gov_metadata" data-i18n-placeholder="gov.metadata_placeholder" placeholder="{}"></div>
+      <div class="form-group"><label class="form-label" data-i18n="gov.occurred_at_label" for="gov_occurred_at">Occurred At (UTC ISO-8601)</label><input class="form-input" id="gov_occurred_at" placeholder="2026-07-30T10:00:00Z"></div>
+      <div class="form-group" id="gov-superseded-by-group" style="display:none"><label class="form-label" data-i18n="gov.superseded_by_id_label">Superseded By ID</label><input class="form-input" id="gov_superseded_by_id" aria-label="Yerine geçen kural ID / Superseded by rule ID"></div>
+      <div class="form-group"><label class="form-label" data-i18n="gov.metadata_label" for="gov_metadata">Metadata (JSON, optional)</label><input class="form-input" id="gov_metadata" data-i18n-placeholder="gov.metadata_placeholder" placeholder="{}"></div>
     </div>
     <button class="btn btn-primary" onclick="govSubmitCommand()" data-i18n="gov.submit_button">Submit Decision</button>
     <div id="gov-command-result" style="margin-top:10px"></div>
@@ -1575,18 +1575,18 @@ textarea:focus-visible,
         <div class="card-sub" data-i18n="qb.list_sub">Search and filter existing question bank records</div></div>
       <div style="display:flex;gap:8px;flex-wrap:wrap">
         <button class="btn btn-secondary btn-sm" onclick="qbExportQuestions()" data-i18n="qb.ie.export_button">Export</button>
-        <input type="file" id="qb-import-file-input" accept="application/json,.json" style="display:none" onchange="qbImportFileSelected(event)">
+        <input type="file" id="qb-import-file-input" accept="application/json,.json" style="display:none" onchange="qbImportFileSelected(event)" aria-label="İçe aktarma dosyası / Import file">
         <button class="btn btn-secondary btn-sm" onclick="qbTriggerImportFilePicker()" data-i18n="qb.ie.import_button">Import</button>
         <button class="btn btn-primary btn-sm" onclick="qbShowCreateForm()" data-i18n="qb.new_question_button">+ New Question</button>
       </div>
     </div>
     <div class="fc-toolbar">
-      <input class="form-input" id="qb-search" data-i18n-placeholder="qb.search_placeholder" placeholder="Search by keyword..." oninput="qbDebouncedLoadList()">
-      <select class="form-select" id="qb-filter-category" onchange="qbLoadList()"><option value="" data-i18n="qb.filter_category_all">All categories</option></select>
-      <select class="form-select" id="qb-filter-difficulty" onchange="qbLoadList()"><option value="" data-i18n="qb.filter_difficulty_all">Any difficulty</option></select>
-      <input class="form-input" id="qb-filter-tag" data-i18n-placeholder="qb.filter_tag_placeholder" placeholder="Filter by tag..." oninput="qbDebouncedLoadList()">
-      <select class="form-select" id="qb-filter-status" onchange="qbLoadList()"><option value="" data-i18n="qb.filter_status_all">Any status</option></select>
-      <label style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text3)"><input type="checkbox" id="qb-filter-include-archived" style="accent-color:var(--accent)" onchange="qbLoadList()"> <span data-i18n="qb.filter_include_archived">Include archived/deleted</span></label>
+      <input class="form-input" id="qb-search" data-i18n-placeholder="qb.search_placeholder" placeholder="Search by keyword..." oninput="qbDebouncedLoadList()" aria-label="Soru ara / Search questions">
+      <select class="form-select" id="qb-filter-category" onchange="qbLoadList()" aria-label="Kategori filtresi / Category filter"><option value="" data-i18n="qb.filter_category_all">All categories</option></select>
+      <select class="form-select" id="qb-filter-difficulty" onchange="qbLoadList()" aria-label="Zorluk filtresi / Difficulty filter"><option value="" data-i18n="qb.filter_difficulty_all">Any difficulty</option></select>
+      <input class="form-input" id="qb-filter-tag" data-i18n-placeholder="qb.filter_tag_placeholder" placeholder="Filter by tag..." oninput="qbDebouncedLoadList()" aria-label="Etiket filtresi / Tag filter">
+      <select class="form-select" id="qb-filter-status" onchange="qbLoadList()" aria-label="Durum filtresi / Status filter"><option value="" data-i18n="qb.filter_status_all">Any status</option></select>
+      <label style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text3)"><input type="checkbox" id="qb-filter-include-archived" style="accent-color:var(--accent)" onchange="qbLoadList()" aria-label="Arşivlenenleri dahil et / Include archived"> <span data-i18n="qb.filter_include_archived">Include archived/deleted</span></label>
     </div>
     <div id="qb-ie-result"></div>
     <div id="qb-bulk-toolbar" class="fc-toolbar" style="display:none;align-items:center;gap:8px">
@@ -1605,7 +1605,7 @@ textarea:focus-visible,
     <div style="overflow-x:auto">
     <table class="source-table" id="qb-list-table">
       <thead><tr>
-        <th style="width:28px" scope="col"><input type="checkbox" id="qb-select-all" onchange="qbToggleSelectAll(this.checked)"></th>
+        <th style="width:28px" scope="col"><input type="checkbox" id="qb-select-all" onchange="qbToggleSelectAll(this.checked)" aria-label="Tümünü seç / Select all"></th>
         <th data-i18n="qb.col.id" scope="col">ID</th>
         <th data-i18n="qb.col.question" scope="col">Question</th>
         <th data-i18n="qb.col.category" scope="col">Category</th>
@@ -1690,51 +1690,51 @@ textarea:focus-visible,
     <div id="qb-form-error" class="alert alert-warn" style="display:none"></div>
 
     <div class="form-row3">
-      <div class="form-group"><label class="form-label" data-i18n="qb.field.question_id">Question ID *</label><input class="form-input" id="qb_f_question_id"></div>
-      <div class="form-group"><label class="form-label" data-i18n="qb.field.content_version">Content Version *</label><input class="form-input" id="qb_f_content_version" type="number" min="1" value="1"></div>
-      <div class="form-group"><label class="form-label" data-i18n="qb.field.subcategory">Subcategory</label><input class="form-input" id="qb_f_subcategory"></div>
+      <div class="form-group"><label class="form-label" data-i18n="qb.field.question_id" for="qb_f_question_id">Question ID *</label><input class="form-input" id="qb_f_question_id"></div>
+      <div class="form-group"><label class="form-label" data-i18n="qb.field.content_version" for="qb_f_content_version">Content Version *</label><input class="form-input" id="qb_f_content_version" type="number" min="1" value="1"></div>
+      <div class="form-group"><label class="form-label" data-i18n="qb.field.subcategory" for="qb_f_subcategory">Subcategory</label><input class="form-input" id="qb_f_subcategory"></div>
     </div>
     <div class="form-row3">
-      <div class="form-group"><label class="form-label" data-i18n="qb.field.category">Category *</label><select class="form-select" id="qb_f_category"></select></div>
-      <div class="form-group"><label class="form-label" data-i18n="qb.field.difficulty">Difficulty *</label><select class="form-select" id="qb_f_difficulty"></select></div>
-      <div class="form-group"><label class="form-label" data-i18n="qb.field.question_type">Question Type *</label><select class="form-select" id="qb_f_question_type" onchange="qbUpdateCorrectAnswerHint()"></select></div>
+      <div class="form-group"><label class="form-label" data-i18n="qb.field.category" for="qb_f_category">Category *</label><select class="form-select" id="qb_f_category"></select></div>
+      <div class="form-group"><label class="form-label" data-i18n="qb.field.difficulty" for="qb_f_difficulty">Difficulty *</label><select class="form-select" id="qb_f_difficulty"></select></div>
+      <div class="form-group"><label class="form-label" data-i18n="qb.field.question_type" for="qb_f_question_type">Question Type *</label><select class="form-select" id="qb_f_question_type" onchange="qbUpdateCorrectAnswerHint()"></select></div>
     </div>
 
-    <div class="form-group"><label class="form-label" data-i18n="qb.field.question_tr">Question text (TR) *</label><textarea class="form-input" id="qb_f_question_tr" rows="2"></textarea></div>
-    <div class="form-group"><label class="form-label" data-i18n="qb.field.question_en">Question text (EN) *</label><textarea class="form-input" id="qb_f_question_en" rows="2"></textarea></div>
+    <div class="form-group"><label class="form-label" data-i18n="qb.field.question_tr" for="qb_f_question_tr">Question text (TR) *</label><textarea class="form-input" id="qb_f_question_tr" rows="2"></textarea></div>
+    <div class="form-group"><label class="form-label" data-i18n="qb.field.question_en" for="qb_f_question_en">Question text (EN) *</label><textarea class="form-input" id="qb_f_question_en" rows="2"></textarea></div>
 
     <div class="grid2">
-      <div class="form-group"><label class="form-label" data-i18n="qb.field.options_tr">Options (TR, one per line)</label><textarea class="form-input" id="qb_f_options_tr" rows="4"></textarea></div>
-      <div class="form-group"><label class="form-label" data-i18n="qb.field.options_en">Options (EN, one per line)</label><textarea class="form-input" id="qb_f_options_en" rows="4"></textarea></div>
+      <div class="form-group"><label class="form-label" data-i18n="qb.field.options_tr" for="qb_f_options_tr">Options (TR, one per line)</label><textarea class="form-input" id="qb_f_options_tr" rows="4"></textarea></div>
+      <div class="form-group"><label class="form-label" data-i18n="qb.field.options_en" for="qb_f_options_en">Options (EN, one per line)</label><textarea class="form-input" id="qb_f_options_en" rows="4"></textarea></div>
     </div>
 
     <div class="form-row3">
-      <div class="form-group"><label class="form-label" data-i18n="qb.field.correct_answer">Correct Answer *</label><input class="form-input" id="qb_f_correct_answer">
+      <div class="form-group"><label class="form-label" data-i18n="qb.field.correct_answer" for="qb_f_correct_answer">Correct Answer *</label><input class="form-input" id="qb_f_correct_answer">
         <div class="fc-muted" id="qb-correct-answer-hint" style="margin-top:4px"></div></div>
-      <div class="form-group"><label class="form-label" data-i18n="qb.field.tolerance">Tolerance</label><input class="form-input" id="qb_f_tolerance" type="number" step="any"></div>
-      <div class="form-group"><label class="form-label" data-i18n="qb.field.engineering_risk_level">Engineering Risk Level *</label><select class="form-select" id="qb_f_engineering_risk_level"></select></div>
+      <div class="form-group"><label class="form-label" data-i18n="qb.field.tolerance" for="qb_f_tolerance">Tolerance</label><input class="form-input" id="qb_f_tolerance" type="number" step="any"></div>
+      <div class="form-group"><label class="form-label" data-i18n="qb.field.engineering_risk_level" for="qb_f_engineering_risk_level">Engineering Risk Level *</label><select class="form-select" id="qb_f_engineering_risk_level"></select></div>
     </div>
 
-    <div class="form-group"><label class="form-label" data-i18n="qb.field.technical_explanation_tr">Technical Explanation (TR) *</label><textarea class="form-input" id="qb_f_technical_explanation_tr" rows="3"></textarea></div>
-    <div class="form-group"><label class="form-label" data-i18n="qb.field.technical_explanation_en">Technical Explanation (EN) *</label><textarea class="form-input" id="qb_f_technical_explanation_en" rows="3"></textarea></div>
+    <div class="form-group"><label class="form-label" data-i18n="qb.field.technical_explanation_tr" for="qb_f_technical_explanation_tr">Technical Explanation (TR) *</label><textarea class="form-input" id="qb_f_technical_explanation_tr" rows="3"></textarea></div>
+    <div class="form-group"><label class="form-label" data-i18n="qb.field.technical_explanation_en" for="qb_f_technical_explanation_en">Technical Explanation (EN) *</label><textarea class="form-input" id="qb_f_technical_explanation_en" rows="3"></textarea></div>
 
     <div class="form-row3">
-      <div class="form-group"><label class="form-label" data-i18n="qb.field.standard_reference_name">Standard Reference — Name</label><input class="form-input" id="qb_f_std_ref_name"></div>
-      <div class="form-group"><label class="form-label" data-i18n="qb.field.standard_reference_edition">Standard Reference — Edition/Year</label><input class="form-input" id="qb_f_std_ref_edition"></div>
-      <div class="form-group"><label class="form-label" data-i18n="qb.field.standard_reference_clause">Standard Reference — Clause/Table</label><input class="form-input" id="qb_f_std_ref_clause"></div>
+      <div class="form-group"><label class="form-label" data-i18n="qb.field.standard_reference_name" for="qb_f_std_ref_name">Standard Reference — Name</label><input class="form-input" id="qb_f_std_ref_name"></div>
+      <div class="form-group"><label class="form-label" data-i18n="qb.field.standard_reference_edition" for="qb_f_std_ref_edition">Standard Reference — Edition/Year</label><input class="form-input" id="qb_f_std_ref_edition"></div>
+      <div class="form-group"><label class="form-label" data-i18n="qb.field.standard_reference_clause" for="qb_f_std_ref_clause">Standard Reference — Clause/Table</label><input class="form-input" id="qb_f_std_ref_clause"></div>
     </div>
     <div class="form-row3">
-      <div class="form-group"><label class="form-label" data-i18n="qb.field.source_reference_type">Source Reference — Type</label><select class="form-select" id="qb_f_src_ref_type"><option value="" data-i18n="qb.none_option">— none —</option></select></div>
-      <div class="form-group"><label class="form-label" data-i18n="qb.field.source_reference_description">Source Reference — Description</label><input class="form-input" id="qb_f_src_ref_description"></div>
-      <div class="form-group"><label class="form-label" data-i18n="qb.field.source_locator">Source Locator</label><input class="form-input" id="qb_f_source_locator"></div>
+      <div class="form-group"><label class="form-label" data-i18n="qb.field.source_reference_type" for="qb_f_src_ref_type">Source Reference — Type</label><select class="form-select" id="qb_f_src_ref_type"><option value="" data-i18n="qb.none_option">— none —</option></select></div>
+      <div class="form-group"><label class="form-label" data-i18n="qb.field.source_reference_description" for="qb_f_src_ref_description">Source Reference — Description</label><input class="form-input" id="qb_f_src_ref_description"></div>
+      <div class="form-group"><label class="form-label" data-i18n="qb.field.source_locator" for="qb_f_source_locator">Source Locator</label><input class="form-input" id="qb_f_source_locator"></div>
     </div>
 
     <div class="form-row3">
-      <div class="form-group"><label class="form-label" data-i18n="qb.field.traceability_level">Traceability Level *</label><select class="form-select" id="qb_f_traceability_level"></select></div>
-      <div class="form-group"><label class="form-label" data-i18n="qb.field.tags">Tags (comma separated)</label><input class="form-input" id="qb_f_tags"></div>
-      <div class="form-group" style="display:flex;align-items:flex-end;gap:6px"><label style="display:flex;align-items:center;gap:6px;font-size:13px;color:var(--text2)"><input type="checkbox" id="qb_f_is_active" style="accent-color:var(--accent)"> <span data-i18n="qb.field.is_active">Active</span></label></div>
+      <div class="form-group"><label class="form-label" data-i18n="qb.field.traceability_level" for="qb_f_traceability_level">Traceability Level *</label><select class="form-select" id="qb_f_traceability_level"></select></div>
+      <div class="form-group"><label class="form-label" data-i18n="qb.field.tags" for="qb_f_tags">Tags (comma separated)</label><input class="form-input" id="qb_f_tags"></div>
+      <div class="form-group" style="display:flex;align-items:flex-end;gap:6px"><label style="display:flex;align-items:center;gap:6px;font-size:13px;color:var(--text2)"><input type="checkbox" id="qb_f_is_active" style="accent-color:var(--accent)" aria-label="Aktif / Active"> <span data-i18n="qb.field.is_active">Active</span></label></div>
     </div>
-    <div class="form-group"><label class="form-label" data-i18n="qb.field.learning_objective">Learning Objective *</label><textarea class="form-input" id="qb_f_learning_objective" rows="2"></textarea></div>
+    <div class="form-group"><label class="form-label" data-i18n="qb.field.learning_objective" for="qb_f_learning_objective">Learning Objective *</label><textarea class="form-input" id="qb_f_learning_objective" rows="2"></textarea></div>
 
     <button class="btn btn-primary" onclick="qbSubmitForm()" id="qb-form-submit-btn" data-i18n="qb.create_submit_button">Create Question</button>
     <button class="btn btn-secondary" onclick="qbCancelForm()" data-i18n="qb.cancel_button">Cancel</button>
@@ -1830,13 +1830,13 @@ textarea:focus-visible,
     <div class="card-title" data-i18n="mi.requirement_title">Material Recommendation</div>
     <div class="card-sub" data-i18n="mi.requirement_sub">All fields are optional. Leave a field empty to apply no filter on that property.</div>
     <div class="ai-form-grid">
-      <div class="form-group"><label class="form-label" data-i18n="mi.field.min_rp02_mpa">Minimum Rp0.2 (MPa)</label>
+      <div class="form-group"><label class="form-label" data-i18n="mi.field.min_rp02_mpa" for="mi-min-rp02">Minimum Rp0.2 (MPa)</label>
         <input class="form-input" id="mi-min-rp02" type="number" min="0" step="1"></div>
-      <div class="form-group"><label class="form-label" data-i18n="mi.field.min_rm_mpa">Minimum Rm (MPa)</label>
+      <div class="form-group"><label class="form-label" data-i18n="mi.field.min_rm_mpa" for="mi-min-rm">Minimum Rm (MPa)</label>
         <input class="form-input" id="mi-min-rm" type="number" min="0" step="1"></div>
-      <div class="form-group"><label class="form-label" data-i18n="mi.field.min_e_mpa">Minimum elastic modulus (MPa)</label>
+      <div class="form-group"><label class="form-label" data-i18n="mi.field.min_e_mpa" for="mi-min-e">Minimum elastic modulus (MPa)</label>
         <input class="form-input" id="mi-min-e" type="number" min="0" step="100"></div>
-      <div class="form-group"><label class="form-label" data-i18n="mi.field.material_family">Material family contains</label>
+      <div class="form-group"><label class="form-label" data-i18n="mi.field.material_family" for="mi-material-family">Material family contains</label>
         <input class="form-input" id="mi-material-family" type="text"></div>
     </div>
     <div style="margin-top:14px">
@@ -1897,13 +1897,13 @@ textarea:focus-visible,
 <div id="page-golivewizard" class="page">
   <div class="section-header"><span class="section-icon">🧭</span><div><div class="section-title" data-i18n="golive.title">İlk Yayın Kurulum Sihirbazı</div><div class="section-sub" data-i18n="golive.subtitle">Sunucu · domain · DNS · HTTPS · yayın</div></div></div>
   <div class="wizard-steps" id="wizardSteps"><div class="wizard-step active"><span data-i18n="golive.step_server">1. Sunucu</span></div><div class="wizard-step"><span data-i18n="golive.step_domain">2. Domain</span></div><div class="wizard-step"><span data-i18n="golive.step_dns">3. DNS</span></div><div class="wizard-step"><span data-i18n="golive.step_https">4. HTTPS</span></div><div class="wizard-step"><span data-i18n="golive.step_publish">5. Yayın</span></div></div>
-  <div class="card"><div class="form-row3"><div class="form-group"><label class="form-label" data-i18n="golive.server_ip_label">Sunucu IP</label><input class="form-input" id="gw_server_ip" placeholder="185.100.20.50"></div><div class="form-group"><label class="form-label" data-i18n="golive.domain_label">Alan Adı</label><input class="form-input" id="gw_domain" placeholder="app.torqpro.com"></div><div class="form-group"><label class="form-label">HTTPS</label><select class="form-select" id="gw_https"><option value="planned" data-i18n="golive.https_planned">Planlanıyor</option><option value="ready" data-i18n="golive.https_ready">Hazır</option></select></div></div><button class="btn btn-primary" onclick="saveGoLiveProfile()" data-i18n="golive.save_profile_btn">Profili Kaydet</button></div>
+  <div class="card"><div class="form-row3"><div class="form-group"><label class="form-label" data-i18n="golive.server_ip_label" for="gw_server_ip">Sunucu IP</label><input class="form-input" id="gw_server_ip" placeholder="185.100.20.50"></div><div class="form-group"><label class="form-label" data-i18n="golive.domain_label" for="gw_domain">Alan Adı</label><input class="form-input" id="gw_domain" placeholder="app.torqpro.com"></div><div class="form-group"><label class="form-label" for="gw_https">HTTPS</label><select class="form-select" id="gw_https"><option value="planned" data-i18n="golive.https_planned">Planlanıyor</option><option value="ready" data-i18n="golive.https_ready">Hazır</option></select></div></div><button class="btn btn-primary" onclick="saveGoLiveProfile()" data-i18n="golive.save_profile_btn">Profili Kaydet</button></div>
   <div class="card"><div class="card-title" data-i18n="golive.checklist_title">Kurulum Kontrol Listesi</div><div id="goLiveChecklist"></div></div>
 </div>
 
 <div id="page-dnscheck" class="page">
   <div class="section-header"><span class="section-icon">🌐</span><div><div class="section-title" data-i18n="dns.title">Domain ve DNS Kontrolü</div><div class="section-sub" data-i18n="dns.subtitle">A kaydı · beklenen IP · HTTPS hazırlığı</div></div></div>
-  <div class="card"><div class="form-row"><div class="form-group"><label class="form-label" data-i18n="dns.domain_label">Alan Adı</label><input class="form-input" id="dns_domain" placeholder="app.torqpro.com"></div><div class="form-group"><label class="form-label" data-i18n="dns.expected_ip_label">Beklenen Sunucu IP</label><input class="form-input" id="dns_expected_ip" placeholder="185.100.20.50"></div></div><button class="btn btn-primary" onclick="runDnsCheck()" data-i18n="dns.check_btn">Kontrol Et</button><div id="dnsResult"></div></div>
+  <div class="card"><div class="form-row"><div class="form-group"><label class="form-label" data-i18n="dns.domain_label" for="dns_domain">Alan Adı</label><input class="form-input" id="dns_domain" placeholder="app.torqpro.com"></div><div class="form-group"><label class="form-label" data-i18n="dns.expected_ip_label" for="dns_expected_ip">Beklenen Sunucu IP</label><input class="form-input" id="dns_expected_ip" placeholder="185.100.20.50"></div></div><button class="btn btn-primary" onclick="runDnsCheck()" data-i18n="dns.check_btn">Kontrol Et</button><div id="dnsResult"></div></div>
 </div>
 
 <div id="page-clouddeploy" class="page">
@@ -1939,9 +1939,9 @@ textarea:focus-visible,
   <div class="section-header"><span class="section-icon">🚀</span><div><div class="section-title" data-i18n="deploy.title">Kurulum Profili</div><div class="section-sub" data-i18n="deploy.subtitle">On-premise · ağ · yedekleme · ortam ayarları</div></div></div>
   <div class="deploy-grid">
     <div class="card">
-      <div class="form-row"><div class="form-group"><label class="form-label" data-i18n="deploy.environment_label">Ortam Adı</label><input class="form-input" id="dep_env" value="Production"></div><div class="form-group"><label class="form-label" data-i18n="deploy.install_type_label">Kurulum Tipi</label><select class="form-select" id="dep_type"><option value="standalone" data-i18n="deploy.type_standalone">Tek Bilgisayar</option><option value="lan" data-i18n="deploy.type_lan">Yerel Ağ Sunucusu</option><option value="cloud" data-i18n="deploy.type_cloud">Bulut Sunucusu</option></select></div></div>
-      <div class="form-row"><div class="form-group"><label class="form-label" data-i18n="deploy.host_label">Sunucu Adresi</label><input class="form-input" id="dep_host" value="127.0.0.1"></div><div class="form-group"><label class="form-label">Port</label><input class="form-input" type="number" id="dep_port" value="8000"></div></div>
-      <div class="form-row"><div class="form-group"><label class="form-label" data-i18n="deploy.backup_freq_label">Yedekleme Sıklığı</label><select class="form-select" id="dep_backup"><option value="daily" data-i18n="deploy.backup_daily">Günlük</option><option value="weekly" data-i18n="deploy.backup_weekly">Haftalık</option><option value="manual" data-i18n="deploy.backup_manual">Manuel</option></select></div><div class="form-group"><label class="form-label" data-i18n="deploy.channel_label">Güncelleme Kanalı</label><select class="form-select" id="dep_channel"><option value="stable" data-i18n="deploy.channel_stable">Stable</option><option value="pilot" data-i18n="deploy.channel_pilot">Pilot</option><option value="offline" data-i18n="deploy.channel_offline">Offline</option></select></div></div>
+      <div class="form-row"><div class="form-group"><label class="form-label" data-i18n="deploy.environment_label" for="dep_env">Ortam Adı</label><input class="form-input" id="dep_env" value="Production"></div><div class="form-group"><label class="form-label" data-i18n="deploy.install_type_label" for="dep_type">Kurulum Tipi</label><select class="form-select" id="dep_type"><option value="standalone" data-i18n="deploy.type_standalone">Tek Bilgisayar</option><option value="lan" data-i18n="deploy.type_lan">Yerel Ağ Sunucusu</option><option value="cloud" data-i18n="deploy.type_cloud">Bulut Sunucusu</option></select></div></div>
+      <div class="form-row"><div class="form-group"><label class="form-label" data-i18n="deploy.host_label" for="dep_host">Sunucu Adresi</label><input class="form-input" id="dep_host" value="127.0.0.1"></div><div class="form-group"><label class="form-label" for="dep_port">Port</label><input class="form-input" type="number" id="dep_port" value="8000"></div></div>
+      <div class="form-row"><div class="form-group"><label class="form-label" data-i18n="deploy.backup_freq_label" for="dep_backup">Yedekleme Sıklığı</label><select class="form-select" id="dep_backup"><option value="daily" data-i18n="deploy.backup_daily">Günlük</option><option value="weekly" data-i18n="deploy.backup_weekly">Haftalık</option><option value="manual" data-i18n="deploy.backup_manual">Manuel</option></select></div><div class="form-group"><label class="form-label" data-i18n="deploy.channel_label" for="dep_channel">Güncelleme Kanalı</label><select class="form-select" id="dep_channel"><option value="stable" data-i18n="deploy.channel_stable">Stable</option><option value="pilot" data-i18n="deploy.channel_pilot">Pilot</option><option value="offline" data-i18n="deploy.channel_offline">Offline</option></select></div></div>
       <button class="btn btn-primary" onclick="saveDeploymentProfile()" data-i18n="deploy.save_btn">Profili Kaydet</button>
     </div>
     <div class="card"><div class="card-title" data-i18n="deploy.active_profile_title">Aktif Profil</div><div id="deploymentPreview" data-i18n="deploy.loading_profile">Profil yükleniyor.</div></div>
@@ -1952,7 +1952,7 @@ textarea:focus-visible,
   <div class="section-header"><span class="section-icon">🔄</span><div><div class="section-title" data-i18n="migration.title">Veri Taşıma</div><div class="section-sub" data-i18n="migration.subtitle">Tam sistem dışa aktarma · içe aktarma · bütünlük kontrolü</div></div></div>
   <div class="deploy-grid">
     <div class="card"><div class="card-title" data-i18n="migration.export_title">Dışa Aktarma</div><p data-i18n="migration.export_note">Kurum, kullanıcı, proje, hesap, standart, onay ve rapor verilerini tek JSON paketi olarak oluşturur.</p><button class="btn btn-primary" onclick="exportSystemPackage()" data-i18n="migration.export_btn">Sistem Paketini Oluştur</button></div>
-    <div class="card"><div class="card-title" data-i18n="migration.import_title">İçe Aktarma</div><input class="form-input" type="file" id="migration_file" accept=".json"><button class="btn btn-secondary" style="margin-top:10px" onclick="importSystemPackage()" data-i18n="migration.import_btn">Paketi Doğrula ve İçe Aktar</button><div id="migrationResult" style="margin-top:10px"></div></div>
+    <div class="card"><div class="card-title" data-i18n="migration.import_title">İçe Aktarma</div><input class="form-input" type="file" id="migration_file" accept=".json" aria-label="Migrasyon dosyası / Migration file"><button class="btn btn-secondary" style="margin-top:10px" onclick="importSystemPackage()" data-i18n="migration.import_btn">Paketi Doğrula ve İçe Aktar</button><div id="migrationResult" style="margin-top:10px"></div></div>
   </div>
   <div class="card"><div class="card-title" data-i18n="migration.history_title">Son Taşıma İşlemleri</div><div id="migrationHistory"></div></div>
 </div>
@@ -1967,10 +1967,10 @@ textarea:focus-visible,
   <div class="section-header"><span class="section-icon">🏢</span><div><div class="section-title">Kurum Ayarları</div><div class="section-sub">Müşteri bilgileri · rapor markalama · iletişim</div></div></div>
   <div class="enterprise-grid">
     <div class="card">
-      <div class="form-row"><div class="form-group"><label class="form-label">Kurum Adı</label><input class="form-input" id="org_name"></div><div class="form-group"><label class="form-label">Kurum Kodu</label><input class="form-input" id="org_code"></div></div>
-      <div class="form-row"><div class="form-group"><label class="form-label">İletişim</label><input class="form-input" id="org_contact"></div><div class="form-group"><label class="form-label">E-posta</label><input class="form-input" id="org_email"></div></div>
-      <div class="form-row"><div class="form-group"><label class="form-label">Rapor Başlığı</label><input class="form-input" id="org_report_title"></div><div class="form-group"><label class="form-label">Logo URL / Dosya Yolu</label><input class="form-input" id="org_logo"></div></div>
-      <div class="form-group"><label class="form-label">Rapor Alt Notu</label><input class="form-input" id="org_footer"></div>
+      <div class="form-row"><div class="form-group"><label class="form-label" for="org_name">Kurum Adı</label><input class="form-input" id="org_name"></div><div class="form-group"><label class="form-label" for="org_code">Kurum Kodu</label><input class="form-input" id="org_code"></div></div>
+      <div class="form-row"><div class="form-group"><label class="form-label" for="org_contact">İletişim</label><input class="form-input" id="org_contact"></div><div class="form-group"><label class="form-label" for="org_email">E-posta</label><input class="form-input" id="org_email"></div></div>
+      <div class="form-row"><div class="form-group"><label class="form-label" for="org_report_title">Rapor Başlığı</label><input class="form-input" id="org_report_title"></div><div class="form-group"><label class="form-label" for="org_logo">Logo URL / Dosya Yolu</label><input class="form-input" id="org_logo"></div></div>
+      <div class="form-group"><label class="form-label" for="org_footer">Rapor Alt Notu</label><input class="form-input" id="org_footer"></div>
       <button class="btn btn-primary" onclick="saveOrganization()">Kaydet</button>
     </div>
     <div class="card"><div class="card-title">Marka Önizleme</div><div id="brandPreview" class="brand-preview">Kurum bilgileri yükleniyor.</div></div>
@@ -1981,7 +1981,7 @@ textarea:focus-visible,
   <div class="section-header"><span class="section-icon">🔐</span><div><div class="section-title">Lisans Yönetimi</div><div class="section-sub">Aktivasyon kodu · süre · kullanıcı · modül yetkileri</div></div></div>
   <div class="enterprise-grid">
     <div class="card">
-      <div class="form-group"><label class="form-label">Aktivasyon Kodu</label><input class="form-input" id="license_key" placeholder="TP-XXXX-XXXX-XXXX"></div>
+      <div class="form-group"><label class="form-label" for="license_key">Aktivasyon Kodu</label><input class="form-input" id="license_key" placeholder="TP-XXXX-XXXX-XXXX"></div>
       <button class="btn btn-primary" onclick="activateLicense()">Lisansı Aktifleştir</button>
     </div>
     <div class="card"><div id="licenseStatus">Lisans bilgisi yükleniyor.</div></div>
@@ -1999,8 +1999,8 @@ textarea:focus-visible,
   <div class="section-header"><span class="section-icon">📦</span><div><div class="section-title">Proje Release Paketi</div><div class="section-sub">Onaylı hesaplar · revizyonlar · veri sürümleri · müşteri raporu</div></div></div>
   <div class="card">
     <div class="form-row">
-      <div class="form-group"><label class="form-label">Proje</label><select class="form-select" id="release_project"></select></div>
-      <div class="form-group"><label class="form-label">Rapor Başlığı</label><input class="form-input" id="release_title" value="Bağlantı Elemanları Tork Doğrulama Raporu"></div>
+      <div class="form-group"><label class="form-label" for="release_project">Proje</label><select class="form-select" id="release_project"></select></div>
+      <div class="form-group"><label class="form-label" for="release_title">Rapor Başlığı</label><input class="form-input" id="release_title" value="Bağlantı Elemanları Tork Doğrulama Raporu"></div>
     </div>
     <button class="btn btn-primary" onclick="generateProjectRelease()">Release Paketi Oluştur</button>
     <button class="btn btn-secondary" onclick="printProjectRelease()">Yazdır</button>
@@ -2013,7 +2013,7 @@ textarea:focus-visible,
 <div id="page-traceability" class="page">
   <div class="section-header"><span class="section-icon">🧾</span><div><div class="section-title">İzlenebilirlik Matrisi</div><div class="section-sub">Proje → hesap → revizyon → veri sürümü → onay</div></div></div>
   <div class="card">
-    <div class="form-row"><div class="form-group"><label class="form-label">Proje</label><select class="form-select" id="trace_project"></select></div><div class="form-group"><label class="form-label">Filtre</label><input class="form-input" id="trace_filter" placeholder="Hesap no, diş, standart..." oninput="renderTraceability()"></div></div>
+    <div class="form-row"><div class="form-group"><label class="form-label" for="trace_project">Proje</label><select class="form-select" id="trace_project"></select></div><div class="form-group"><label class="form-label" for="trace_filter">Filtre</label><input class="form-input" id="trace_filter" placeholder="Hesap no, diş, standart..." oninput="renderTraceability()"></div></div>
     <button class="btn btn-primary" onclick="loadTraceability()">Matrisi Yükle</button>
   </div>
   <div class="card"><div id="traceabilityView"></div></div>
@@ -2021,11 +2021,11 @@ textarea:focus-visible,
 
 <div id="page-projects" class="page">
   <div class="alert alert-info" data-i18n="ui.under_development" style="margin-top:20px">This feature is currently under development.</div><div class="section-header"><span class="section-icon">📁</span><div><div class="section-title">Projeler</div><div class="section-sub">Müşteri · ürün · hesap kayıtları</div></div></div>
-<div class="project-grid"><div class="card"><div class="card-title">Yeni Proje</div><div class="form-row"><div class="form-group"><label class="form-label">Proje Adı</label><input class="form-input" id="project_name"></div><div class="form-group"><label class="form-label">Müşteri</label><input class="form-input" id="project_customer"></div></div><div class="form-row"><div class="form-group"><label class="form-label">Ürün</label><input class="form-input" id="project_product"></div><div class="form-group"><label class="form-label">Kod</label><input class="form-input" id="project_code"></div></div><button class="btn btn-primary" onclick="createProject()">Oluştur</button></div><div class="card"><div class="card-title">Aktif Proje</div><div id="activeProjectBox">Seçilmedi.</div></div></div>
+<div class="project-grid"><div class="card"><div class="card-title">Yeni Proje</div><div class="form-row"><div class="form-group"><label class="form-label" for="project_name">Proje Adı</label><input class="form-input" id="project_name"></div><div class="form-group"><label class="form-label" for="project_customer">Müşteri</label><input class="form-input" id="project_customer"></div></div><div class="form-row"><div class="form-group"><label class="form-label" for="project_product">Ürün</label><input class="form-input" id="project_product"></div><div class="form-group"><label class="form-label" for="project_code">Kod</label><input class="form-input" id="project_code"></div></div><button class="btn btn-primary" onclick="createProject()">Oluştur</button></div><div class="card"><div class="card-title">Aktif Proje</div><div id="activeProjectBox">Seçilmedi.</div></div></div>
 <div class="card"><div class="card-header"><div class="card-title">Projeler</div><button class="btn btn-secondary btn-sm" onclick="loadProjects()">Yenile</button></div><div id="projectRows"></div></div></div>
 
 <div id="page-revisions" class="page">
-  <div class="alert alert-info" data-i18n="ui.under_development" style="margin-top:20px">This feature is currently under development.</div><div class="section-header"><span class="section-icon">🔁</span><div><div class="section-title">Hesap Revizyonları</div></div></div><div class="card"><div class="form-row3"><div class="form-group"><label class="form-label">Hesap ID</label><input class="form-input" type="number" id="rev_calc_id"></div><div class="form-group"><label class="form-label">Revizyon Notu</label><input class="form-input" id="rev_note"></div><div class="form-group"><label class="form-label">Değişiklik Nedeni</label><input class="form-input" id="rev_reason"></div></div><button class="btn btn-primary" onclick="createRevision()">Revizyon Oluştur</button></div><div class="card"><div id="revisionRows"></div></div></div>
+  <div class="alert alert-info" data-i18n="ui.under_development" style="margin-top:20px">This feature is currently under development.</div><div class="section-header"><span class="section-icon">🔁</span><div><div class="section-title">Hesap Revizyonları</div></div></div><div class="card"><div class="form-row3"><div class="form-group"><label class="form-label" for="rev_calc_id">Hesap ID</label><input class="form-input" type="number" id="rev_calc_id"></div><div class="form-group"><label class="form-label" for="rev_note">Revizyon Notu</label><input class="form-input" id="rev_note"></div><div class="form-group"><label class="form-label" for="rev_reason">Değişiklik Nedeni</label><input class="form-input" id="rev_reason"></div></div><button class="btn btn-primary" onclick="createRevision()">Revizyon Oluştur</button></div><div class="card"><div id="revisionRows"></div></div></div>
 
 <div id="page-approvals" class="page">
   <div class="alert alert-info" data-i18n="ui.under_development" style="margin-top:20px">This feature is currently under development.</div><div class="section-header"><span class="section-icon">✍️</span><div><div class="section-title">Mühendislik Onay Akışı</div></div></div><div class="card"><div id="approvalRows"></div></div></div>
@@ -2053,14 +2053,14 @@ textarea:focus-visible,
   </div></div>
   <div class="card">
     <div class="form-row3">
-      <div class="form-group"><label class="form-label" data-i18n="golden.name_label">Senaryo Adı</label><input class="form-input" id="gc_name" value="M10-10.9-Referans"></div>
-      <div class="form-group"><label class="form-label" data-i18n="golden.thread_label">Diş</label><input class="form-input" id="gc_thread" value="M10"></div>
-      <div class="form-group"><label class="form-label" data-i18n="golden.class_label">Sınıf</label><input class="form-input" id="gc_class" value="10.9"></div>
+      <div class="form-group"><label class="form-label" data-i18n="golden.name_label" for="gc_name">Senaryo Adı</label><input class="form-input" id="gc_name" value="M10-10.9-Referans"></div>
+      <div class="form-group"><label class="form-label" data-i18n="golden.thread_label" for="gc_thread">Diş</label><input class="form-input" id="gc_thread" value="M10"></div>
+      <div class="form-group"><label class="form-label" data-i18n="golden.class_label" for="gc_class">Sınıf</label><input class="form-input" id="gc_class" value="10.9"></div>
     </div>
     <div class="form-row3">
-      <div class="form-group"><label class="form-label" data-i18n="golden.reference_torque_label">Referans Tork</label><input class="form-input" type="number" id="gc_reference" value="70" step="0.1"></div>
-      <div class="form-group"><label class="form-label" data-i18n="golden.program_torque_label">Program Torku</label><input class="form-input" type="number" id="gc_program" value="69.3" step="0.1"></div>
-      <div class="form-group"><label class="form-label" data-i18n="golden.tolerance_label">Tolerans (%)</label><input class="form-input" type="number" id="gc_tolerance" value="5" step="0.1"></div>
+      <div class="form-group"><label class="form-label" data-i18n="golden.reference_torque_label" for="gc_reference">Referans Tork</label><input class="form-input" type="number" id="gc_reference" value="70" step="0.1"></div>
+      <div class="form-group"><label class="form-label" data-i18n="golden.program_torque_label" for="gc_program">Program Torku</label><input class="form-input" type="number" id="gc_program" value="69.3" step="0.1"></div>
+      <div class="form-group"><label class="form-label" data-i18n="golden.tolerance_label" for="gc_tolerance">Tolerans (%)</label><input class="form-input" type="number" id="gc_tolerance" value="5" step="0.1"></div>
     </div>
     <button class="btn btn-primary" onclick="saveGoldenCase()" data-i18n="golden.save_btn">Altın Senaryoyu Kaydet</button>
   </div>
@@ -2090,8 +2090,8 @@ textarea:focus-visible,
   </div>
   <div class="card"><div class="card-header"><div class="card-title">Tüm Veri Sürümleri</div><button class="btn btn-secondary btn-sm" onclick="loadDataVersions()">Yenile</button></div><div id="allVersions"></div></div>
   <div class="card"><div class="card-title">Etki Analizi</div>
-    <div class="form-row"><div class="form-group"><label class="form-label">Veri Seti</label><select class="form-select" id="impact_dataset"><option value="proof_load">Proof-Load</option><option value="friction">Sürtünme</option><option value="washer">Pul</option><option value="compatibility">Uyumluluk</option></select></div>
-    <div class="form-group"><label class="form-label">Kayıt Limiti</label><input class="form-input" type="number" id="impact_limit" value="100"></div></div>
+    <div class="form-row"><div class="form-group"><label class="form-label" for="impact_dataset">Veri Seti</label><select class="form-select" id="impact_dataset"><option value="proof_load">Proof-Load</option><option value="friction">Sürtünme</option><option value="washer">Pul</option><option value="compatibility">Uyumluluk</option></select></div>
+    <div class="form-group"><label class="form-label" for="impact_limit">Kayıt Limiti</label><input class="form-input" type="number" id="impact_limit" value="100"></div></div>
     <button class="btn btn-primary" onclick="runImpactAnalysis()">Etki Analizi</button><div id="impactResult" class="impact-box">Henüz analiz yapılmadı.</div>
   </div>
 </div>
@@ -2106,7 +2106,7 @@ textarea:focus-visible,
     <div class="card">
       <div class="card-title">Veri Dosyası Yükle</div>
       <div class="form-row">
-        <div class="form-group"><label class="form-label">Veri Seti</label>
+        <div class="form-group"><label class="form-label" for="upload_dataset">Veri Seti</label>
           <select class="form-select" id="upload_dataset">
             <option value="proof_load">ISO 898-2 Proof-Load</option>
             <option value="friction">ISO 16047 Sürtünme</option>
@@ -2114,15 +2114,15 @@ textarea:focus-visible,
             <option value="compatibility">Civata-Somun Uyumluluğu</option>
           </select>
         </div>
-        <div class="form-group"><label class="form-label">Dosya</label><input class="form-input" type="file" id="upload_file" accept=".json,.csv"></div>
+        <div class="form-group"><label class="form-label" for="upload_file">Dosya</label><input class="form-input" type="file" id="upload_file" accept=".json,.csv"></div>
       </div>
       <div class="form-row">
-        <div class="form-group"><label class="form-label">Standart / Kaynak</label><input class="form-input" id="upload_source_title" placeholder="Örn. ISO 898-2:2022"></div>
-        <div class="form-group"><label class="form-label">Kaynak Sayfa</label><input class="form-input" id="upload_source_page" placeholder="Örn. Table 5 / p.12"></div>
+        <div class="form-group"><label class="form-label" for="upload_source_title">Standart / Kaynak</label><input class="form-input" id="upload_source_title" placeholder="Örn. ISO 898-2:2022"></div>
+        <div class="form-group"><label class="form-label" for="upload_source_page">Kaynak Sayfa</label><input class="form-input" id="upload_source_page" placeholder="Örn. Table 5 / p.12"></div>
       </div>
       <div class="form-row">
-        <div class="form-group"><label class="form-label">Güven Seviyesi</label><select class="form-select" id="upload_confidence"><option value="1">1 — Taslak</option><option value="2">2 — İkincil Kaynak</option><option value="3">3 — Çapraz Kontrol</option><option value="4">4 — Birincil Kaynak / Onaylı Test</option></select></div>
-        <div class="form-group"><label class="form-label">Not</label><input class="form-input" id="upload_note"></div>
+        <div class="form-group"><label class="form-label" for="upload_confidence">Güven Seviyesi</label><select class="form-select" id="upload_confidence"><option value="1">1 — Taslak</option><option value="2">2 — İkincil Kaynak</option><option value="3">3 — Çapraz Kontrol</option><option value="4">4 — Birincil Kaynak / Onaylı Test</option></select></div>
+        <div class="form-group"><label class="form-label" for="upload_note">Not</label><input class="form-input" id="upload_note"></div>
       </div>
       <button class="btn btn-primary" onclick="uploadStandardData()">Dosyayı Yükle</button>
       <div id="uploadResult" style="font-size:12px;margin-top:10px"></div>
@@ -2154,14 +2154,14 @@ textarea:focus-visible,
 
   <div class="card">
     <div class="form-row3">
-      <div class="form-group"><label class="form-label" data-i18n="calibration.thread">Diş</label><select class="form-select" id="cal_thread"><option>M6</option><option>M8</option><option selected>M10</option><option>M12</option><option>M16</option><option>M20</option></select></div>
-      <div class="form-group"><label class="form-label" data-i18n="calibration.reference_torque">Referans Tork (Nm)</label><input class="form-input" type="number" id="cal_reference" value="70" step="0.1"></div>
-      <div class="form-group"><label class="form-label" data-i18n="calibration.allowed_error">İzin Verilen Hata (%)</label><input class="form-input" type="number" id="cal_tolerance" value="5" step="0.1"></div>
+      <div class="form-group"><label class="form-label" data-i18n="calibration.thread" for="cal_thread">Diş</label><select class="form-select" id="cal_thread"><option>M6</option><option>M8</option><option selected>M10</option><option>M12</option><option>M16</option><option>M20</option></select></div>
+      <div class="form-group"><label class="form-label" data-i18n="calibration.reference_torque" for="cal_reference">Referans Tork (Nm)</label><input class="form-input" type="number" id="cal_reference" value="70" step="0.1"></div>
+      <div class="form-group"><label class="form-label" data-i18n="calibration.allowed_error" for="cal_tolerance">İzin Verilen Hata (%)</label><input class="form-input" type="number" id="cal_tolerance" value="5" step="0.1"></div>
     </div>
     <div class="form-row3">
-      <div class="form-group"><label class="form-label" data-i18n="calibration.program_torque">Program Torku (Nm)</label><input class="form-input" type="number" id="cal_program" value="69.3" step="0.1"></div>
-      <div class="form-group"><label class="form-label" data-i18n="calibration.source_id">Kaynak ID</label><input class="form-input" id="cal_source_id" placeholder="SRC-..."></div>
-      <div class="form-group"><label class="form-label" data-i18n="calibration.scenario_note">Senaryo Notu</label><input class="form-input" id="cal_note"></div>
+      <div class="form-group"><label class="form-label" data-i18n="calibration.program_torque" for="cal_program">Program Torku (Nm)</label><input class="form-input" type="number" id="cal_program" value="69.3" step="0.1"></div>
+      <div class="form-group"><label class="form-label" data-i18n="calibration.source_id" for="cal_source_id">Kaynak ID</label><input class="form-input" id="cal_source_id" placeholder="SRC-..."></div>
+      <div class="form-group"><label class="form-label" data-i18n="calibration.scenario_note" for="cal_note">Senaryo Notu</label><input class="form-input" id="cal_note"></div>
     </div>
     <button class="btn btn-primary" onclick="saveCalibrationCase()" data-i18n="calibration.save_btn">Kalibrasyon Kaydet</button>
   </div>
@@ -2188,7 +2188,7 @@ textarea:focus-visible,
   <div class="section-header"><span class="section-icon">🗂️</span><div><div class="section-title">Kayıt Arşivi</div><div class="section-sub">Tarayıcı yerel arşivi · CSV / JSON dışa aktarım</div></div></div>
   <div class="card">
     <div class="archive-toolbar">
-      <input class="form-input" id="archiveSearch" placeholder="Kayıt no, standart, diş, kullanıcı..." style="max-width:320px" oninput="renderArchive()">
+      <input class="form-input" id="archiveSearch" placeholder="Kayıt no, standart, diş, kullanıcı..." style="max-width:320px" oninput="renderArchive()" aria-label="Arşiv ara / Search archive">
       <button class="btn btn-secondary btn-sm" onclick="exportArchiveCSV()">CSV Dışa Aktar</button>
       <button class="btn btn-secondary btn-sm" onclick="exportArchiveJSON()">JSON Dışa Aktar</button>
       <button class="btn btn-danger btn-sm" onclick="clearArchive()">Arşivi Temizle</button>
@@ -2214,12 +2214,12 @@ textarea:focus-visible,
     <div class="card">
       <div class="card-title" data-i18n="admin.new_user_title">Yeni Kullanıcı</div>
       <div class="form-row">
-        <div class="form-group"><label class="form-label" data-i18n="admin.username_label">Kullanıcı Adı</label><input class="form-input" id="adm_username"></div>
-        <div class="form-group"><label class="form-label" data-i18n="admin.display_name_label">Görünen Ad</label><input class="form-input" id="adm_display"></div>
+        <div class="form-group"><label class="form-label" data-i18n="admin.username_label" for="adm_username">Kullanıcı Adı</label><input class="form-input" id="adm_username"></div>
+        <div class="form-group"><label class="form-label" data-i18n="admin.display_name_label" for="adm_display">Görünen Ad</label><input class="form-input" id="adm_display"></div>
       </div>
       <div class="form-row">
-        <div class="form-group"><label class="form-label" data-i18n="admin.password_label">Şifre</label><input type="password" class="form-input" id="adm_password"></div>
-        <div class="form-group"><label class="form-label" data-i18n="admin.role_label">Rol</label><select class="form-select" id="adm_role"><option value="engineer" data-i18n="admin.role_engineer">Engineer</option><option value="viewer" data-i18n="admin.role_viewer">Viewer</option><option value="admin" data-i18n="admin.role_admin">Admin</option></select></div>
+        <div class="form-group"><label class="form-label" data-i18n="admin.password_label" for="adm_password">Şifre</label><input type="password" class="form-input" id="adm_password"></div>
+        <div class="form-group"><label class="form-label" data-i18n="admin.role_label" for="adm_role">Rol</label><select class="form-select" id="adm_role"><option value="engineer" data-i18n="admin.role_engineer">Engineer</option><option value="viewer" data-i18n="admin.role_viewer">Viewer</option><option value="admin" data-i18n="admin.role_admin">Admin</option></select></div>
       </div>
       <button class="btn btn-primary" onclick="adminCreateUser()" data-i18n="admin.add_user_btn">Kullanıcı Ekle</button>
     </div>
@@ -2227,8 +2227,8 @@ textarea:focus-visible,
     <div class="card">
       <div class="card-title" data-i18n="admin.change_password_title">Parola Değiştir</div>
       <div class="form-row">
-        <div class="form-group"><label class="form-label" data-i18n="admin.current_password_label">Mevcut Şifre</label><input type="password" class="form-input" id="pwd_current"></div>
-        <div class="form-group"><label class="form-label" data-i18n="admin.new_password_label">Yeni Şifre</label><input type="password" class="form-input" id="pwd_new"></div>
+        <div class="form-group"><label class="form-label" data-i18n="admin.current_password_label" for="pwd_current">Mevcut Şifre</label><input type="password" class="form-input" id="pwd_current"></div>
+        <div class="form-group"><label class="form-label" data-i18n="admin.new_password_label" for="pwd_new">Yeni Şifre</label><input type="password" class="form-input" id="pwd_new"></div>
       </div>
       <button class="btn btn-secondary" onclick="changeOwnPassword()" data-i18n="admin.update_password_btn">Parolayı Güncelle</button>
     </div>
