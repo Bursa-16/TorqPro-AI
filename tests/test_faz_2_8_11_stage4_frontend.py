@@ -123,7 +123,7 @@ def test_harness_scenarios_are_declared_async():
 
 
 def test_sidebar_entry_present(frontend_html):
-    assert "showPage('governance')" in frontend_html
+    assert "showPage('governance'" in frontend_html
     assert 'id="page-governance"' in frontend_html
 
 
@@ -132,12 +132,12 @@ def test_page_id_appears_exactly_once(frontend_html):
 
 
 def test_sidebar_target_matches_page_id(frontend_html):
-    assert "showPage('governance')" in frontend_html
+    assert "showPage('governance'" in frontend_html
     assert 'id="page-governance"' in frontend_html
 
 
 def test_sidebar_entry_uses_existing_showpage_mechanism(frontend_html):
-    start = frontend_html.index("showPage('governance')")
+    start = frontend_html.index("showPage('governance'")
     line_start = frontend_html.rfind("\n", 0, start)
     line_end = frontend_html.index("\n", start)
     line = frontend_html[line_start:line_end]

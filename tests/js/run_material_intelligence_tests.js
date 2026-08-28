@@ -367,7 +367,7 @@ async function testLanguageSwitchDoesNotRefetchWhenPageNotActive() {
 // 6. Sidebar / page presence and static translation coverage
 // ---------------------------------------------------------------
 async function testSidebarAndPageMarkupPresent() {
-  check("sidebar item present", HTML.indexOf("showPage('materialintelligence')") !== -1);
+  check("sidebar item present", HTML.indexOf("showPage('materialintelligence'") !== -1);
   check('page container present', HTML.indexOf('id="page-materialintelligence"') !== -1);
 }
 

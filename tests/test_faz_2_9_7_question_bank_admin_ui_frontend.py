@@ -73,12 +73,12 @@ def _keys_in_literal(literal: str) -> list:
 
 
 def test_sidebar_entry_present(frontend_html):
-    assert "showPage('questionbank')" in frontend_html
+    assert "showPage('questionbank'" in frontend_html
     assert 'id="page-questionbank"' in frontend_html
 
 
 def test_sidebar_entry_uses_existing_showpage_mechanism(frontend_html):
-    start = frontend_html.index("showPage('questionbank')")
+    start = frontend_html.index("showPage('questionbank'")
     line_start = frontend_html.rfind("\n", 0, start)
     line_end = frontend_html.index("\n", start)
     line = frontend_html[line_start:line_end]

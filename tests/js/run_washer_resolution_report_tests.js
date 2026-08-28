@@ -290,7 +290,7 @@ async function testReapplyLanguageNoOpWhenPageNotActive() {
 
 // 8. Sidebar / page presence
 async function testSidebarAndPageMarkupPresent() {
-  check("sidebar item present", HTML.indexOf("showPage('washerresolution')") !== -1);
+  check("sidebar item present", HTML.indexOf("showPage('washerresolution'") !== -1);
   check('page container present', HTML.indexOf('id="page-washerresolution"') !== -1);
 }
 

@@ -97,14 +97,14 @@ def test_harness_file_is_dependency_free():
 # ---------------------------------------------------------------------
 
 def test_sidebar_entry_present(frontend_html):
-    assert "showPage('assemblyintelligence')" in frontend_html
+    assert "showPage('assemblyintelligence'" in frontend_html
     assert 'id="page-assemblyintelligence"' in frontend_html
 
 
 def test_sidebar_entry_uses_existing_showpage_mechanism(frontend_html):
     """Not a bespoke navigation mechanism -- reuses the same
     onclick="showPage(...)" pattern every other sidebar item uses."""
-    start = frontend_html.index("showPage('assemblyintelligence')")
+    start = frontend_html.index("showPage('assemblyintelligence'")
     line_start = frontend_html.rfind("\n", 0, start)
     line_end = frontend_html.index("\n", start)
     line = frontend_html[line_start:line_end]
@@ -295,8 +295,8 @@ def test_uses_existing_api_request_helper(frontend_html):
 
 def test_existing_navigation_items_unaffected(frontend_html):
     for item in (
-        "showPage('frictioncondition')", "showPage('strengthclasses')", "showPage('norm')",
-        "showPage('dashboard')", "showPage('oem')",
+        "showPage('frictioncondition'", "showPage('strengthclasses'", "showPage('norm'",
+        "showPage('dashboard'", "showPage('oem'",
     ):
         assert item in frontend_html
 

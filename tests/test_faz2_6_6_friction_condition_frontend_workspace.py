@@ -149,7 +149,7 @@ def test_frontend_still_a_single_file():
 
 
 def test_frontend_navigation_item_present(frontend_html):
-    assert "showPage('frictioncondition')" in frontend_html
+    assert "showPage('frictioncondition'" in frontend_html
     assert 'id="page-frictioncondition"' in frontend_html
 
 

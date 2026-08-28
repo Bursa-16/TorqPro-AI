@@ -182,7 +182,7 @@ const { source: EXTRACTED, rawHtml: HTML } = buildExtractedSource();
 
 // 1 & 2. Sidebar / page markup presence, correct navigation target
 async function testSidebarAndPageMarkupPresent() {
-  check('sidebar item present', HTML.indexOf("showPage('governance')") !== -1);
+  check('sidebar item present', HTML.indexOf("showPage('governance'") !== -1);
   check('page container present', HTML.indexOf('id="page-governance"') !== -1);
   const pageMatches = HTML.match(/id="page-governance"/g) || [];
   check('page container appears exactly once', pageMatches.length === 1);

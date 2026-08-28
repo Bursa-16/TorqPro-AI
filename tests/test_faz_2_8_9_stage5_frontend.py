@@ -117,7 +117,7 @@ def test_harness_uses_awaited_main_not_bare_process_exit():
 
 
 def test_sidebar_entry_present(frontend_html):
-    assert "showPage('washerresolution')" in frontend_html
+    assert "showPage('washerresolution'" in frontend_html
     assert 'id="page-washerresolution"' in frontend_html
 
 
@@ -126,15 +126,15 @@ def test_page_id_appears_exactly_once(frontend_html):
 
 
 def test_sidebar_target_matches_page_id(frontend_html):
-    """The sidebar item's showPage('washerresolution') target must
+    """The sidebar item's showPage('washerresolution' target must
     correspond to page-washerresolution -- same naming convention
     every other sidebar item uses (showPage('X') <-> page-X)."""
-    assert "showPage('washerresolution')" in frontend_html
+    assert "showPage('washerresolution'" in frontend_html
     assert 'id="page-washerresolution"' in frontend_html
 
 
 def test_sidebar_entry_uses_existing_showpage_mechanism(frontend_html):
-    start = frontend_html.index("showPage('washerresolution')")
+    start = frontend_html.index("showPage('washerresolution'")
     line_start = frontend_html.rfind("\n", 0, start)
     line_end = frontend_html.index("\n", start)
     line = frontend_html[line_start:line_end]

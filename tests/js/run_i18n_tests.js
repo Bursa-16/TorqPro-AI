@@ -716,7 +716,7 @@ async function main() {
       'sidebar.problem_management': ['Problem Yönetimi', 'Problem Management'],
       'sidebar.oem_norm_query': ['OEM Norm Sorgu', 'OEM Norm Query'],
       'sidebar.norm_guide': ['Norm Rehberi', 'Norm Guide'],
-      'sidebar.fmea_catalog': ['FMEA Kataloğu', 'FMEA Catalog'],
+      // Note: sidebar.fmea_catalog removed from nav in UX-P1 (stub hidden); key kept in dictionary.
       'sidebar.admin_panel': ['Yönetici Paneli', 'Admin Panel'],
       'sidebar.setup_wizard': ['Kurulum Sihirbazı', 'Setup Wizard'],
       'sidebar.dns_check': ['Domain & DNS Kontrolü', 'Domain & DNS Check'],
@@ -731,9 +731,9 @@ async function main() {
       'sidebar.usage_summary': ['Kullanım Özeti', 'Usage Summary'],
       'sidebar.release_package': ['Proje Release Paketi', 'Project Release Package'],
       'sidebar.traceability_matrix': ['İzlenebilirlik Matrisi', 'Traceability Matrix'],
-      'sidebar.projects': ['Projeler', 'Projects'],
-      'sidebar.revisions': ['Hesap Revizyonları', 'Calculation Revisions'],
-      'sidebar.approvals_pending': ['Onay Bekleyenler', 'Pending Approvals'],
+      // Note: projects/revisions/approvals_pending/fmea_catalog sidebar entries were
+      // removed from primary navigation in UX-P1 (stub pages hidden from nav).
+      // Their i18n keys remain in the dictionary; sidebar DOM check removed here.
       'sidebar.data_quality_gate': ['Veri Kalite Kapısı', 'Data Quality Gate'],
       'sidebar.golden_cases': ['Altın Senaryolar', 'Golden Cases'],
       'sidebar.release_cert': ['Sürüm Sertifikası', 'Release Certificate'],
@@ -3975,7 +3975,7 @@ async function main() {
     check('Compatibility Checker section title present', !!getByI18nKey(ctx, 'sc.compat_section_title'));
     check('bolt strength-class table container exists', rawHtml.indexOf('id="sc-bolt-table"') !== -1);
     check('nut property-class table container exists', rawHtml.indexOf('id="sc-nut-table"') !== -1);
-    check('sidebar item calls showPage(\'strengthclasses\')', rawHtml.indexOf("showPage('strengthclasses')") !== -1);
+    check('sidebar item calls showPage(\'strengthclasses\')', rawHtml.indexOf("showPage('strengthclasses'") !== -1);
   }
 
   // ---- 202. Faz 2.8.3: compatibility checker inputs exist in the
