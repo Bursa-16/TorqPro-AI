@@ -407,10 +407,48 @@ html{scrollbar-width:thin;scrollbar-color:var(--neutral) var(--surface)}
   .fc-condition-grid{grid-template-columns:1fr;max-height:none}
   .fc-field-value{max-width:100%}
 }
+
+/* ===== UX-P2: GLOBAL ACCESSIBILITY ===== */
+
+/* Focus-visible: all interactive controls get a consistent outline.
+   Uses :focus-visible so mouse users are unaffected. */
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible,
+[tabindex="0"]:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+/* Inputs/selects already show border change on focus; keep both cues */
+.form-input:focus-visible,.form-select:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+
+/* Prefers-reduced-motion: disable non-essential transitions & animations */
+@media(prefers-reduced-motion:reduce){
+  *,*::before,*::after{
+    animation-duration:.01ms!important;
+    animation-iteration-count:1!important;
+    transition-duration:.01ms!important;
+    scroll-behavior:auto!important;
+  }
+  .progress-fill,.progress-bar *,.tork-seg,.sidebar-item,.btn{transition:none!important}
+}
+
+/* tpAlert: minimal accessible notification replacing native alert().
+   Reuses existing .confirm-overlay / .confirm-box CSS + design tokens. */
+.tp-alert-overlay{position:fixed;inset:0;background:rgba(8,9,14,.55);z-index:99999;
+  display:flex;align-items:center;justify-content:center}
+.tp-alert-box{background:var(--surface);border:1px solid var(--border2);border-radius:12px;
+  padding:20px 24px;width:340px;max-width:90vw;box-shadow:0 24px 64px rgba(0,0,0,.5)}
+.tp-alert-title{font-size:14px;font-weight:600;color:var(--text);margin-bottom:8px}
+.tp-alert-body{font-size:13px;color:var(--text2);margin-bottom:16px;line-height:1.5}
+.tp-alert-actions{display:flex;justify-content:flex-end}
+.tp-alert-box.tp-alert-warn .tp-alert-title{color:var(--warning)}
+.tp-alert-box.tp-alert-error .tp-alert-title{color:var(--danger)}
+.tp-alert-box.tp-alert-success .tp-alert-title{color:var(--success)}
 </style>
 </head>
 <body>
-<div class="mobile-topbar"><button class="mobile-menu-btn" onclick="toggleMobileMenu()">☰ Menü</button><strong>TorqPro</strong><button class="mobile-menu-btn" onclick="showPage('mobileaccess',this)">📱</button></div>
+<div class="mobile-topbar"><button class="mobile-menu-btn" onclick="toggleMobileMenu()">☰ Menü</button><strong>TorqPro</strong><button class="mobile-menu-btn" aria-label="Mobile Access" onclick="showPage('mobileaccess',this)">📱</button></div>
 
 <!-- LOGIN -->
 <div class="login-overlay" id="loginOverlay">
@@ -579,7 +617,7 @@ html{scrollbar-width:thin;scrollbar-color:var(--neutral) var(--surface)}
     </div>
     <div class="card">
       <div class="card-title" data-i18n="dashboard.recent_nok_title">Son NOK Kayıtlar</div><div class="card-sub" data-i18n="dashboard.recent_nok_sub">Müdahale gerektiren ölçümler</div>
-      <table class="table"><tr><th data-i18n="dashboard.th_operation">Operasyon</th><th data-i18n="dashboard.th_chassis">Şase</th><th data-i18n="dashboard.th_value">Değer</th><th data-i18n="dashboard.th_status">Durum</th></tr>
+      <table class="table"><tr><th data-i18n="dashboard.th_operation" scope="col">Operasyon</th><th data-i18n="dashboard.th_chassis" scope="col">Şase</th><th data-i18n="dashboard.th_value" scope="col">Değer</th><th data-i18n="dashboard.th_status" scope="col">Durum</th></tr>
       <tr><td data-i18n="dashboard.op_front_susp_crossmember">Ön süsp. travers</td><td>YH24-001823</td><td style="color:var(--danger)">87 Nm</td><td><span class="pill pill-nok" data-i18n="dashboard.status_nok">NOK</span></td></tr>
       <tr><td data-i18n="dashboard.op_seatbelt">Emniyet kemeri</td><td>YH24-001819</td><td style="color:var(--warning)">31 Nm</td><td><span class="pill pill-warn" data-i18n="dashboard.status_borderline">SINIRDA</span></td></tr>
       <tr><td data-i18n="dashboard.op_engine_mount">Motor takozu</td><td>YH24-001804</td><td style="color:var(--danger)">42 Nm</td><td><span class="pill pill-nok" data-i18n="dashboard.status_nok">NOK</span></td></tr>
@@ -858,7 +896,7 @@ html{scrollbar-width:thin;scrollbar-color:var(--neutral) var(--surface)}
   <div class="section-header"><span class="section-icon">🔩</span><div><div class="section-title">Sıkıcı Takip Listesi</div><div class="section-sub"><span class="norm-badge">Örnek norma göre periyotlar</span></div></div></div>
   <div class="alert alert-warn">⚠️ 3 sıkıcının yetenek çalışması süresi dolmuş.</div>
   <div class="card"><div class="card-header"><div class="card-title">Sıkıcı Envanteri</div><button class="btn btn-primary btn-sm">+ Yeni Ekle</button></div>
-    <table class="table"><tr><th>Sicil</th><th>Model</th><th>Operasyon</th><th>Nom.(Nm)</th><th>Sınıf</th><th>Cm/Cmk</th><th>Son Yetenek</th><th>Durum</th></tr>
+    <table class="table"><tr><th scope="col">Sicil</th><th scope="col">Model</th><th scope="col">Operasyon</th><th scope="col">Nom.(Nm)</th><th scope="col">Sınıf</th><th scope="col">Cm/Cmk</th><th scope="col">Son Yetenek</th><th scope="col">Durum</th></tr>
     <tr><td>G278</td><td>EXACT 12</td><td>Güneşlik mont.</td><td>15</td><td>C</td><td style="color:var(--success)">2.34/2.18</td><td>20.06.2024</td><td><span class="pill pill-ok">OK</span></td></tr>
     <tr><td>S1823</td><td>SEC EXACT</td><td>Braket mont.</td><td>28</td><td>B</td><td style="color:var(--warning)">1.71/1.42</td><td>15.05.2024</td><td><span class="pill pill-warn">KONTROL</span></td></tr>
     <tr><td>S1109</td><td>EXACT 15</td><td>Kutup başı mont.</td><td>5</td><td>C</td><td style="color:var(--danger)">1.28/1.10</td><td>02.04.2024</td><td><span class="pill pill-nok">YETERSİZ</span></td></tr>
@@ -1567,13 +1605,13 @@ html{scrollbar-width:thin;scrollbar-color:var(--neutral) var(--surface)}
     <div style="overflow-x:auto">
     <table class="source-table" id="qb-list-table">
       <thead><tr>
-        <th style="width:28px"><input type="checkbox" id="qb-select-all" onchange="qbToggleSelectAll(this.checked)"></th>
-        <th data-i18n="qb.col.id">ID</th>
-        <th data-i18n="qb.col.question">Question</th>
-        <th data-i18n="qb.col.category">Category</th>
-        <th data-i18n="qb.col.tags">Tags</th>
-        <th data-i18n="qb.col.difficulty">Difficulty</th>
-        <th data-i18n="qb.col.status">Status</th>
+        <th style="width:28px" scope="col"><input type="checkbox" id="qb-select-all" onchange="qbToggleSelectAll(this.checked)"></th>
+        <th data-i18n="qb.col.id" scope="col">ID</th>
+        <th data-i18n="qb.col.question" scope="col">Question</th>
+        <th data-i18n="qb.col.category" scope="col">Category</th>
+        <th data-i18n="qb.col.tags" scope="col">Tags</th>
+        <th data-i18n="qb.col.difficulty" scope="col">Difficulty</th>
+        <th data-i18n="qb.col.status" scope="col">Status</th>
       </tr></thead>
       <tbody id="qb-list-body"></tbody>
     </table>
@@ -2093,10 +2131,10 @@ html{scrollbar-width:thin;scrollbar-color:var(--neutral) var(--surface)}
     <div class="card">
       <div class="card-title">Onay Politikası</div>
       <table class="source-table">
-        <tr><th>Güven 1</th><td>Taslak, üretimde kullanılamaz</td></tr>
-        <tr><th>Güven 2</th><td>İkincil kaynak, ön değerlendirme</td></tr>
-        <tr><th>Güven 3</th><td>Çapraz kontrollü, mühendislik kullanımı</td></tr>
-        <tr><th>Güven 4</th><td>Birincil standart veya onaylı test</td></tr>
+        <tr><th scope="col">Güven 1</th><td>Taslak, üretimde kullanılamaz</td></tr>
+        <tr><th scope="col">Güven 2</th><td>İkincil kaynak, ön değerlendirme</td></tr>
+        <tr><th scope="col">Güven 3</th><td>Çapraz kontrollü, mühendislik kullanımı</td></tr>
+        <tr><th scope="col">Güven 4</th><td>Birincil standart veya onaylı test</td></tr>
       </table>
       <div class="alert alert-warn" style="margin-top:12px">Güven 4 tek başına yeterli değildir; kayıt ayrıca yönetici tarafından “Onaylı” durumuna alınmalıdır.</div>
     </div>
@@ -2130,7 +2168,7 @@ html{scrollbar-width:thin;scrollbar-color:var(--neutral) var(--surface)}
 
   <div class="card">
     <div class="card-header"><div><div class="card-title" data-i18n="calibration.results_title">Kalibrasyon Sonuçları</div></div><button class="btn btn-secondary btn-sm" onclick="loadCalibrationCases()" data-i18n="calibration.refresh_btn">Yenile</button></div>
-    <table class="cal-table"><thead><tr><th data-i18n="calibration.th_thread">Diş</th><th data-i18n="calibration.th_program">Program</th><th data-i18n="calibration.th_reference">Referans</th><th data-i18n="calibration.th_error">Hata</th><th data-i18n="calibration.th_tolerance">Tolerans</th><th data-i18n="calibration.th_decision">Karar</th><th data-i18n="calibration.th_source">Kaynak</th></tr></thead><tbody id="calibrationBody"></tbody></table>
+    <table class="cal-table"><thead><tr><th data-i18n="calibration.th_thread" scope="col">Diş</th><th data-i18n="calibration.th_program" scope="col">Program</th><th data-i18n="calibration.th_reference" scope="col">Referans</th><th data-i18n="calibration.th_error" scope="col">Hata</th><th data-i18n="calibration.th_tolerance" scope="col">Tolerans</th><th data-i18n="calibration.th_decision" scope="col">Karar</th><th data-i18n="calibration.th_source" scope="col">Kaynak</th></tr></thead><tbody id="calibrationBody"></tbody></table>
   </div>
 </div>
 
@@ -2142,7 +2180,7 @@ html{scrollbar-width:thin;scrollbar-color:var(--neutral) var(--surface)}
     <div class="validation-card"><div class="card-title" data-i18n="validation.overall_decision">Genel Karar</div><div class="stat-val yellow" data-i18n="validation.preliminary_assessment">Ön değerlendirme</div><div class="stat-sub" data-i18n="validation.overall_decision_note">Güven 4 olmayan kayıt seri üretim onayı oluşturmaz.</div></div>
   </div>
   <div class="card"><div class="card-header"><div><div class="card-title" data-i18n="validation.current_traceability">Mevcut Hesabın İzlenebilirliği</div></div><button class="btn btn-secondary btn-sm" onclick="refreshValidationPanel()" data-i18n="validation.refresh_btn">Yenile</button></div><div id="validationCurrent"></div></div>
-  <div class="card"><div class="card-title" data-i18n="validation.dataset_status_title">Veri Seti Durumu</div><table class="source-table"><thead><tr><th data-i18n="validation.th_dataset">Veri Seti</th><th data-i18n="validation.th_status">Durum</th><th data-i18n="validation.th_record">Kayıt</th><th data-i18n="validation.th_production">Üretim</th><th data-i18n="validation.th_action">Aksiyon</th></tr></thead><tbody id="validationDatasets"></tbody></table></div>
+  <div class="card"><div class="card-title" data-i18n="validation.dataset_status_title">Veri Seti Durumu</div><table class="source-table"><thead><tr><th data-i18n="validation.th_dataset" scope="col">Veri Seti</th><th data-i18n="validation.th_status" scope="col">Durum</th><th data-i18n="validation.th_record" scope="col">Kayıt</th><th data-i18n="validation.th_production" scope="col">Üretim</th><th data-i18n="validation.th_action" scope="col">Aksiyon</th></tr></thead><tbody id="validationDatasets"></tbody></table></div>
   <div class="alert alert-warn" data-i18n="validation.footer_warning">Doğrulanmış standart veya test raporu olmadan taslak veri seri üretim torku olarak kullanılmamalıdır.</div>
 </div>
 
@@ -2158,7 +2196,7 @@ html{scrollbar-width:thin;scrollbar-color:var(--neutral) var(--surface)}
     <div id="archiveCount" style="font-size:12px;color:var(--text3);margin-bottom:10px"></div>
     <div style="overflow-x:auto">
       <table class="table">
-        <thead><tr><th>Tarih</th><th>Kayıt</th><th>Standart</th><th>Diş</th><th>Sınıf</th><th>Tork</th><th>Ön Yük</th><th>Güven</th><th>İşlem</th></tr></thead>
+        <thead><tr><th scope="col">Tarih</th><th scope="col">Kayıt</th><th scope="col">Standart</th><th scope="col">Diş</th><th scope="col">Sınıf</th><th scope="col">Tork</th><th scope="col">Ön Yük</th><th scope="col">Güven</th><th scope="col">İşlem</th></tr></thead>
         <tbody id="archiveBody"></tbody>
       </table>
     </div>
@@ -2234,6 +2272,74 @@ html{scrollbar-width:thin;scrollbar-color:var(--neutral) var(--surface)}
 </div></div></div>
 
 <script>
+// ===== UX-P2: tpAlert — accessible replacement for native alert() =====
+// Usage: tpAlert(message, type) where type = 'info' | 'warn' | 'error' | 'success'
+// Falls back gracefully: if DOM unavailable, logs to console only.
+(function() {
+  window.tpAlert = function(msg, type) {
+    type = type || 'info';
+    const titleKeys = { info:'ui.alert_info', warn:'ui.alert_warning', error:'ui.alert_error', success:'ui.alert_success' };
+    const titleKey = titleKeys[type] || 'ui.alert_info';
+    const title = (typeof t === 'function') ? t(titleKey) : titleKey;
+    const okLabel = (typeof t === 'function') ? t('ui.alert_ok') : 'OK';
+    const overlay = document.createElement('div');
+    overlay.className = 'tp-alert-overlay';
+    overlay.setAttribute('role', 'alertdialog');
+    overlay.setAttribute('aria-modal', 'true');
+    overlay.setAttribute('aria-labelledby', 'tp-alert-title');
+    overlay.setAttribute('aria-describedby', 'tp-alert-body');
+    overlay.innerHTML = [
+      '<div class="tp-alert-box tp-alert-' + type + '" role="document">',
+      '<div class="tp-alert-title" id="tp-alert-title">' + title + '</div>',
+      '<div class="tp-alert-body" id="tp-alert-body">' + (String(msg || '').replace(/</g, '&lt;').replace(/>/g, '&gt;')) + '</div>',
+      '<div class="tp-alert-actions">',
+      '<button class="btn btn-primary btn-sm" id="tp-alert-ok">' + okLabel + '</button>',
+      '</div></div>',
+    ].join('');
+    document.body.appendChild(overlay);
+    const okBtn = overlay.querySelector('#tp-alert-ok');
+    function close() { overlay.remove(); }
+    if (okBtn) { okBtn.focus(); okBtn.addEventListener('click', close); }
+    overlay.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape') close();
+    });
+  };
+})();
+// ===== END tpAlert =====
+
+
+// ===== UX-P2: Shared modal focus-trap helper =====
+// Call trapFocus(containerEl, openerEl) on modal open.
+// Call releaseFocus(handler, openerEl) on modal close.
+(function() {
+  const FOCUSABLE = 'button:not([disabled]),a[href],input:not([disabled]),select:not([disabled]),textarea:not([disabled]),[tabindex="0"]';
+  window.trapFocus = function(container, openerEl) {
+    if (!container) return null;
+    // Focus first focusable element or the container itself
+    const els = container.querySelectorAll(FOCUSABLE);
+    const first = els[0], last = els[els.length - 1];
+    (first || container).focus();
+    function handler(e) {
+      if (e.key !== 'Tab') return;
+      if (!els.length) { e.preventDefault(); return; }
+      if (e.shiftKey) {
+        if (document.activeElement === first) { e.preventDefault(); last.focus(); }
+      } else {
+        if (document.activeElement === last) { e.preventDefault(); first.focus(); }
+      }
+    }
+    container.addEventListener('keydown', handler);
+    return handler;
+  };
+  window.releaseFocus = function(container, handler, openerEl) {
+    if (container && handler) container.removeEventListener('keydown', handler);
+    if (openerEl && typeof openerEl.focus === 'function') {
+      try { openerEl.focus(); } catch(e) {}
+    }
+  };
+})();
+// ===== END focus-trap helper =====
+
 // ========== SÜRÜM (tek merkezi kaynak: backend VERSION dosyası, /api/health üzerinden) ==========
 // Frontend hiçbir sürüm numarasını hardcode etmez -- backend'in
 // APP_VERSION'ı (repo kökündeki VERSION dosyasından okunur) ile
@@ -2376,6 +2482,29 @@ const I18N = {
     'sidebar.section_knowledge': 'Knowledge',
     'sidebar.section_project_trace': 'Project & Traceability',
     'ui.under_development': 'This feature is currently under development.',
+    'ui.alert_info': 'Notice',
+    'ui.alert_warning': 'Warning',
+    'ui.alert_error': 'Error',
+    'ui.alert_success': 'Done',
+    'ui.alert_ok': 'OK',
+    'ui.admin_required': 'Administrator access required.',
+    'ui.select_file_first': 'Please select a file first.',
+    'ui.csv_export_failed': 'CSV export failed.',
+    'ui.enter_code_first': 'Please enter a code.',
+    'ui.no_errors': 'No errors.',
+    'ui.project_name_required': 'Project name is required.',
+    'ui.org_settings_saved': 'Organization settings saved.',
+    'ui.license_activated': 'License activated.',
+    'ui.operation_failed': 'Operation failed. Please try again.',
+    'hizli.calc_first_warning': 'Please run a calculation first.',
+    'hizli.record_added': 'Record added:',
+    'hizli.record_error': 'Record could not be saved.',
+    'checklist.btn_ok_label': 'OK — Pass',
+    'checklist.btn_nok_label': 'NOK — Fail',
+    'checklist.btn_na_label': 'N/A — Not applicable',
+
+
+
 
     'sidebar.dashboard': 'Dashboard',
     'sidebar.sample_torque_study': 'Sample Torque Study',
@@ -5341,6 +5470,29 @@ const I18N = {
     'sidebar.section_knowledge': 'Bilgi',
     'sidebar.section_project_trace': 'Proje ve İzlenebilirlik',
     'ui.under_development': 'Bu özellik geliştirme aşamasındadır.',
+    'ui.alert_info': 'Bilgi',
+    'ui.alert_warning': 'Uyarı',
+    'ui.alert_error': 'Hata',
+    'ui.alert_success': 'Tamam',
+    'ui.alert_ok': 'Tamam',
+    'ui.admin_required': 'Yönetici yetkisi gereklidir.',
+    'ui.select_file_first': 'Lütfen önce bir dosya seçin.',
+    'ui.csv_export_failed': 'CSV dışa aktarma başarısız.',
+    'ui.enter_code_first': 'Lütfen bir kod girin.',
+    'ui.no_errors': 'Hata yok.',
+    'ui.project_name_required': 'Proje adı gereklidir.',
+    'ui.org_settings_saved': 'Kurum ayarları kaydedildi.',
+    'ui.license_activated': 'Lisans aktifleştirildi.',
+    'ui.operation_failed': 'İşlem başarısız. Lütfen tekrar deneyin.',
+    'hizli.calc_first_warning': 'Lütfen önce hesaplama yapın.',
+    'hizli.record_added': 'Kayıt eklendi:',
+    'hizli.record_error': 'Kayıt kaydedilemedi.',
+    'checklist.btn_ok_label': 'OK — Geçti',
+    'checklist.btn_nok_label': 'NOK — Başarısız',
+    'checklist.btn_na_label': 'N/A — Uygulanamaz',
+
+
+
 
     'sidebar.dashboard': 'Dashboard',
     'sidebar.sample_torque_study': 'Örnek Tork Çalışması',
@@ -6370,21 +6522,21 @@ function scRenderBoltTable() {
     <td class="sc-wrap">${scEsc(b.source)}</td>
   </tr>`).join('');
   el.innerHTML = `<table class="sc-table"><thead><tr>
-    <th data-i18n="sc.field.designation">Designation</th>
-    <th data-i18n="sc.field.standard">Standard</th>
-    <th data-i18n="sc.field.material_family">Material family</th>
-    <th data-i18n="sc.field.nominal_tensile">Nominal Rm</th>
-    <th data-i18n="sc.field.min_tensile">Min Rm</th>
-    <th data-i18n="sc.field.yield_ratio">Yield ratio</th>
-    <th data-i18n="sc.field.min_yield">Min Rp0.2</th>
-    <th data-i18n="sc.field.proof_stress">Proof stress</th>
-    <th data-i18n="sc.field.hardness">Hardness</th>
-    <th data-i18n="sc.field.diameter_range">Diameter range</th>
-    <th data-i18n="sc.field.heat_treatment">Heat treatment</th>
-    <th data-i18n="sc.field.elongation">Elongation</th>
-    <th data-i18n="sc.field.verification_status">Verification</th>
-    <th data-i18n="sc.field.notes">Notes</th>
-    <th data-i18n="sc.field.source">Source</th>
+    <th data-i18n="sc.field.designation" scope="col">Designation</th>
+    <th data-i18n="sc.field.standard" scope="col">Standard</th>
+    <th data-i18n="sc.field.material_family" scope="col">Material family</th>
+    <th data-i18n="sc.field.nominal_tensile" scope="col">Nominal Rm</th>
+    <th data-i18n="sc.field.min_tensile" scope="col">Min Rm</th>
+    <th data-i18n="sc.field.yield_ratio" scope="col">Yield ratio</th>
+    <th data-i18n="sc.field.min_yield" scope="col">Min Rp0.2</th>
+    <th data-i18n="sc.field.proof_stress" scope="col">Proof stress</th>
+    <th data-i18n="sc.field.hardness" scope="col">Hardness</th>
+    <th data-i18n="sc.field.diameter_range" scope="col">Diameter range</th>
+    <th data-i18n="sc.field.heat_treatment" scope="col">Heat treatment</th>
+    <th data-i18n="sc.field.elongation" scope="col">Elongation</th>
+    <th data-i18n="sc.field.verification_status" scope="col">Verification</th>
+    <th data-i18n="sc.field.notes" scope="col">Notes</th>
+    <th data-i18n="sc.field.source" scope="col">Source</th>
   </tr></thead><tbody>${rows}</tbody></table>`;
   applyStaticTranslations();
 }
@@ -6407,18 +6559,18 @@ function scRenderNutTable() {
     <td class="sc-wrap">${scEsc(n.source)}</td>
   </tr>`).join('');
   el.innerHTML = `<table class="sc-table"><thead><tr>
-    <th data-i18n="sc.field.designation">Designation</th>
-    <th data-i18n="sc.field.standard">Standard</th>
-    <th data-i18n="sc.field.material_family">Material family</th>
-    <th data-i18n="sc.field.proof_load_stress">Proof-load stress</th>
-    <th data-i18n="sc.field.compatible_bolt_classes">Compatible bolt classes</th>
-    <th data-i18n="sc.field.diameter_range">Diameter range</th>
-    <th data-i18n="sc.field.nut_style">Nut style</th>
-    <th data-i18n="sc.field.hardness">Hardness</th>
-    <th data-i18n="sc.field.heat_treatment">Heat treatment</th>
-    <th data-i18n="sc.field.verification_status">Verification</th>
-    <th data-i18n="sc.field.notes">Notes</th>
-    <th data-i18n="sc.field.source">Source</th>
+    <th data-i18n="sc.field.designation" scope="col">Designation</th>
+    <th data-i18n="sc.field.standard" scope="col">Standard</th>
+    <th data-i18n="sc.field.material_family" scope="col">Material family</th>
+    <th data-i18n="sc.field.proof_load_stress" scope="col">Proof-load stress</th>
+    <th data-i18n="sc.field.compatible_bolt_classes" scope="col">Compatible bolt classes</th>
+    <th data-i18n="sc.field.diameter_range" scope="col">Diameter range</th>
+    <th data-i18n="sc.field.nut_style" scope="col">Nut style</th>
+    <th data-i18n="sc.field.hardness" scope="col">Hardness</th>
+    <th data-i18n="sc.field.heat_treatment" scope="col">Heat treatment</th>
+    <th data-i18n="sc.field.verification_status" scope="col">Verification</th>
+    <th data-i18n="sc.field.notes" scope="col">Notes</th>
+    <th data-i18n="sc.field.source" scope="col">Source</th>
   </tr></thead><tbody>${rows}</tbody></table>`;
   applyStaticTranslations();
 }
@@ -6892,9 +7044,9 @@ function miRenderMaterialsTable() {
     <td>${scEsc(m.approval_status)}</td>
   </tr>`).join('');
   el.innerHTML = `<table class="sc-table"><thead><tr>
-    <th>${scEsc(t('mi.col.id'))}</th><th>${scEsc(t('mi.col.material'))}</th>
-    <th>${scEsc(t('mi.col.grade'))}</th><th>Rp0.2</th><th>Rm</th><th>E</th>
-    <th>${scEsc(t('mi.col.validation_status'))}</th><th>${scEsc(t('mi.col.approval_status'))}</th>
+    <th scope="col">${scEsc(t('mi.col.id'))}</th><th scope="col">${scEsc(t('mi.col.material'))}</th>
+    <th scope="col">${scEsc(t('mi.col.grade'))}</th><th scope="col">Rp0.2</th><th scope="col">Rm</th><th scope="col">E</th>
+    <th scope="col">${scEsc(t('mi.col.validation_status'))}</th><th scope="col">${scEsc(t('mi.col.approval_status'))}</th>
   </tr></thead><tbody>${rows}</tbody></table>`;
 }
 
@@ -6939,8 +7091,8 @@ function miRenderRecommendation(result) {
     <td>${c.requirement_margin_ratio == null ? '—' : c.requirement_margin_ratio}</td>
   </tr>`).join('');
   const table = candidates.length
-    ? `<table class="sc-table"><thead><tr><th>${scEsc(t('mi.col.id'))}</th><th>${scEsc(t('mi.col.material'))}</th>
-        <th>${scEsc(t('mi.col.grade'))}</th><th>Rp0.2</th><th>Rm</th><th>${scEsc(t('mi.col.margin'))}</th></tr></thead>
+    ? `<table class="sc-table"><thead><tr><th scope="col">${scEsc(t('mi.col.id'))}</th><th scope="col">${scEsc(t('mi.col.material'))}</th>
+        <th scope="col">${scEsc(t('mi.col.grade'))}</th><th scope="col">Rp0.2</th><th scope="col">Rm</th><th scope="col">${scEsc(t('mi.col.margin'))}</th></tr></thead>
         <tbody>${rows}</tbody></table>`
     : `<div class="fc-muted">${scEsc(t('mi.no_candidates'))}</div>`;
   const warnings = (result.engineering_warnings || []).map(w =>
@@ -6970,9 +7122,9 @@ async function miLoadFormulaValidation() {
     el.innerHTML =
       `<div class="fc-field-row"><span class="fc-field-label">${scEsc(t('mi.col.approved_count'))}</span>` +
       `<span class="fc-field-value">${report.approved_count}/${report.total_count}</span></div>` +
-      `<table class="sc-table"><thead><tr><th>ID</th><th>${scEsc(t('mi.col.symbol'))}</th>` +
-      `<th>${scEsc(t('mi.col.classification'))}</th><th>${scEsc(t('mi.col.validation_status'))}</th>` +
-      `<th>${scEsc(t('mi.col.catalog'))}</th></tr></thead><tbody>${rows}</tbody></table>` +
+      `<table class="sc-table"><thead><tr><th scope="col">ID</th><th scope="col">${scEsc(t('mi.col.symbol'))}</th>` +
+      `<th scope="col">${scEsc(t('mi.col.classification'))}</th><th scope="col">${scEsc(t('mi.col.validation_status'))}</th>` +
+      `<th scope="col">${scEsc(t('mi.col.catalog'))}</th></tr></thead><tbody>${rows}</tbody></table>` +
       (notices ? `<div style="margin-top:10px">${notices}</div>` : '');
   } catch (e) {
     el.innerHTML = '<div class="alert alert-danger">' +
@@ -7217,9 +7369,9 @@ function wrrRenderLatestDecisions(rows) {
     <td>${scEsc(r.last_resolved_by)}</td>
   </tr>`).join('');
   el.innerHTML = `<table class="sc-table"><thead><tr>
-    <th>${scEsc(t('wrr.col.resolution_id'))}</th><th>${scEsc(t('wrr.col.effective_status'))}</th>
-    <th>${scEsc(t('wrr.col.decision_count'))}</th><th>${scEsc(t('wrr.col.last_decision'))}</th>
-    <th>${scEsc(t('wrr.col.decided_at'))}</th><th>${scEsc(t('wrr.col.decided_by'))}</th>
+    <th scope="col">${scEsc(t('wrr.col.resolution_id'))}</th><th scope="col">${scEsc(t('wrr.col.effective_status'))}</th>
+    <th scope="col">${scEsc(t('wrr.col.decision_count'))}</th><th scope="col">${scEsc(t('wrr.col.last_decision'))}</th>
+    <th scope="col">${scEsc(t('wrr.col.decided_at'))}</th><th scope="col">${scEsc(t('wrr.col.decided_by'))}</th>
   </tr></thead><tbody>${body}</tbody></table>`;
 }
 
@@ -7340,15 +7492,15 @@ function wrrRenderQueueTable(records) {
     <td><button class="btn btn-secondary" onclick="wrrLoadResolutionDetail('${scEsc(r.resolution_id)}')" data-i18n="wrr.queue.detail_button">Detail</button></td>
   </tr>`).join('');
   el.innerHTML = `<div class="sc-table-wrap"><table class="sc-table"><thead><tr>
-    <th>${scEsc(t('wrr.col.resolution_id'))}</th>
-    <th>${scEsc(t('wrr.queue.col.washer_record_id'))}</th>
-    <th>${scEsc(t('wrr.queue.col.issue_type'))}</th>
-    <th>${scEsc(t('wrr.queue.col.source_status'))}</th>
-    <th>${scEsc(t('wrr.col.effective_status'))}</th>
-    <th>${scEsc(t('wrr.col.decision_count'))}</th>
-    <th>${scEsc(t('wrr.queue.col.is_blocked'))}</th>
-    <th>${scEsc(t('wrr.queue.col.is_terminal'))}</th>
-    <th></th>
+    <th scope="col">${scEsc(t('wrr.col.resolution_id'))}</th>
+    <th scope="col">${scEsc(t('wrr.queue.col.washer_record_id'))}</th>
+    <th scope="col">${scEsc(t('wrr.queue.col.issue_type'))}</th>
+    <th scope="col">${scEsc(t('wrr.queue.col.source_status'))}</th>
+    <th scope="col">${scEsc(t('wrr.col.effective_status'))}</th>
+    <th scope="col">${scEsc(t('wrr.col.decision_count'))}</th>
+    <th scope="col">${scEsc(t('wrr.queue.col.is_blocked'))}</th>
+    <th scope="col">${scEsc(t('wrr.queue.col.is_terminal'))}</th>
+    <th scope="col"></th>
   </tr></thead><tbody>${body}</tbody></table></div>`;
 }
 
@@ -7644,14 +7796,14 @@ function wrrRenderHistoryTable(decisions) {
     <td>${scEsc(d.confidence_level === null || d.confidence_level === undefined ? '—' : String(d.confidence_level))}</td>
   </tr>`).join('');
   el.innerHTML = `<div class="sc-table-wrap"><table class="sc-table"><thead><tr>
-    <th>${scEsc(t('wrr.history.col.decision_id'))}</th>
-    <th>${scEsc(t('wrr.history.col.previous_status'))}</th>
-    <th>${scEsc(t('wrr.history.col.new_status'))}</th>
-    <th>${scEsc(t('wrr.history.col.resolution_note'))}</th>
-    <th>${scEsc(t('wrr.history.col.evidence_reference'))}</th>
-    <th>${scEsc(t('wrr.history.col.resolved_by'))}</th>
-    <th>${scEsc(t('wrr.history.col.decided_at'))}</th>
-    <th>${scEsc(t('wrr.history.col.confidence_level'))}</th>
+    <th scope="col">${scEsc(t('wrr.history.col.decision_id'))}</th>
+    <th scope="col">${scEsc(t('wrr.history.col.previous_status'))}</th>
+    <th scope="col">${scEsc(t('wrr.history.col.new_status'))}</th>
+    <th scope="col">${scEsc(t('wrr.history.col.resolution_note'))}</th>
+    <th scope="col">${scEsc(t('wrr.history.col.evidence_reference'))}</th>
+    <th scope="col">${scEsc(t('wrr.history.col.resolved_by'))}</th>
+    <th scope="col">${scEsc(t('wrr.history.col.decided_at'))}</th>
+    <th scope="col">${scEsc(t('wrr.history.col.confidence_level'))}</th>
   </tr></thead><tbody>${rows}</tbody></table></div>`;
 }
 
@@ -7765,13 +7917,13 @@ function wrrRenderEvidenceTable(records) {
     <td>${scEsc(r.created_at)}</td>
   </tr>`).join('');
   el.innerHTML = `<div class="sc-table-wrap"><table class="sc-table"><thead><tr>
-    <th>${scEsc(t('wrr.evidence.col.evidence_id'))}</th>
-    <th>${scEsc(t('wrr.evidence.col.evidence_type'))}</th>
-    <th>${scEsc(t('wrr.evidence.col.title'))}</th>
-    <th>${scEsc(t('wrr.evidence.col.source_reference'))}</th>
-    <th>${scEsc(t('wrr.evidence.col.verification_status'))}</th>
-    <th>${scEsc(t('wrr.evidence.col.created_by'))}</th>
-    <th>${scEsc(t('wrr.evidence.col.created_at'))}</th>
+    <th scope="col">${scEsc(t('wrr.evidence.col.evidence_id'))}</th>
+    <th scope="col">${scEsc(t('wrr.evidence.col.evidence_type'))}</th>
+    <th scope="col">${scEsc(t('wrr.evidence.col.title'))}</th>
+    <th scope="col">${scEsc(t('wrr.evidence.col.source_reference'))}</th>
+    <th scope="col">${scEsc(t('wrr.evidence.col.verification_status'))}</th>
+    <th scope="col">${scEsc(t('wrr.evidence.col.created_by'))}</th>
+    <th scope="col">${scEsc(t('wrr.evidence.col.created_at'))}</th>
   </tr></thead><tbody>${rows}</tbody></table></div>`;
 }
 
@@ -8413,7 +8565,7 @@ function renderClassEquipmentRows(list) {
       <td><span class="pill ${DASH_EQUIPMENT_STATUS_PILL[eq.status] || 'pill-warn'}">${escHtml(t(DASH_EQUIPMENT_STATUS_KEY[eq.status] || 'dashboard.equipment_status_check'))}</span></td>
     </tr>`).join('');
   return `<table class="table" style="margin-top:8px">
-      <tr><th>${escHtml(t('dashboard.equipment_id_label'))}</th><th>${escHtml(t('dashboard.equipment_model_label'))}</th><th>${escHtml(t('dashboard.th_status'))}</th></tr>
+      <tr><th scope="col">${escHtml(t('dashboard.equipment_id_label'))}</th><th scope="col">${escHtml(t('dashboard.equipment_model_label'))}</th><th scope="col">${escHtml(t('dashboard.th_status'))}</th></tr>
       ${rows}
     </table>`;
 }
@@ -8444,14 +8596,25 @@ function openClassEquipmentModal(classId, triggerEl) {
   overlay.querySelector('[data-role="close"]').addEventListener('click', () => closeClassEquipmentModal());
   overlay._onKey = onKey;
   document.addEventListener('keydown', onKey);
-  overlay.querySelector('[data-role="close"]').focus();
+  // UX-P2A: wire Tab-cycle focus trap; focus-restoration on close handled by closeClassEquipmentModal
+  if (typeof trapFocus === 'function') {
+    overlay._trapHandler = trapFocus(overlay.querySelector('.equip-modal-box'), triggerEl);
+  } else {
+    overlay.querySelector('[data-role="close"]').focus();
+  }
 }
 function closeClassEquipmentModal() {
   const overlay = document.getElementById('classEquipmentModalOverlay');
   if (!overlay) return;
   if (overlay._onKey) document.removeEventListener('keydown', overlay._onKey);
+  // UX-P2A: release Tab-trap and restore focus to opener
+  if (typeof releaseFocus === 'function' && overlay._trapHandler) {
+    releaseFocus(overlay.querySelector('.equip-modal-box'), overlay._trapHandler, dashEquipmentModalTrigger);
+  } else if (dashEquipmentModalTrigger) {
+    dashEquipmentModalTrigger.focus();
+  }
   overlay.remove();
-  if (dashEquipmentModalTrigger) { dashEquipmentModalTrigger.focus(); dashEquipmentModalTrigger = null; }
+  dashEquipmentModalTrigger = null;
 }
 
 // ========== SAYFA YÖNETİMİ ==========
@@ -8460,7 +8623,7 @@ function showPage(id, el) {
   const pg = document.getElementById('page-' + id);
   if (pg) pg.classList.add('active');
   document.querySelectorAll('.sidebar-item').forEach(i => i.classList.remove('active'));
-  if(id==='arsiv')renderArchive();if(id==='validation'){renderValidationDatasets();refreshValidationPanel();}if(id==='dataadmin'){loadDataPackages();}if(id==='calibration'){loadCalibrationCases();}if(id==='versions'){loadDataVersions();}if(id==='qualitygate'){loadQualityGate();}if(id==='projects'){loadProjects();}if(id==='releasepackage'){populateReleaseProjects();}if(id==='organization'){loadOrganization();}if(id==='deployment'){loadDeploymentProfile();}if(id==='mobileaccess'){loadMobileAccess();document.querySelector('.sidebar')?.classList.remove('mobile-open');}if(id==='clouddeploy'){loadCloudReadiness();}if(id==='golivewizard'){loadGoLiveProfile();}if(id==='runtimehealth'){if(CURRENT_ROLE!=='admin'){alert('Bu sayfa için yönetici yetkisi gerekir.');showPage('dashboard');return;}loadRuntimeHealth();}if(id==='migration'){loadMigrationHistory();}if(id==='diagnostics'){runDiagnostics();}if(id==='license'){loadLicense();}if(id==='usage'){loadUsage();}if(id==='traceability'){populateReleaseProjects();}if(id==='revisions'){loadRevisions();}if(id==='approvals'){loadApprovalQueue();}if(id==='goldencases'){loadGoldenCases();}if(id==='admin'){if(CURRENT_ROLE!=='admin'){alert('Bu sayfa için yönetici yetkisi gerekir.');showPage('dashboard');return;}loadAdminUsers();loadAudit();loadSystemHealth();}if(id==='frictioncondition'){loadFrictionConditionWorkspace();}if(id==='strengthclasses'){loadStrengthClassesWorkspace();}if(id==='materialintelligence'){loadMaterialIntelligenceWorkspace();}if(id==='washerresolution'){loadWasherResolutionReport();loadWasherResolutionQueue();}if(id==='governance'){govInit();}if(id==='questionbank'){qbInit();}if(id==='documentintelligence'){diInit();}
+  if(id==='arsiv')renderArchive();if(id==='validation'){renderValidationDatasets();refreshValidationPanel();}if(id==='dataadmin'){loadDataPackages();}if(id==='calibration'){loadCalibrationCases();}if(id==='versions'){loadDataVersions();}if(id==='qualitygate'){loadQualityGate();}if(id==='projects'){loadProjects();}if(id==='releasepackage'){populateReleaseProjects();}if(id==='organization'){loadOrganization();}if(id==='deployment'){loadDeploymentProfile();}if(id==='mobileaccess'){loadMobileAccess();document.querySelector('.sidebar')?.classList.remove('mobile-open');}if(id==='clouddeploy'){loadCloudReadiness();}if(id==='golivewizard'){loadGoLiveProfile();}if(id==='runtimehealth'){if(CURRENT_ROLE!=='admin'){tpAlert(t('ui.admin_required'),'warn');showPage('dashboard');return;}loadRuntimeHealth();}if(id==='migration'){loadMigrationHistory();}if(id==='diagnostics'){runDiagnostics();}if(id==='license'){loadLicense();}if(id==='usage'){loadUsage();}if(id==='traceability'){populateReleaseProjects();}if(id==='revisions'){loadRevisions();}if(id==='approvals'){loadApprovalQueue();}if(id==='goldencases'){loadGoldenCases();}if(id==='admin'){if(CURRENT_ROLE!=='admin'){tpAlert(t('ui.admin_required'),'warn');showPage('dashboard');return;}loadAdminUsers();loadAudit();loadSystemHealth();}if(id==='frictioncondition'){loadFrictionConditionWorkspace();}if(id==='strengthclasses'){loadStrengthClassesWorkspace();}if(id==='materialintelligence'){loadMaterialIntelligenceWorkspace();}if(id==='washerresolution'){loadWasherResolutionReport();loadWasherResolutionQueue();}if(id==='governance'){govInit();}if(id==='questionbank'){qbInit();}if(id==='documentintelligence'){diInit();}
 }
 
 // ========== DOCUMENT INTELLIGENCE (Stage 2 / Slice 5) ==========
@@ -8742,12 +8905,12 @@ function diRenderDocumentList(docs) {
     return;
   }
   let html = '<table class="table"><tr>' +
-    '<th>' + diEsc(t('di.mydocs_col_filename')) + '</th>' +
-    '<th>' + diEsc(t('di.mydocs_col_format')) + '</th>' +
-    '<th>' + diEsc(t('di.mydocs_col_status')) + '</th>' +
-    '<th>' + diEsc(t('di.mydocs_col_created_at')) + '</th>' +
-    '<th>' + diEsc(t('di.mydocs_col_character_count')) + '</th>' +
-    '<th>' + diEsc(t('di.mydocs_col_request_id')) + '</th>' +
+    '<th scope="col">' + diEsc(t('di.mydocs_col_filename')) + '</th>' +
+    '<th scope="col">' + diEsc(t('di.mydocs_col_format')) + '</th>' +
+    '<th scope="col">' + diEsc(t('di.mydocs_col_status')) + '</th>' +
+    '<th scope="col">' + diEsc(t('di.mydocs_col_created_at')) + '</th>' +
+    '<th scope="col">' + diEsc(t('di.mydocs_col_character_count')) + '</th>' +
+    '<th scope="col">' + diEsc(t('di.mydocs_col_request_id')) + '</th>' +
     '</tr>';
   docs.forEach(doc => {
     const pillClass = diStatusPillClass(doc.status);
@@ -9103,7 +9266,7 @@ function fcRenderReport(report, loading) {
 }
 
 function downloadFrictionConditionReportJSON() {
-  if (!FC_LAST_REPORT) { alert(t('fc.alert_no_report')); return; }
+  if (!FC_LAST_REPORT) { tpAlert(t('fc.alert_no_report'),'warn'); return; }
   downloadText('FrictionCondition_' + FC_LAST_REPORT.friction_condition_id + '.json', JSON.stringify(FC_LAST_REPORT, null, 2), 'application/json');
 }
 
@@ -9517,7 +9680,7 @@ function hesapla(){
     </div>
 
     <table class="eng-table">
-      <thead><tr><th>${t('hizli.eng_table_scenario')}</th><th>μthread</th><th>μbearing</th><th>${t('hizli.eng_table_torque')}</th><th>${t('hizli.eng_table_preload')}</th></tr></thead>
+      <thead><tr><th scope="col">${t('hizli.eng_table_scenario')}</th><th scope="col">μthread</th><th scope="col">μbearing</th><th scope="col">${t('hizli.eng_table_torque')}</th><th scope="col">${t('hizli.eng_table_preload')}</th></tr></thead>
       <tbody>
         <tr><td>${t('hizli.scenario_min_friction')}</td><td>${mtMin.toFixed(3)}</td><td>${mbMin.toFixed(3)}</td><td>${tMin.total.toFixed(1)} Nm</td><td>${Math.round(Ftarget).toLocaleString('tr-TR')} N</td></tr>
         <tr><td>${t('hizli.scenario_nominal')}</td><td>${mtNom.toFixed(3)}</td><td>${mbNom.toFixed(3)}</td><td>${tNom.total.toFixed(1)} Nm</td><td>${Math.round(Ftarget).toLocaleString('tr-TR')} N</td></tr>
@@ -9550,7 +9713,7 @@ const CL=[{no:'1.1',katKey:'checklist.cat_incoming',textKey:'checklist.item_1_1'
 
 function buildCL(){
   let cats={};CL.forEach(i=>{if(!cats[i.katKey])cats[i.katKey]=[];cats[i.katKey].push(i);});
-  let h='';for(let k in cats){h+=`<div style="margin-bottom:16px"><div style="font-size:12px;font-weight:600;color:var(--accent2);margin-bottom:8px;text-transform:uppercase">${t(k)}</div>`;cats[k].forEach(i=>{h+=`<div class="check-item" id="ci${i.no.replace('.','_')}"><div class="check-number">${i.no}</div><div style="flex:1"><div class="check-text">${t(i.textKey)}</div><div class="check-ref">${t(i.refKey)}</div></div><div class="check-actions"><button class="check-btn ok-btn" onclick="sc('${i.no}','ok',this)">✓</button><button class="check-btn nok-btn" onclick="sc('${i.no}','nok',this)">✗</button><button class="check-btn na-btn" onclick="sc('${i.no}','na',this)">—</button></div></div>`;});h+='</div>';}
+  let h='';for(let k in cats){h+=`<div style="margin-bottom:16px"><div style="font-size:12px;font-weight:600;color:var(--accent2);margin-bottom:8px;text-transform:uppercase">${t(k)}</div>`;cats[k].forEach(i=>{h+=`<div class="check-item" id="ci${i.no.replace('.','_')}"><div class="check-number">${i.no}</div><div style="flex:1"><div class="check-text">${t(i.textKey)}</div><div class="check-ref">${t(i.refKey)}</div></div><div class="check-actions"><button class="check-btn ok-btn" aria-label="${t('checklist.btn_ok_label')}" onclick="sc('${i.no}','ok',this)">✓</button><button class="check-btn nok-btn" aria-label="${t('checklist.btn_nok_label')}" onclick="sc('${i.no}','nok',this)">✗</button><button class="check-btn na-btn" aria-label="${t('checklist.btn_na_label')}" onclick="sc('${i.no}','na',this)">—</button></div></div>`;});h+='</div>';}
   document.getElementById('checklist-items').innerHTML=h;
 }
 const cls={};
@@ -9844,9 +10007,9 @@ function captureCurrentCalculation(){
   LAST_CALCULATION=rec; return rec;
 }
 async function saveCurrentCalculation(){
-  const rec=captureCurrentCalculation(); if(rec.torque_nm==null){alert('Önce geçerli bir hesaplama yapın.');return;}
-  try{const s=await apiRequest('/api/calculations',{method:'POST',body:JSON.stringify(rec)});alert('Kayıt eklendi: '+s.record_no);await renderArchive();}
-  catch(e){alert('Kayıt hatası: '+e.message);}
+  const rec=captureCurrentCalculation(); if(rec.torque_nm==null){tpAlert(t('hizli.calc_first_warning'),'warn');return;}
+  try{const s=await apiRequest('/api/calculations',{method:'POST',body:JSON.stringify(rec)});tpAlert((typeof t==='function'?t('hizli.record_added'):'')+' '+s.record_no,'success');await renderArchive();}
+  catch(e){tpAlert(t('hizli.record_error'),'error');}
 }
 async function renderArchive(){
   const body=document.getElementById('archiveBody'); if(!body||!AUTH_TOKEN)return;
@@ -9859,7 +10022,7 @@ async function renderArchive(){
 async function deleteRecord(id){if(!confirm('Bu kayıt silinsin mi?'))return;await apiRequest('/api/calculations/'+id,{method:'DELETE'});await renderArchive();}
 async function clearArchive(){if(!confirm('Kendi tüm kayıtlarınız silinsin mi?'))return;await apiRequest('/api/calculations',{method:'DELETE'});await renderArchive();}
 function downloadText(filename,text,type){const b=new Blob([text],{type:type||'text/plain;charset=utf-8'}),a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=filename;a.click();URL.revokeObjectURL(a.href);}
-async function exportArchiveCSV(){const r=await fetch('/api/calculations/export.csv',{headers:{Authorization:'Bearer '+AUTH_TOKEN}});if(!r.ok){alert('CSV üretilemedi');return;}const b=await r.blob(),a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='TorqPro_Arsiv.csv';a.click();URL.revokeObjectURL(a.href);}
+async function exportArchiveCSV(){const r=await fetch('/api/calculations/export.csv',{headers:{Authorization:'Bearer '+AUTH_TOKEN}});if(!r.ok){tpAlert(t('ui.csv_export_failed'),'error');return;}const b=await r.blob(),a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='TorqPro_Arsiv.csv';a.click();URL.revokeObjectURL(a.href);}
 async function exportArchiveJSON(){const rows=await apiRequest('/api/calculations');downloadText('TorqPro_Arsiv.json',JSON.stringify(rows,null,2),'application/json');}
 // Controlled locale helper for printable reports: the report is
 // formatted in whatever language is active at generation/print time
@@ -9867,7 +10030,7 @@ async function exportArchiveJSON(){const rows=await apiRequest('/api/calculation
 // numeric values are never altered -- only their display formatting.
 function reportLocale(){return CURRENT_LANG==='en'?'en-US':'tr-TR';}
 function reportHtml(r){return `<div class="report-sheet"><h1>${t('rapor.report_heading')}</h1><p><strong>${t('rapor.record_label')}:</strong> ${r.record_no||t('rapor.temporary')} &nbsp; <strong>${t('rapor.date_label')}:</strong> ${new Date(r.created_at||Date.now()).toLocaleString(reportLocale())}</p><p><strong>${t('rapor.user_label')}:</strong> ${CURRENT_USER||'Protype Lab'}</p><hr><div class="report-grid"><div class="report-item"><div class="report-label">${t('rapor.product_family_label')}</div><div class="report-value">${r.family||'—'}</div></div><div class="report-item"><div class="report-label">${t('rapor.standard_thread_label')}</div><div class="report-value">${r.standard||'—'} / ${r.thread||'—'}</div></div><div class="report-item"><div class="report-label">${t('rapor.property_class_label')}</div><div class="report-value">${r.property_class||'—'}</div></div><div class="report-item"><div class="report-label">${t('rapor.total_torque_label')}</div><div class="report-value">${r.torque_nm!=null?Number(r.torque_nm).toFixed(1)+' Nm':'—'}</div></div><div class="report-item"><div class="report-label">${t('rapor.preload_label')}</div><div class="report-value">${r.preload_n!=null?Math.round(r.preload_n).toLocaleString(reportLocale())+' N':'—'}</div></div><div class="report-item"><div class="report-label">${t('rapor.confidence_label')}</div><div class="report-value">${r.confidence!=null?'G'+r.confidence:'—'}</div></div></div><hr><p><strong>${t('rapor.warning_label')}:</strong> ${t('rapor.preliminary_assessment_note')}</p></div>`;}
-function printCurrentReport(){const r=captureCurrentCalculation();if(r.torque_nm==null){alert(t('rapor.calculate_first_warning'));return;}const p=document.getElementById('printArea');p.innerHTML=reportHtml(r);p.style.display='block';window.print();setTimeout(()=>p.style.display='none',500);}
+function printCurrentReport(){const r=captureCurrentCalculation();if(r.torque_nm==null){tpAlert(t('rapor.calculate_first_warning'),'warn');return;}const p=document.getElementById('printArea');p.innerHTML=reportHtml(r);p.style.display='block';window.print();setTimeout(()=>p.style.display='none',500);}
 function printRecord(id){const r=ARCHIVE_CACHE.find(x=>x.id===id);if(!r)return;const p=document.getElementById('printArea');p.innerHTML=reportHtml(r);p.style.display='block';window.print();setTimeout(()=>p.style.display='none',500);}
 
 
@@ -9876,26 +10039,26 @@ function printRecord(id){const r=ARCHIVE_CACHE.find(x=>x.id===id);if(!r)return;c
 async function changeOwnPassword(){
   const current=document.getElementById('pwd_current').value;
   const next=document.getElementById('pwd_new').value;
-  if(!current||!next){alert(t('admin.enter_current_and_new_password'));return;}
-  try{await apiRequest('/api/change-password',{method:'POST',body:JSON.stringify({current_password:current,new_password:next})});alert(t('admin.password_updated'));document.getElementById('pwd_current').value='';document.getElementById('pwd_new').value='';}
-  catch(e){alert(e.message);}
+  if(!current||!next){tpAlert(t('admin.enter_current_and_new_password'),'warn');return;}
+  try{await apiRequest('/api/change-password',{method:'POST',body:JSON.stringify({current_password:current,new_password:next})});tpAlert(t('admin.password_updated'),'success');document.getElementById('pwd_current').value='';document.getElementById('pwd_new').value='';}
+  catch(e){tpAlert(t('ui.operation_failed'),'error');}
 }
 async function adminCreateUser(){
   const payload={username:document.getElementById('adm_username').value.trim(),display_name:document.getElementById('adm_display').value.trim(),password:document.getElementById('adm_password').value,role:document.getElementById('adm_role').value};
-  if(!payload.username||!payload.display_name||!payload.password){alert(t('admin.fill_all_fields'));return;}
-  try{await apiRequest('/api/admin/users',{method:'POST',body:JSON.stringify(payload)});alert(t('admin.user_created'));await loadAdminUsers();}
-  catch(e){alert(e.message);}
+  if(!payload.username||!payload.display_name||!payload.password){tpAlert(t('admin.fill_all_fields'),'warn');return;}
+  try{await apiRequest('/api/admin/users',{method:'POST',body:JSON.stringify(payload)});tpAlert(t('admin.user_created'),'success');await loadAdminUsers();}
+  catch(e){tpAlert(t('ui.operation_failed'),'error');}
 }
 async function loadAdminUsers(){
   if(CURRENT_ROLE!=='admin')return;
   const rows=await apiRequest('/api/admin/users');
   document.getElementById('adminUsers').innerHTML=rows.length?rows.map(u=>`<div class="admin-row"><div><strong>${u.display_name}</strong><div style="font-size:11px;color:var(--text3)">${u.username}</div></div><select class="form-select" onchange="adminUpdateUser(${u.id},{role:this.value})"><option ${u.role==='viewer'?'selected':''} value="viewer">${t('admin.role_viewer')}</option><option ${u.role==='engineer'?'selected':''} value="engineer">${t('admin.role_engineer')}</option><option ${u.role==='admin'?'selected':''} value="admin">${t('admin.role_admin')}</option></select><span class="pill ${u.is_active?'pill-ok':'pill-nok'}">${u.is_active?t('admin.status_active'):t('admin.status_inactive')}</span><button class="btn btn-secondary btn-sm" onclick="adminUpdateUser(${u.id},{is_active:${u.is_active?0:1}})">${u.is_active?t('admin.deactivate_btn'):t('admin.activate_btn')}</button><button class="btn btn-danger btn-sm" onclick="adminResetPassword(${u.id})">${t('admin.reset_password_btn')}</button></div>`).join(''):t('admin.no_users_found');
 }
-async function adminUpdateUser(id,patch){try{await apiRequest('/api/admin/users/'+id,{method:'PATCH',body:JSON.stringify(patch)});await loadAdminUsers();}catch(e){alert(e.message);}}
+async function adminUpdateUser(id,patch){try{await apiRequest('/api/admin/users/'+id,{method:'PATCH',body:JSON.stringify(patch)});await loadAdminUsers();}catch(e){tpAlert(t('ui.operation_failed'),'error');}}
 async function adminResetPassword(id){
   const p=prompt(t('admin.new_temp_password_prompt'));if(!p)return;
-  try{await apiRequest('/api/admin/users/'+id+'/reset-password',{method:'POST',body:JSON.stringify({new_password:p})});alert(t('admin.password_updated'));}
-  catch(e){alert(e.message);}
+  try{await apiRequest('/api/admin/users/'+id+'/reset-password',{method:'POST',body:JSON.stringify({new_password:p})});tpAlert(t('admin.password_updated'),'success');}
+  catch(e){tpAlert(t('ui.operation_failed'),'error');}
 }
 async function loadAudit(){
   if(CURRENT_ROLE!=='admin')return;
@@ -9904,7 +10067,7 @@ async function loadAudit(){
 }
 async function downloadBackup(){
   const res=await fetch('/api/admin/backup',{headers:{Authorization:'Bearer '+AUTH_TOKEN}});
-  if(!res.ok){alert(t('admin.backup_failed'));return;}
+  if(!res.ok){tpAlert(t('admin.backup_failed'),'error');return;}
   const b=await res.blob(),a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='TorqPro_Backup.db';a.click();URL.revokeObjectURL(a.href);
 }
 
@@ -9981,13 +10144,13 @@ const VALIDATION_DATASETS=[
 {nameKey:'validation.ds_friction_db',statusKey:'validation.ds_draft',count:1,production:false,actionKey:'validation.ds_action_add_iso16047_report'},
 {nameKey:'validation.ds_technical_source_records',statusKey:'validation.ds_active',count:1,production:false,actionKey:'validation.ds_action_add_primary_source'}];
 function renderValidationDatasets(){const e=document.getElementById('validationDatasets');if(!e)return;e.innerHTML=VALIDATION_DATASETS.map(d=>`<tr><td>${t(d.nameKey)}</td><td>${t(d.statusKey)}</td><td>${d.count}</td><td><span class="badge-prod ${d.production?'ok':'nok'}">${d.production?t('validation.yes'):t('validation.no')}</span></td><td>${t(d.actionKey)}</td></tr>`).join('');}
-function refreshValidationPanel(){const s=getLibrarySelection();const c=[s.thread?.confidence,s.bolt?.confidence,s.strength?.confidence,s.nut?.confidence,s.washer?.confidence].filter(Number.isFinite);const m=c.length?Math.min(...c):1;const fc=s.coating?.confidence||1;document.getElementById('validationCurrent').innerHTML=`<table class="source-table"><tr><th>${t('hizli.standard')}</th><td>${s.standard||'—'}</td></tr><tr><th>${t('validation.thread_label')}</th><td>${s.thread?.thread_code||'—'}</td></tr><tr><th>${t('validation.connection_data_confidence')}</th><td><span class="confidence ${confClass(m)}">${confLabel(m)}</span></td></tr><tr><th>${t('validation.friction_confidence')}</th><td><span class="confidence ${confClass(fc)}">${confLabel(fc)}</span></td></tr><tr><th>${t('validation.nut_proof_load')}</th><td><span class="badge-prod nok">${t('validation.no_verified_table')}</span></td></tr><tr><th>${t('validation.production_decision')}</th><td><span class="badge-prod nok">${t('validation.not_yet_validated_for_production')}</span><div class="fc-muted" style="font-size:11px;margin-top:4px">${t('validation.not_yet_validated_reason')}</div></td></tr></table>`;}
+function refreshValidationPanel(){const s=getLibrarySelection();const c=[s.thread?.confidence,s.bolt?.confidence,s.strength?.confidence,s.nut?.confidence,s.washer?.confidence].filter(Number.isFinite);const m=c.length?Math.min(...c):1;const fc=s.coating?.confidence||1;document.getElementById('validationCurrent').innerHTML=`<table class="source-table"><tr><th scope="col">${t('hizli.standard')}</th><td>${s.standard||'—'}</td></tr><tr><th scope="col">${t('validation.thread_label')}</th><td>${s.thread?.thread_code||'—'}</td></tr><tr><th scope="col">${t('validation.connection_data_confidence')}</th><td><span class="confidence ${confClass(m)}">${confLabel(m)}</span></td></tr><tr><th scope="col">${t('validation.friction_confidence')}</th><td><span class="confidence ${confClass(fc)}">${confLabel(fc)}</span></td></tr><tr><th scope="col">${t('validation.nut_proof_load')}</th><td><span class="badge-prod nok">${t('validation.no_verified_table')}</span></td></tr><tr><th scope="col">${t('validation.production_decision')}</th><td><span class="badge-prod nok">${t('validation.not_yet_validated_for_production')}</span><div class="fc-muted" style="font-size:11px;margin-top:4px">${t('validation.not_yet_validated_reason')}</div></td></tr></table>`;}
 
 
 async function uploadStandardData(){
-  if(CURRENT_ROLE!=='admin'){alert('Yönetici yetkisi gerekir.');return;}
+  if(CURRENT_ROLE!=='admin'){tpAlert(t('ui.admin_required'),'warn');return;}
   const file=document.getElementById('upload_file').files[0];
-  if(!file){alert('Dosya seçin.');return;}
+  if(!file){tpAlert(t('ui.select_file_first'),'warn');return;}
   const text=await file.text();
   const payload={
     dataset:document.getElementById('upload_dataset').value,
@@ -10017,14 +10180,14 @@ async function loadDataPackages(){
 }
 async function setPackageStatus(id,status){
   try{await apiRequest('/api/admin/data-packages/'+id+'/status',{method:'PATCH',body:JSON.stringify({status})});await loadDataPackages();refreshValidationPanel();}
-  catch(e){alert(e.message);}
+  catch(e){tpAlert(t('ui.operation_failed'),'error');}
 }
 async function saveCalibrationCase(){
   const p=parseFloat(document.getElementById('cal_program').value),r=parseFloat(document.getElementById('cal_reference').value),tol=parseFloat(document.getElementById('cal_tolerance').value);
-  if(!Number.isFinite(p)||!Number.isFinite(r)||r===0){alert(t('calibration.err_enter_valid_value'));return;}
+  if(!Number.isFinite(p)||!Number.isFinite(r)||r===0){tpAlert(t('calibration.err_enter_valid_value'),'warn');return;}
   const payload={thread:document.getElementById('cal_thread').value,program_value:p,reference_value:r,tolerance_pct:tol,source_id:document.getElementById('cal_source_id').value.trim(),note:document.getElementById('cal_note').value.trim()};
   try{await apiRequest('/api/calibration/cases',{method:'POST',body:JSON.stringify(payload)});await loadCalibrationCases();}
-  catch(e){alert(e.message);}
+  catch(e){tpAlert(t('ui.operation_failed'),'error');}
 }
 async function loadCalibrationCases(){
   const e=document.getElementById('calibrationBody');if(!e)return;
@@ -10041,10 +10204,10 @@ async function loadDataVersions(){
   document.getElementById('activeVersions').innerHTML=a.length?a.map(v=>`<div class="version-row version-active"><div><strong>${v.dataset}</strong><div>${v.version_no}</div></div><div>${v.package_no}</div><div>G${v.confidence}</div><div>${new Date(v.activated_at).toLocaleString('tr-TR')}</div><div><button class="btn btn-danger btn-sm" onclick="rollbackDataset(${v.id})">Geri Al</button></div></div>`).join(''):'Aktif sürüm yok.';
   document.getElementById('allVersions').innerHTML=d.length?d.map(v=>`<div class="version-row ${v.is_active?'version-active':'version-inactive'}"><div><strong>${v.dataset}</strong><div>${v.version_no}</div></div><div>${v.package_no}</div><div>G${v.confidence}</div><div>${v.is_active?'Aktif':'Pasif'}</div><div>${!v.is_active?`<button class="btn btn-success btn-sm" onclick="activateVersion(${v.id})">Aktifleştir</button>`:''}</div></div>`).join(''):'Sürüm yok.';
   const s=await loadActiveEngineData();
-  document.getElementById('engineDataStatus').innerHTML=`<table class="source-table"><tr><th>Proof-Load</th><td>${s.datasets.proof_load?.version_no||'Yok'}</td></tr><tr><th>Sürtünme</th><td>${s.datasets.friction?.version_no||'Yok'}</td></tr><tr><th>Pul</th><td>${s.datasets.washer?.version_no||'Yok'}</td></tr><tr><th>Uyumluluk</th><td>${s.datasets.compatibility?.version_no||'Yok'}</td></tr><tr><th>Üretim Hazırlığı</th><td><span class="badge-prod ${s.production_ready?'ok':'nok'}">${s.production_ready?'Hazır':'Hazır değil'}</span></td></tr></table>`;
+  document.getElementById('engineDataStatus').innerHTML=`<table class="source-table"><tr><th scope="col">Proof-Load</th><td>${s.datasets.proof_load?.version_no||'Yok'}</td></tr><tr><th scope="col">Sürtünme</th><td>${s.datasets.friction?.version_no||'Yok'}</td></tr><tr><th scope="col">Pul</th><td>${s.datasets.washer?.version_no||'Yok'}</td></tr><tr><th scope="col">Uyumluluk</th><td>${s.datasets.compatibility?.version_no||'Yok'}</td></tr><tr><th scope="col">Üretim Hazırlığı</th><td><span class="badge-prod ${s.production_ready?'ok':'nok'}">${s.production_ready?'Hazır':'Hazır değil'}</span></td></tr></table>`;
 }
-async function activateVersion(id){try{await apiRequest('/api/admin/data-versions/'+id+'/activate',{method:'POST'});await loadDataVersions();}catch(e){alert(e.message);}}
-async function rollbackDataset(id){if(!confirm('Önceki sürüme dönülsün mü?'))return;try{await apiRequest('/api/admin/data-versions/'+id+'/rollback',{method:'POST'});await loadDataVersions();}catch(e){alert(e.message);}}
+async function activateVersion(id){try{await apiRequest('/api/admin/data-versions/'+id+'/activate',{method:'POST'});await loadDataVersions();}catch(e){tpAlert(t('ui.operation_failed'),'error');}}
+async function rollbackDataset(id){if(!confirm('Önceki sürüme dönülsün mü?'))return;try{await apiRequest('/api/admin/data-versions/'+id+'/rollback',{method:'POST'});await loadDataVersions();}catch(e){tpAlert(t('ui.operation_failed'),'error');}}
 async function runImpactAnalysis(){const ds=document.getElementById('impact_dataset').value,lim=parseInt(document.getElementById('impact_limit').value)||100;try{const r=await apiRequest('/api/admin/data-versions/impact?dataset='+ds+'&limit='+lim);document.getElementById('impactResult').innerHTML=`Aktif sürüm: ${r.active_version||'Yok'}<br>İncelenen hesap: ${r.calculation_count}<br>Etkilenen kayıt: ${r.affected_count}<br>${r.note}`;}catch(e){document.getElementById('impactResult').textContent=e.message;}}
 
 
@@ -10121,7 +10284,7 @@ async function loadQualityGate(){
       <div><button class="btn btn-secondary btn-sm" onclick='showQualityErrors(${JSON.stringify(p.errors)})'>Detay</button></div>
     </div>`).join(''):'Paket bulunamadı.';
 }
-function showQualityErrors(errors){alert(errors.length?errors.join('\n'):'Hata yok.');}
+function showQualityErrors(errors){tpAlert(errors.length?errors.join('<br>'):(typeof t==='function'?t('ui.no_errors'):'Hata yok.'),'info');}
 
 async function saveGoldenCase(){
   const payload={
@@ -10133,7 +10296,7 @@ async function saveGoldenCase(){
     tolerance_pct:parseFloat(document.getElementById('gc_tolerance').value)
   };
   try{await apiRequest('/api/admin/golden-cases',{method:'POST',body:JSON.stringify(payload)});await loadGoldenCases();}
-  catch(e){alert(e.message);}
+  catch(e){tpAlert(t('ui.operation_failed'),'error');}
 }
 async function loadGoldenCases(){
   if(CURRENT_ROLE!=='admin')return;
@@ -10159,7 +10322,7 @@ async function generateReleaseCertificate(){
       <div><strong>${t('cert.golden_cases_label')}:</strong> ${c.golden_passed}/${c.golden_total}</div>
       <div><strong>${t('cert.production_readiness_label')}:</strong> ${c.production_ready?t('release.ready'):t('release.not_ready')}</div>
       <div><strong>${t('cert.decision_label')}:</strong> ${c.decision}</div>`;
-  }catch(e){alert(e.message);}
+  }catch(e){tpAlert(t('ui.operation_failed'),'error');}
 }
 function printReleaseCertificate(){
   const c=document.getElementById('releaseCertificate').innerHTML;
@@ -10168,7 +10331,7 @@ function printReleaseCertificate(){
 
 
 let ACTIVE_PROJECT_ID=null;
-async function createProject(){const p={name:document.getElementById('project_name').value.trim(),customer:document.getElementById('project_customer').value.trim(),product:document.getElementById('project_product').value.trim(),project_code:document.getElementById('project_code').value.trim()};if(!p.name){alert('Proje adı gerekli');return;}await apiRequest('/api/projects',{method:'POST',body:JSON.stringify(p)});loadProjects();}
+async function createProject(){const p={name:document.getElementById('project_name').value.trim(),customer:document.getElementById('project_customer').value.trim(),product:document.getElementById('project_product').value.trim(),project_code:document.getElementById('project_code').value.trim()};if(!p.name){tpAlert(t('ui.project_name_required'),'warn');return;}await apiRequest('/api/projects',{method:'POST',body:JSON.stringify(p)});loadProjects();}
 async function loadProjects(){const r=await apiRequest('/api/projects');document.getElementById('projectRows').innerHTML=r.map(p=>`<div class="workflow-row"><div><strong>${p.name}</strong><div>${p.customer||'—'} · ${p.product||'—'}</div></div><div>${p.project_code||'—'}</div><div>${p.calculation_count} hesap</div><div>${p.status}</div><div><button class="btn btn-primary btn-sm" onclick="selectProject(${p.id},'${String(p.name).replace(/'/g,'')}')">Aktif Yap</button></div></div>`).join('');}
 function selectProject(id,name){ACTIVE_PROJECT_ID=id;document.getElementById('activeProjectBox').innerHTML=`<div class="lock-box"><strong>${name}</strong><br>Proje ID: ${id}</div>`;}
 async function createRevision(){const p={calculation_id:parseInt(document.getElementById('rev_calc_id').value),note:document.getElementById('rev_note').value.trim(),change_reason:document.getElementById('rev_reason').value.trim()};await apiRequest('/api/revisions',{method:'POST',body:JSON.stringify(p)});loadRevisions();}
@@ -10190,7 +10353,7 @@ async function populateReleaseProjects(){
 }
 async function generateProjectRelease(){
   const id=parseInt(document.getElementById('release_project').value);
-  if(!id){alert(t('release.select_project_warning'));return;}
+  if(!id){tpAlert(t('release.select_project_warning'),'warn');return;}
   const title=document.getElementById('release_title').value.trim();
   CURRENT_RELEASE_PACKAGE=await apiRequest('/api/projects/'+id+'/release-package?title='+encodeURIComponent(title));
   const p=CURRENT_RELEASE_PACKAGE;
@@ -10202,15 +10365,15 @@ async function generateProjectRelease(){
       <div class="release-card"><div class="stat-label">${t('release.open_revisions_label')}</div><div class="stat-val yellow">${p.summary.open_revisions}</div></div>
       <div class="release-card"><div class="stat-label">${t('release.decision_label')}</div><div class="stat-val ${p.summary.release_ready?'green':'red'}">${p.summary.release_ready?t('release.ready'):t('release.not_ready')}</div></div>
     </div>
-    <table class="trace-table"><thead><tr><th>${t('release.th_calculation')}</th><th>${t('release.th_thread')}</th><th>${t('release.th_class')}</th><th>${t('release.th_torque')}</th><th>${t('release.th_revision')}</th><th>${t('release.th_status')}</th><th>${t('release.th_data_version')}</th><th>${t('release.th_approver')}</th></tr></thead><tbody>
+    <table class="trace-table"><thead><tr><th scope="col">${t('release.th_calculation')}</th><th scope="col">${t('release.th_thread')}</th><th scope="col">${t('release.th_class')}</th><th scope="col">${t('release.th_torque')}</th><th scope="col">${t('release.th_revision')}</th><th scope="col">${t('release.th_status')}</th><th scope="col">${t('release.th_data_version')}</th><th scope="col">${t('release.th_approver')}</th></tr></thead><tbody>
       ${p.items.map(x=>`<tr><td>${x.record_no}</td><td>${x.thread||'—'}</td><td>${x.property_class||'—'}</td><td>${x.torque_nm??'—'} Nm</td><td>${x.revision_no!=null?'R'+x.revision_no:'—'}</td><td>${x.revision_status||'—'}</td><td>${x.version_signature||'—'}</td><td>${x.reviewer_name||'—'}</td></tr>`).join('')}
     </tbody></table>
     <div class="alert ${p.summary.release_ready?'alert-success':'alert-warn'}"><strong>${t('release.decision_prefix')}:</strong> ${p.decision}</div>`;
 }
-function printProjectRelease(){if(!CURRENT_RELEASE_PACKAGE){alert(t('release.create_package_first_warning'));return;}const w=window.open('','_blank');w.document.write('<html><body>'+document.getElementById('releasePackageView').innerHTML+'</body></html>');w.document.close();w.print();}
+function printProjectRelease(){if(!CURRENT_RELEASE_PACKAGE){tpAlert(t('release.create_package_first_warning'),'warn');return;}const w=window.open('','_blank');w.document.write('<html><body>'+document.getElementById('releasePackageView').innerHTML+'</body></html>');w.document.close();w.print();}
 function downloadBlob(text,name,type){const b=new Blob([text],{type}),a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=name;a.click();URL.revokeObjectURL(a.href);}
-function downloadReleaseJson(){if(!CURRENT_RELEASE_PACKAGE){alert(t('release.create_package_first_warning'));return;}downloadBlob(JSON.stringify(CURRENT_RELEASE_PACKAGE,null,2),CURRENT_RELEASE_PACKAGE.package_no+'.json','application/json');}
-function downloadReleaseCsv(){if(!CURRENT_RELEASE_PACKAGE){alert(t('release.create_package_first_warning'));return;}const h=['record_no','thread','property_class','torque_nm','revision_no','revision_status','version_signature','reviewer_name'];const rows=[h.join(';'),...CURRENT_RELEASE_PACKAGE.items.map(x=>h.map(k=>String(x[k]??'').replace(/;/g,',')).join(';'))];downloadBlob('\ufeff'+rows.join('\n'),CURRENT_RELEASE_PACKAGE.package_no+'.csv','text/csv');}
+function downloadReleaseJson(){if(!CURRENT_RELEASE_PACKAGE){tpAlert(t('release.create_package_first_warning'),'warn');return;}downloadBlob(JSON.stringify(CURRENT_RELEASE_PACKAGE,null,2),CURRENT_RELEASE_PACKAGE.package_no+'.json','application/json');}
+function downloadReleaseCsv(){if(!CURRENT_RELEASE_PACKAGE){tpAlert(t('release.create_package_first_warning'),'warn');return;}const h=['record_no','thread','property_class','torque_nm','revision_no','revision_status','version_signature','reviewer_name'];const rows=[h.join(';'),...CURRENT_RELEASE_PACKAGE.items.map(x=>h.map(k=>String(x[k]??'').replace(/;/g,',')).join(';'))];downloadBlob('\ufeff'+rows.join('\n'),CURRENT_RELEASE_PACKAGE.package_no+'.csv','text/csv');}
 
 async function loadTraceability(){
   const id=parseInt(document.getElementById('trace_project').value);
@@ -10220,7 +10383,7 @@ async function loadTraceability(){
 function renderTraceability(){
   const q=(document.getElementById('trace_filter')?.value||'').toLowerCase();
   const rows=TRACEABILITY_ROWS.filter(x=>JSON.stringify(x).toLowerCase().includes(q));
-  document.getElementById('traceabilityView').innerHTML=`<table class="trace-table"><thead><tr><th>Hesap</th><th>Standart</th><th>Diş</th><th>Revizyon</th><th>Durum</th><th>Veri İzleri</th><th>Oluşturan</th><th>Onaylayan</th></tr></thead><tbody>${rows.map(x=>`<tr><td>${x.record_no}</td><td>${x.standard||'—'}</td><td>${x.thread||'—'}</td><td>${x.revision_no!=null?'R'+x.revision_no:'—'}</td><td>${x.revision_status||'—'}</td><td>${(x.data_versions||[]).map(v=>`<span class="data-source-chip">${v.dataset}:${v.version_no}</span>`).join('')||'—'}</td><td>${x.creator_name||'—'}</td><td>${x.reviewer_name||'—'}</td></tr>`).join('')}</tbody></table>`;
+  document.getElementById('traceabilityView').innerHTML=`<table class="trace-table"><thead><tr><th scope="col">Hesap</th><th scope="col">Standart</th><th scope="col">Diş</th><th scope="col">Revizyon</th><th scope="col">Durum</th><th scope="col">Veri İzleri</th><th scope="col">Oluşturan</th><th scope="col">Onaylayan</th></tr></thead><tbody>${rows.map(x=>`<tr><td>${x.record_no}</td><td>${x.standard||'—'}</td><td>${x.thread||'—'}</td><td>${x.revision_no!=null?'R'+x.revision_no:'—'}</td><td>${x.revision_status||'—'}</td><td>${(x.data_versions||[]).map(v=>`<span class="data-source-chip">${v.dataset}:${v.version_no}</span>`).join('')||'—'}</td><td>${x.creator_name||'—'}</td><td>${x.reviewer_name||'—'}</td></tr>`).join('')}</tbody></table>`;
 }
 
 
@@ -10241,7 +10404,7 @@ function renderBrandPreview(){
 }
 async function saveOrganization(){
   const p={name:document.getElementById('org_name').value.trim(),code:document.getElementById('org_code').value.trim(),contact:document.getElementById('org_contact').value.trim(),email:document.getElementById('org_email').value.trim(),report_title:document.getElementById('org_report_title').value.trim(),logo:document.getElementById('org_logo').value.trim(),footer:document.getElementById('org_footer').value.trim()};
-  await apiRequest('/api/admin/organization',{method:'PUT',body:JSON.stringify(p)});ORG_SETTINGS=p;renderBrandPreview();alert('Kurum ayarları kaydedildi.');
+  await apiRequest('/api/admin/organization',{method:'PUT',body:JSON.stringify(p)});ORG_SETTINGS=p;renderBrandPreview();tpAlert(t('ui.org_settings_saved'),'success');
 }
 async function loadLicense(){
   const l=await apiRequest('/api/admin/license');
@@ -10249,13 +10412,13 @@ async function loadLicense(){
   document.getElementById('licensedModules').innerHTML=(l.modules||[]).map(m=>`<span class="data-source-chip">${m}</span>`).join('')||'Modül yok.';
 }
 async function activateLicense(){
-  const key=document.getElementById('license_key').value.trim();if(!key){alert('Kod girin.');return;}
-  try{await apiRequest('/api/admin/license/activate',{method:'POST',body:JSON.stringify({license_key:key})});await loadLicense();alert('Lisans aktifleştirildi.');}catch(e){alert(e.message);}
+  const key=document.getElementById('license_key').value.trim();if(!key){tpAlert(t('ui.enter_code_first'),'warn');return;}
+  try{await apiRequest('/api/admin/license/activate',{method:'POST',body:JSON.stringify({license_key:key})});await loadLicense();tpAlert(t('ui.license_activated'),'success');}catch(e){tpAlert(t('ui.operation_failed'),'error');}
 }
 async function loadUsage(){
   const u=await apiRequest('/api/admin/usage-summary');
   document.getElementById('usageCards').innerHTML=`<div class="release-card"><div class="stat-label">Kullanıcı</div><div class="stat-val blue">${u.users}</div></div><div class="release-card"><div class="stat-label">Proje</div><div class="stat-val blue">${u.projects}</div></div><div class="release-card"><div class="stat-label">Hesap</div><div class="stat-val blue">${u.calculations}</div></div><div class="release-card"><div class="stat-label">Release Paketi</div><div class="stat-val blue">${u.release_packages}</div></div>`;
-  document.getElementById('usageLimits').innerHTML=`<table class="source-table"><tr><th>Kullanıcı Limiti</th><td>${u.users}/${u.max_users}</td></tr><tr><th>Proje Limiti</th><td>${u.projects}/${u.max_projects}</td></tr><tr><th>Lisans Durumu</th><td>${u.license_active?'Aktif':'Pasif'}</td></tr></table>`;
+  document.getElementById('usageLimits').innerHTML=`<table class="source-table"><tr><th scope="col">Kullanıcı Limiti</th><td>${u.users}/${u.max_users}</td></tr><tr><th scope="col">Proje Limiti</th><td>${u.projects}/${u.max_projects}</td></tr><tr><th scope="col">Lisans Durumu</th><td>${u.license_active?'Aktif':'Pasif'}</td></tr></table>`;
 }
 
 
@@ -10264,10 +10427,10 @@ async function loadDeploymentProfile(){const d=await apiRequest('/api/admin/depl
 const DEPLOY_TYPE_LABEL_KEY={standalone:'deploy.type_standalone',lan:'deploy.type_lan',cloud:'deploy.type_cloud'};
 const DEPLOY_BACKUP_LABEL_KEY={daily:'deploy.backup_daily',weekly:'deploy.backup_weekly',manual:'deploy.backup_manual'};
 const DEPLOY_CHANNEL_LABEL_KEY={stable:'deploy.channel_stable',pilot:'deploy.channel_pilot',offline:'deploy.channel_offline'};
-function renderDeployment(d){document.getElementById('deploymentPreview').innerHTML=`<table class="source-table"><tr><th>${t('deploy.row_environment')}</th><td>${d.environment||'—'}</td></tr><tr><th>${t('deploy.row_type')}</th><td>${d.install_type?t(DEPLOY_TYPE_LABEL_KEY[d.install_type]||d.install_type):'—'}</td></tr><tr><th>${t('deploy.row_address')}</th><td>${d.host||'—'}:${d.port||'—'}</td></tr><tr><th>${t('deploy.row_backup')}</th><td>${d.backup_frequency?t(DEPLOY_BACKUP_LABEL_KEY[d.backup_frequency]||d.backup_frequency):'—'}</td></tr><tr><th>${t('deploy.row_update')}</th><td>${d.update_channel?t(DEPLOY_CHANNEL_LABEL_KEY[d.update_channel]||d.update_channel):'—'}</td></tr></table>`;}
-async function saveDeploymentProfile(){const p={environment:document.getElementById('dep_env').value.trim(),install_type:document.getElementById('dep_type').value,host:document.getElementById('dep_host').value.trim(),port:parseInt(document.getElementById('dep_port').value),backup_frequency:document.getElementById('dep_backup').value,update_channel:document.getElementById('dep_channel').value};await apiRequest('/api/admin/deployment-profile',{method:'PUT',body:JSON.stringify(p)});renderDeployment(p);alert(t('deploy.profile_saved_alert'));}
+function renderDeployment(d){document.getElementById('deploymentPreview').innerHTML=`<table class="source-table"><tr><th scope="col">${t('deploy.row_environment')}</th><td>${d.environment||'—'}</td></tr><tr><th scope="col">${t('deploy.row_type')}</th><td>${d.install_type?t(DEPLOY_TYPE_LABEL_KEY[d.install_type]||d.install_type):'—'}</td></tr><tr><th scope="col">${t('deploy.row_address')}</th><td>${d.host||'—'}:${d.port||'—'}</td></tr><tr><th scope="col">${t('deploy.row_backup')}</th><td>${d.backup_frequency?t(DEPLOY_BACKUP_LABEL_KEY[d.backup_frequency]||d.backup_frequency):'—'}</td></tr><tr><th scope="col">${t('deploy.row_update')}</th><td>${d.update_channel?t(DEPLOY_CHANNEL_LABEL_KEY[d.update_channel]||d.update_channel):'—'}</td></tr></table>`;}
+async function saveDeploymentProfile(){const p={environment:document.getElementById('dep_env').value.trim(),install_type:document.getElementById('dep_type').value,host:document.getElementById('dep_host').value.trim(),port:parseInt(document.getElementById('dep_port').value),backup_frequency:document.getElementById('dep_backup').value,update_channel:document.getElementById('dep_channel').value};await apiRequest('/api/admin/deployment-profile',{method:'PUT',body:JSON.stringify(p)});renderDeployment(p);tpAlert(t('deploy.profile_saved_alert'),'success');}
 async function exportSystemPackage(){const p=await apiRequest('/api/admin/system-export',{method:'POST'});downloadBlob(JSON.stringify(p,null,2),p.export_no+'.json','application/json');loadMigrationHistory();}
-async function importSystemPackage(){const f=document.getElementById('migration_file').files[0];if(!f){alert(t('migration.select_file_alert'));return;}const text=await f.text();try{const r=await apiRequest('/api/admin/system-import',{method:'POST',body:JSON.stringify({content:text})});document.getElementById('migrationResult').innerHTML=`<span class="ok">${t('migration.verified_prefix')}: ${r.import_no} · ${r.table_count} ${t('migration.table_suffix')}</span>`;loadMigrationHistory();}catch(e){document.getElementById('migrationResult').innerHTML=`<span class="nok">${e.message}</span>`;}}
+async function importSystemPackage(){const f=document.getElementById('migration_file').files[0];if(!f){tpAlert(t('migration.select_file_alert'),'warn');return;}const text=await f.text();try{const r=await apiRequest('/api/admin/system-import',{method:'POST',body:JSON.stringify({content:text})});document.getElementById('migrationResult').innerHTML=`<span class="ok">${t('migration.verified_prefix')}: ${r.import_no} · ${r.table_count} ${t('migration.table_suffix')}</span>`;loadMigrationHistory();}catch(e){document.getElementById('migrationResult').innerHTML=`<span class="nok">${e.message}</span>`;}}
 async function loadMigrationHistory(){const r=await apiRequest('/api/admin/migration-history');document.getElementById('migrationHistory').innerHTML=r.map(x=>`<div class="diag-row"><div>${x.operation_no}</div><div>${x.operation_type}</div><div>${x.status}</div></div>`).join('')||t('migration.no_records');}
 async function runDiagnostics(){LAST_DIAGNOSTICS=await apiRequest('/api/admin/diagnostics');renderDiagnostics(LAST_DIAGNOSTICS);}
 function renderDiagnostics(diag){document.getElementById('diagnosticRows').innerHTML=diag.checks.map(c=>`<div class="diag-row"><div><strong>${c.name}</strong><div>${c.detail||''}</div></div><div>${c.value??'—'}</div><div class="${c.ok?'qg-pass':'qg-fail'}">${c.ok?'OK':t('diagnostics.error')}</div></div>`).join('')+`<div class="alert ${diag.overall_ok?'alert-success':'alert-warn'}"><strong>${t('diagnostics.overall_status_label')}:</strong> ${diag.overall_ok?t('diagnostics.healthy'):t('diagnostics.check_needed')}</div>`;}
@@ -10277,7 +10440,7 @@ async function downloadDiagnostics(){if(!LAST_DIAGNOSTICS)await runDiagnostics()
 let deferredPrompt=null;
 function toggleMobileMenu(){document.querySelector('.sidebar')?.classList.toggle('mobile-open');}
 window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();deferredPrompt=e;const b=document.getElementById('installPwaBtn');if(b)b.disabled=false;});
-async function installPwa(){if(!deferredPrompt){alert(t('mobile.install_not_ready_alert'));return;}deferredPrompt.prompt();await deferredPrompt.userChoice;deferredPrompt=null;document.getElementById('installPwaBtn').disabled=true;}
+async function installPwa(){if(!deferredPrompt){tpAlert(t('mobile.install_not_ready_alert'),'info');return;}deferredPrompt.prompt();await deferredPrompt.userChoice;deferredPrompt=null;document.getElementById('installPwaBtn').disabled=true;}
 async function loadMobileAccess(){
   try{
     const d=await apiRequest('/api/mobile/access-info');
@@ -10295,7 +10458,7 @@ async function loadCloudReadiness(){
 async function loadRuntimeHealth(){
   if(CURRENT_ROLE!=='admin')return;
   const d=await apiRequest('/api/runtime/status');
-  document.getElementById('runtimeHealth').innerHTML=`<table class="source-table"><tr><th>${t('runtime.app_label')}</th><td>${d.app}</td></tr><tr><th>${t('runtime.version_label')}</th><td>${d.version}</td></tr><tr><th>${t('runtime.liveness_label')}</th><td>${d.liveness?'OK':t('runtime.error')}</td></tr><tr><th>${t('runtime.readiness_label')}</th><td>${d.readiness?t('runtime.ready'):t('runtime.not_ready')}</td></tr><tr><th>${t('runtime.database_label')}</th><td>${d.database}</td></tr><tr><th>${t('runtime.license_label')}</th><td>${d.license}</td></tr><tr><th>${t('runtime.active_dataset_label')}</th><td>${d.active_datasets}</td></tr></table>`;
+  document.getElementById('runtimeHealth').innerHTML=`<table class="source-table"><tr><th scope="col">${t('runtime.app_label')}</th><td>${d.app}</td></tr><tr><th scope="col">${t('runtime.version_label')}</th><td>${d.version}</td></tr><tr><th scope="col">${t('runtime.liveness_label')}</th><td>${d.liveness?'OK':t('runtime.error')}</td></tr><tr><th scope="col">${t('runtime.readiness_label')}</th><td>${d.readiness?t('runtime.ready'):t('runtime.not_ready')}</td></tr><tr><th scope="col">${t('runtime.database_label')}</th><td>${d.database}</td></tr><tr><th scope="col">${t('runtime.license_label')}</th><td>${d.license}</td></tr><tr><th scope="col">${t('runtime.active_dataset_label')}</th><td>${d.active_datasets}</td></tr></table>`;
 }
 
 
@@ -10315,7 +10478,7 @@ function renderGoLiveChecklist(d){
 async function saveGoLiveProfile(){
   const p={server_ip:document.getElementById('gw_server_ip').value.trim(),domain:document.getElementById('gw_domain').value.trim(),https_status:document.getElementById('gw_https').value};
   const r=await apiRequest('/api/admin/golive-profile',{method:'PUT',body:JSON.stringify(p)});
-  renderGoLiveChecklist(r);alert(t('golive.profile_saved_alert'));
+  renderGoLiveChecklist(r);tpAlert(t('golive.profile_saved_alert'),'success');
 }
 async function runDnsCheck(){
   const d=document.getElementById('dns_domain').value.trim(),ip=document.getElementById('dns_expected_ip').value.trim();
@@ -10474,12 +10637,12 @@ function govRenderHistory(data) {
     `<td>${govEsc(e.occurred_at)}</td>` +
     `</tr>`).join('');
   el.innerHTML = `<table class="table"><thead><tr>` +
-    `<th>${govEsc(t('gov.col.event_id'))}</th>` +
-    `<th>${govEsc(t('gov.col.lifecycle_group'))}</th>` +
-    `<th>${govEsc(t('gov.col.previous_status'))}</th>` +
-    `<th>${govEsc(t('gov.col.new_status'))}</th>` +
-    `<th>${govEsc(t('gov.col.actor'))}</th>` +
-    `<th>${govEsc(t('gov.col.occurred_at'))}</th>` +
+    `<th scope="col">${govEsc(t('gov.col.event_id'))}</th>` +
+    `<th scope="col">${govEsc(t('gov.col.lifecycle_group'))}</th>` +
+    `<th scope="col">${govEsc(t('gov.col.previous_status'))}</th>` +
+    `<th scope="col">${govEsc(t('gov.col.new_status'))}</th>` +
+    `<th scope="col">${govEsc(t('gov.col.actor'))}</th>` +
+    `<th scope="col">${govEsc(t('gov.col.occurred_at'))}</th>` +
     `</tr></thead><tbody>${rows}</tbody></table>`;
 }
 
@@ -10781,12 +10944,12 @@ function govRenderJointRevisionList(items) {
     `</tr>`).join('');
   el.innerHTML = `<div class="fc-muted" style="margin-bottom:6px">${govEsc(t('gov.jrlist.result_count_prefix'))}${items.length}</div>` +
     `<table class="table"><thead><tr>` +
-    `<th>${govEsc(t('gov.jrlist.col_revision_id'))}</th>` +
-    `<th>${govEsc(t('gov.jr.outcome_label'))}</th>` +
-    `<th>${govEsc(t('gov.jr.source_status_label'))}</th>` +
-    `<th>${govEsc(t('gov.jr.canonical_status_label'))}</th>` +
-    `<th>${govEsc(t('gov.jr.lifecycle_group_label'))}</th>` +
-    `<th>${govEsc(t('gov.jrlist.col_reason'))}</th>` +
+    `<th scope="col">${govEsc(t('gov.jrlist.col_revision_id'))}</th>` +
+    `<th scope="col">${govEsc(t('gov.jr.outcome_label'))}</th>` +
+    `<th scope="col">${govEsc(t('gov.jr.source_status_label'))}</th>` +
+    `<th scope="col">${govEsc(t('gov.jr.canonical_status_label'))}</th>` +
+    `<th scope="col">${govEsc(t('gov.jr.lifecycle_group_label'))}</th>` +
+    `<th scope="col">${govEsc(t('gov.jrlist.col_reason'))}</th>` +
     `</tr></thead><tbody>${rows}</tbody></table>`;
 }
 
@@ -10983,12 +11146,12 @@ function govRenderJointRevisionQueryResult() {
   el.innerHTML =
     `<div class="fc-muted" style="margin-bottom:6px">${summary}</div>` +
     `<table class="table"><thead><tr>` +
-    `<th>${govEsc(t('gov.jrlist.col_revision_id'))}</th>` +
-    `<th>${govEsc(t('gov.jr.source_status_label'))}</th>` +
-    `<th>${govEsc(t('gov.jr.lifecycle_group_label'))}</th>` +
-    `<th>${govEsc(t('gov.jr.canonical_status_label'))}</th>` +
-    `<th>${govEsc(t('gov.jr.outcome_label'))}</th>` +
-    `<th>${govEsc(t('gov.jrlist.col_reason'))}</th>` +
+    `<th scope="col">${govEsc(t('gov.jrlist.col_revision_id'))}</th>` +
+    `<th scope="col">${govEsc(t('gov.jr.source_status_label'))}</th>` +
+    `<th scope="col">${govEsc(t('gov.jr.lifecycle_group_label'))}</th>` +
+    `<th scope="col">${govEsc(t('gov.jr.canonical_status_label'))}</th>` +
+    `<th scope="col">${govEsc(t('gov.jr.outcome_label'))}</th>` +
+    `<th scope="col">${govEsc(t('gov.jrlist.col_reason'))}</th>` +
     `</tr></thead><tbody>${rows}</tbody></table>` +
     `<div class="form-row" style="margin-top:10px">` +
     `<button class="btn btn-secondary" id="gov_jrlist_query_prev_btn" onclick="govJointRevisionQueryPrevPage()">${govEsc(t('gov.jrlist.previous'))}</button>` +
@@ -11448,8 +11611,8 @@ function qbRenderStatsHistory() {
     `<tr><td>${qbEsc(snap.created_at)}</td><td style="text-align:right">${qbEsc(String(snap.stats.total))}</td></tr>`,
   ).join('');
   bodyEl.innerHTML = `<table class="source-table"><thead><tr>` +
-    `<th>${qbEsc(t('qb.stats.history.col_taken_at'))}</th>` +
-    `<th style="text-align:right">${qbEsc(t('qb.stats.history.col_total'))}</th>` +
+    `<th scope="col">${qbEsc(t('qb.stats.history.col_taken_at'))}</th>` +
+    `<th style="text-align:right" scope="col">${qbEsc(t('qb.stats.history.col_total'))}</th>` +
     `</tr></thead><tbody>${rows}</tbody></table>`;
 }
 
@@ -11654,7 +11817,7 @@ function qbCloseDetail() {
 }
 
 function qbFieldRow(labelKey, valueHtml) {
-  return `<tr><th>${qbEsc(t(labelKey))}</th><td>${valueHtml}</td></tr>`;
+  return `<tr><th scope="col">${qbEsc(t(labelKey))}</th><td>${valueHtml}</td></tr>`;
 }
 
 function qbCurrentLifecycleState() {
@@ -11938,11 +12101,11 @@ function qbRenderStatusHistory() {
     return;
   }
   el.innerHTML = `<table class="source-table"><thead><tr>
-    <th>${qbEsc(t('qb.status_history.col.from'))}</th>
-    <th>${qbEsc(t('qb.status_history.col.to'))}</th>
-    <th>${qbEsc(t('qb.status_history.col.actor'))}</th>
-    <th>${qbEsc(t('qb.status_history.col.date'))}</th>
-    <th>${qbEsc(t('qb.status_history.col.reason'))}</th>
+    <th scope="col">${qbEsc(t('qb.status_history.col.from'))}</th>
+    <th scope="col">${qbEsc(t('qb.status_history.col.to'))}</th>
+    <th scope="col">${qbEsc(t('qb.status_history.col.actor'))}</th>
+    <th scope="col">${qbEsc(t('qb.status_history.col.date'))}</th>
+    <th scope="col">${qbEsc(t('qb.status_history.col.reason'))}</th>
   </tr></thead><tbody>${QB_SELECTED_STATUS_HISTORY.map(row => `<tr>
     <td>${row.from_status ? qbEsc(qbLabel('validation_status', row.from_status)) : '—'}</td>
     <td>${qbEsc(qbLabel('validation_status', row.to_status))}</td>
@@ -11960,10 +12123,10 @@ function qbRenderAudit() {
     return;
   }
   el.innerHTML = `<table class="source-table"><thead><tr>
-    <th>${qbEsc(t('qb.audit.col.action'))}</th>
-    <th>${qbEsc(t('qb.audit.col.actor'))}</th>
-    <th>${qbEsc(t('qb.audit.col.role'))}</th>
-    <th>${qbEsc(t('qb.audit.col.date'))}</th>
+    <th scope="col">${qbEsc(t('qb.audit.col.action'))}</th>
+    <th scope="col">${qbEsc(t('qb.audit.col.actor'))}</th>
+    <th scope="col">${qbEsc(t('qb.audit.col.role'))}</th>
+    <th scope="col">${qbEsc(t('qb.audit.col.date'))}</th>
   </tr></thead><tbody>${QB_SELECTED_AUDIT.map(row => `<tr>
     <td>${qbEsc(row.action)}</td>
     <td>${qbEsc(row.actor)}</td>
@@ -11986,7 +12149,7 @@ async function qbRunLifecycleAction(fn) {
     await qbOpenDetail(QB_SELECTED_ID);
     await qbLoadList();
   } catch (e) {
-    alert(t('qb.action.error_prefix') + e.message);
+    tpAlert(t('qb.action.error_prefix'),'error');
   }
 }
 
@@ -12128,8 +12291,8 @@ function qbRenderBulkResult(result) {
   let html = `<div class="alert ${failed > 0 ? 'alert-warn' : 'alert-info'}">${qbEsc(summary)}</div>`;
   if (failed > 0 && Array.isArray(result.failed)) {
     html += `<table class="source-table"><thead><tr>
-      <th>${qbEsc(t('qb.bulk.result.col.question_id'))}</th>
-      <th>${qbEsc(t('qb.bulk.result.col.error'))}</th>
+      <th scope="col">${qbEsc(t('qb.bulk.result.col.question_id'))}</th>
+      <th scope="col">${qbEsc(t('qb.bulk.result.col.error'))}</th>
     </tr></thead><tbody>${result.failed.map(f => `<tr>
       <td>${qbEsc(f.question_id)}</td>
       <td>${qbEsc(f.error || '—')}</td>
@@ -12333,8 +12496,8 @@ function qbRenderImportResult(result) {
   let html = `<div class="alert ${result.rejected_count > 0 ? 'alert-warn' : 'alert-info'}">${qbEsc(summary)}</div>`;
   if (result.rejected_count > 0 && Array.isArray(result.rejected)) {
     html += `<table class="source-table"><thead><tr>
-      <th>${qbEsc(t('qb.ie.result.col.question_id'))}</th>
-      <th>${qbEsc(t('qb.ie.result.col.reason'))}</th>
+      <th scope="col">${qbEsc(t('qb.ie.result.col.question_id'))}</th>
+      <th scope="col">${qbEsc(t('qb.ie.result.col.reason'))}</th>
     </tr></thead><tbody>${result.rejected.map(r => `<tr>
       <td>${qbEsc(r.question_id || '—')}</td>
       <td>${qbEsc((r.reasons || []).join('; ') || '—')}</td>

@@ -376,6 +376,9 @@ function newContext(extractedSource, rawHtml, localStorageSeed, apiRequestImpl) 
     sessionStorage: makeLocalStorage({}),
     console: console,
     alert: (msg) => { alertCalls.push(msg); },
+    // UX-P2: tpAlert replaces native alert(); stub it here so functions using
+    // tpAlert(...) don't throw ReferenceError in the i18n test harness.
+    tpAlert: (msg, type) => { alertCalls.push(msg); },
     prompt: (msg) => { promptCalls.push(msg); return promptReturnValue; },
     setTimeout: (fn) => { fn(); },
     window: {
@@ -4205,7 +4208,7 @@ async function main() {
       check('showPage(' + JSON.stringify(pageId) + '): non-admin is redirected to dashboard (marked active)',
         dashEl.classList.contains('active'));
       check('showPage(' + JSON.stringify(pageId) + '): non-admin sees a permission-warning alert',
-        ctx.alertCalls.length === 1 && ctx.alertCalls[0].indexOf('yönetici yetkisi') !== -1);
+        ctx.alertCalls.length === 1 && ctx.alertCalls[0].toLowerCase().indexOf('yönetici yetkisi') !== -1);
     }
   }
 
