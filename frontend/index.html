@@ -408,6 +408,12 @@ html{scrollbar-width:thin;scrollbar-color:var(--neutral) var(--surface)}
   .fc-field-value{max-width:100%}
 }
 
+/* Empty state messages: shown in result containers before/after data loads */
+.empty-state-msg{
+  padding:24px 16px;text-align:center;color:var(--text3);
+  font-size:13px;line-height:1.5;
+}
+
 /* ===== UX-P3: RESPONSIVE TABLES, FORMS & LAYOUT ===== */
 
 /* Global: inputs/selects never exceed container width */
@@ -984,7 +990,8 @@ textarea:focus-visible,
       </div>
       <button class="btn btn-primary" onclick="yetenekHesapla()" style="width:100%"><span data-i18n="yetenek.calculate_btn">📈 Yetenek Hesapla</span></button>
     </div>
-    <div class="card" id="yetenek-sonuc"><div class="card-title" data-i18n="yetenek.result_title">Yetenek Sonucu</div><div style="text-align:center;padding:30px;color:var(--text3)"><div style="font-size:36px;margin-bottom:8px">📈</div><div data-i18n="yetenek.enter_measurements">Ölçümleri girin</div></div></div>
+    <div class="card" id="yetenek-sonuc">
+      <div class="empty-state-msg" role="status" data-i18n="yetenek.initial_state">Enter measurements and press Calculate.</div><div class="card-title" data-i18n="yetenek.result_title">Yetenek Sonucu</div><div style="text-align:center;padding:30px;color:var(--text3)"><div style="font-size:36px;margin-bottom:8px">📈</div><div data-i18n="yetenek.enter_measurements">Ölçümleri girin</div></div></div>
   </div>
 </div>
 
@@ -996,7 +1003,8 @@ textarea:focus-visible,
     <div class="form-row3"><div class="form-group"><label class="form-label" data-i18n="problem.field_how" for="p_nasil">NASIL</label><input class="form-input" id="p_nasil" data-i18n-placeholder="problem.placeholder_how" placeholder="SPC kontrolü"></div><div class="form-group"><label class="form-label" data-i18n="problem.field_how_much" for="p_nekdar">NE KADAR</label><input class="form-input" id="p_nekdar" data-i18n-placeholder="problem.placeholder_how_much" placeholder="5 araç etkilendi"></div><div class="form-group"><label class="form-label" data-i18n="problem.field_who" for="p_kim">KİM</label><input class="form-input" id="p_kim" data-i18n-placeholder="problem.placeholder_who" placeholder="Ad Soyad"></div></div>
   </div>
   <div class="card"><div class="card-title" data-i18n="problem.step2_title">Adım 2 — Ishikawa Kök Neden</div><div class="card-sub" data-i18n="problem.step2_sub">Olası nedenleri işaretleyin</div><div id="ishikawa-cats"></div><button class="btn btn-primary" style="margin-top:12px" onclick="problemAnaliz()">🔍 <span data-i18n="problem.analyze_btn">Analiz Et</span></button></div>
-  <div id="mudahale-sonuc"></div>
+  <div id="mudahale-sonuc">
+      <div class="empty-state-msg" role="status" data-i18n="problem.empty_state">Enter parameters and press Analyze.</div></div>
 </div>
 
 <!-- SIKICI -->
@@ -1950,7 +1958,7 @@ textarea:focus-visible,
     <div style="margin-top:14px">
       <button class="btn btn-primary" id="mi-recommend-btn" onclick="miRecommend()" data-i18n="mi.recommend_button">Get Recommendation</button>
     </div>
-    <div id="mi-recommendation-result" style="margin-top:16px"></div>
+    <div id="mi-recommendation-result" style="margin-top:16px"><div class="empty-state-msg" role="status" data-i18n="mi.initial_state">Enter parameters and press Recommend.</div></div>
   </div>
 
   <div class="card">
@@ -2150,7 +2158,8 @@ textarea:focus-visible,
   </div>
   <div class="card">
     <div class="card-header"><div class="card-title">Paket Kalite Sonuçları</div><button class="btn btn-secondary btn-sm" onclick="loadQualityGate()">Yenile</button></div>
-    <div id="qualityGateRows"></div>
+    <div id="qualityGateRows">
+        <tr><td colspan="10"><div class="empty-state-msg" role="status" data-i18n="qualitygate.empty_state">Press Refresh to load results.</div></td></tr></div>
   </div>
 </div>
 
@@ -2305,7 +2314,8 @@ textarea:focus-visible,
     <div style="overflow-x:auto">
       <table class="table">
         <thead><tr><th scope="col">Tarih</th><th scope="col">Kayıt</th><th scope="col">Standart</th><th scope="col">Diş</th><th scope="col">Sınıf</th><th scope="col">Tork</th><th scope="col">Ön Yük</th><th scope="col">Güven</th><th scope="col">İşlem</th></tr></thead>
-        <tbody id="archiveBody"></tbody>
+        <tbody id="archiveBody">
+      <div class="empty-state-msg" role="status" data-i18n="arsiv.empty_state">No archived measurements found.</div></tbody>
       </table>
     </div>
   </div>
@@ -2696,6 +2706,15 @@ const I18N = {
     'dashboard.demo_badge': 'DEMO DATA',
     'dashboard.demo_badge_hint': 'KPI values above are sample data. Connect to a live production database to see real metrics.',
     'dashboard.onboard_dismiss': 'Dismiss',
+    'problem.empty_state': 'Enter the problem parameters above and press Analyze.',
+    'qualitygate.empty_state': 'Press Refresh to load quality gate results.',
+    'qualitygate.no_records': 'No quality gate records found.',
+    'arsiv.empty_state': 'No archived measurements found.',
+    'arsiv.no_records': 'No records match the current filter.',
+    'sikici.empty_state': 'No tool records found. Press + Add New to register a tool.',
+    'mi.initial_state': 'Enter bolt geometry and loading parameters above, then press Recommend.',
+    'yetenek.initial_state': 'Enter measurements and limits above, then press Calculate.',
+
 
     'dashboard.equipment_none_found': 'No equipment found.',
     'dashboard.equipment_sample_note': 'Sample equipment data — this count does not match the class\'s measurement-point total.',
@@ -5696,6 +5715,15 @@ const I18N = {
     'dashboard.demo_badge': 'DEMO VERİSİ',
     'dashboard.demo_badge_hint': 'Yukarıdaki KPI değerleri örnek verilerdir. Gerçek metrikleri görmek için canlı üretim veri tabanına bağlayın.',
     'dashboard.onboard_dismiss': 'Kapat',
+    'problem.empty_state': 'Yukarıdaki parametreleri girin ve Analiz Et düğmesine basın.',
+    'qualitygate.empty_state': 'Kalite kapısı sonuçlarını yüklemek için Yenile düğmesine basın.',
+    'qualitygate.no_records': 'Kalite kapısı kaydı bulunamadı.',
+    'arsiv.empty_state': 'Arşivlenmiş ölçüm bulunamadı.',
+    'arsiv.no_records': 'Geçerli filtreyle eşleşen kayıt yok.',
+    'sikici.empty_state': 'Alet kaydı bulunamadı. Kayıt eklemek için + Yeni Ekle düğmesine basın.',
+    'mi.initial_state': 'Yukarıdaki cıvata ve yük parametrelerini girin, ardından Öner düğmesine basın.',
+    'yetenek.initial_state': 'Yukarıdaki ölçüm ve sınır değerlerini girin, ardından Hesapla düğmesine basın.',
+
 
     'dashboard.equipment_none_found': 'Ekipman bulunamadı.',
     'dashboard.equipment_sample_note': 'Örnek ekipman verisi — bu sayı, sınıfın ölçüm noktası toplamıyla aynı değildir.',
