@@ -1501,6 +1501,26 @@ html{scrollbar-width:thin;scrollbar-color:var(--neutral) var(--surface)}
     This workspace manages Question Bank content only. It never runs a quiz, scores an answer, or changes any engineering calculation elsewhere in TorqPro.
   </div>
 
+  <!-- AI-F1: Approved Question Bank Semantic Search (POST /api/ai/question-bank/search) -->
+  <div class="card" id="qb-ai-search-card">
+    <div class="card-header">
+      <div>
+        <div class="card-title" style="margin-bottom:0" data-i18n="qb.ai.search_title">AI Question Search</div>
+        <div class="card-sub" data-i18n="qb.ai.search_sub">Search approved, published questions by meaning — returns only validated records</div>
+      </div>
+    </div>
+    <div style="display:flex;gap:8px;align-items:center;margin:8px 0">
+      <input class="form-input" id="qb-ai-search-input" style="flex:1"
+        data-i18n-placeholder="qb.ai.search_placeholder"
+        placeholder="Search approved questions by keyword…"
+        onkeydown="if(event.key==='Enter')qbAiSearch()"
+        aria-label="AI question search input">
+      <button class="btn btn-primary btn-sm" onclick="qbAiSearch()" data-i18n="qb.ai.search_button">Search</button>
+    </div>
+    <div id="qb-ai-search-status" role="status" aria-live="polite" style="min-height:20px"></div>
+    <div id="qb-ai-search-results"></div>
+  </div>
+
   <div class="card">
     <div class="card-header">
       <div><div class="card-title" style="margin-bottom:0" data-i18n="qb.list_title">Questions</div>
@@ -1591,6 +1611,22 @@ html{scrollbar-width:thin;scrollbar-color:var(--neutral) var(--surface)}
       </div>
     </div>
     <div id="qb-detail-body"></div>
+
+    <!-- AI-F1: Explain panel — appears BELOW approved content, always secondary -->
+    <div id="qb-ai-explain-section" style="margin-top:14px;display:none">
+      <div style="border-top:1px solid var(--border);margin-bottom:12px"></div>
+      <button class="btn btn-secondary btn-sm" id="qb-ai-explain-btn"
+        onclick="qbAiExplain()"
+        data-i18n="qb.ai.explain_button"
+        aria-label="Explain this record with AI">Explain with AI</button>
+      <div id="qb-ai-explain-status" role="status" aria-live="polite" style="min-height:20px;margin-top:8px"></div>
+      <div id="qb-ai-explain-panel" style="display:none;margin-top:8px">
+        <div class="alert alert-info" id="qb-ai-explain-disclosure" style="font-size:12px;margin-bottom:8px"></div>
+        <div id="qb-ai-explain-text" style="font-size:14px;line-height:1.6;white-space:pre-wrap"></div>
+        <div id="qb-ai-explain-evidence" style="margin-top:10px;font-size:12px;color:var(--text2)"></div>
+        <div id="qb-ai-explain-limitations" style="margin-top:6px;font-size:12px;color:var(--text2)"></div>
+      </div>
+    </div>
     <div class="card-title" style="margin-top:14px" data-i18n="qb.lifecycle_title">Lifecycle</div>
     <div id="qb-lifecycle-body"></div>
     <div id="qb-lifecycle-actions" style="margin-top:8px;display:flex;gap:8px;flex-wrap:wrap"></div>
@@ -4092,6 +4128,24 @@ const I18N = {
     'qb.stats.history.snapshot_success': 'Snapshot saved.',
     'qb.stats.history.col_taken_at': 'Taken at',
     'qb.stats.history.col_total': 'Total questions',
+
+    // ---- AI-F1: Question Bank AI Search + Explain ----
+    'qb.ai.search_title': 'AI Question Search',
+    'qb.ai.search_sub': 'Search approved, published questions by keyword — returns only validated records',
+    'qb.ai.search_placeholder': 'Search approved questions by keyword…',
+    'qb.ai.search_button': 'Search',
+    'qb.ai.search_loading': 'Searching…',
+    'qb.ai.search_empty': 'No approved questions matched your search.',
+    'qb.ai.search_error': 'Search failed. Please try again.',
+    'qb.ai.search_result_count': '{n} approved question(s) found',
+    'qb.ai.explain_button': 'Explain with AI',
+    'qb.ai.explain_loading': 'Preparing explanation…',
+    'qb.ai.explain_error_503': 'AI explanation currently unavailable.',
+    'qb.ai.explain_error_404': 'Approved source unavailable.',
+    'qb.ai.explain_error_generic': 'AI explanation failed. Please try again.',
+    'qb.ai.disclosure': 'AI explanation. The approved Question Bank content remains the authoritative source.',
+    'qb.ai.evidence_label': 'Anchored evidence:',
+    'qb.ai.limitations_label': 'Limitations:',
     // ---- Stage 2 / Slice 5: Document Intelligence ----
     'sidebar.documentintelligence': 'Document Intelligence',
     'di.page_title': 'Document Intelligence',
@@ -6009,6 +6063,24 @@ const I18N = {
     'qb.stats.history.snapshot_success': 'Anlık görüntü kaydedildi.',
     'qb.stats.history.col_taken_at': 'Alınma zamanı',
     'qb.stats.history.col_total': 'Toplam soru sayısı',
+
+    // ---- AI-F1: Question Bank AI Search + Explain ----
+    'qb.ai.search_title': 'Yapay Zeka Soru Arama',
+    'qb.ai.search_sub': 'Onaylı, yayımlanan soruları anahtar kelimeyle ara — yalnızca doğrulanmış kayıtları döndürür',
+    'qb.ai.search_placeholder': 'Onaylı soruları anahtar kelimeyle ara…',
+    'qb.ai.search_button': 'Ara',
+    'qb.ai.search_loading': 'Aranıyor…',
+    'qb.ai.search_empty': 'Aramanızla eşleşen onaylı soru bulunamadı.',
+    'qb.ai.search_error': 'Arama başarısız oldu. Lütfen tekrar deneyin.',
+    'qb.ai.search_result_count': '{n} onaylı soru bulundu',
+    'qb.ai.explain_button': 'AI ile Açıkla',
+    'qb.ai.explain_loading': 'Açıklama hazırlanıyor…',
+    'qb.ai.explain_error_503': 'AI açıklaması şu anda kullanılamıyor.',
+    'qb.ai.explain_error_404': 'Onaylı kaynak mevcut değil.',
+    'qb.ai.explain_error_generic': 'AI açıklaması başarısız oldu. Lütfen tekrar deneyin.',
+    'qb.ai.disclosure': 'Yapay zeka açıklaması. Onaylı Soru Bankası içeriği yetkili kaynak olmaya devam eder.',
+    'qb.ai.evidence_label': 'Bağlı kanıt:',
+    'qb.ai.limitations_label': 'Kısıtlamalar:',
     // ---- Stage 2 / Slice 5: Document Intelligence ----
     'sidebar.documentintelligence': 'Doküman Analizi',
     'di.page_title': 'Doküman Analizi',
@@ -11621,6 +11693,175 @@ function qbRenderDetail() {
   qbRenderLifecycleActions(status, lifecycle);
   qbRenderStatusHistory();
   qbRenderAudit();
+
+  // AI-F1: Show explain button only for publishable (validated) records.
+  // Provider name is never exposed; backend controls provider selection.
+  const explainSection = document.getElementById('qb-ai-explain-section');
+  const explainPanel = document.getElementById('qb-ai-explain-panel');
+  const explainStatus = document.getElementById('qb-ai-explain-status');
+  if (explainSection) {
+    const isValidated = (status === 'validated');
+    explainSection.style.display = isValidated ? '' : 'none';
+    if (explainPanel) explainPanel.style.display = 'none';
+    if (explainStatus) explainStatus.textContent = '';
+    const btn = document.getElementById('qb-ai-explain-btn');
+    if (btn) btn.textContent = t('qb.ai.explain_button');
+  }
+}
+
+// ---- AI-F1: QB Semantic Search (POST /api/ai/question-bank/search) ----
+// Retrieval only -- deterministic keyword search over approved records.
+// Must NOT be presented as generative AI.  No fabricated scores/rankings.
+
+async function qbAiSearch() {
+  const input = document.getElementById('qb-ai-search-input');
+  const statusEl = document.getElementById('qb-ai-search-status');
+  const resultsEl = document.getElementById('qb-ai-search-results');
+  if (!input || !statusEl || !resultsEl) return;
+
+  const query = input.value.trim();
+  if (!query) {
+    statusEl.setAttribute('role', 'status');
+    statusEl.textContent = '';
+    resultsEl.textContent = '';
+    return;
+  }
+
+  statusEl.setAttribute('role', 'status');
+  statusEl.textContent = t('qb.ai.search_loading');
+  resultsEl.textContent = '';
+
+  let data;
+  try {
+    const resp = await apiRequest('POST', '/api/ai/question-bank/search', { query_text: query });
+    data = resp;
+  } catch (err) {
+    statusEl.setAttribute('role', 'alert');
+    statusEl.textContent = t('qb.ai.search_error');
+    return;
+  }
+
+  const results = Array.isArray(data.results) ? data.results : [];
+  if (!results.length) {
+    statusEl.textContent = t('qb.ai.search_empty');
+    return;
+  }
+
+  const countText = t('qb.ai.search_result_count').replace('{n}', String(results.length));
+  statusEl.textContent = countText;
+
+  // Render results as clickable rows -- tapping a row opens the full
+  // QB detail view using the exact question_id returned by the backend.
+  // data-qid carries the raw source_id; the click/keydown handler reads
+  // it via getAttribute -- no source_id value can escape into JS context.
+  const rows = results.map(r => {
+    const rawId = String(r.source_id || '');
+    const title = qbEsc(
+      (CURRENT_LANG === 'tr' ? (r.title_tr || r.title_en) : (r.title_en || r.title_tr)) || rawId
+    );
+    const cat = qbEsc(r.category ? qbFmtLabel(r.category) : '');
+    const diff = qbEsc(qbLabel('difficulty', r.difficulty));
+    const qidAttr = qbEsc(rawId);
+    return `<tr style="cursor:pointer" tabindex="0" role="button"
+      data-qid="${qidAttr}"
+      aria-label="${qidAttr}"
+      onclick="qbOpenDetail(this.getAttribute('data-qid'))"
+      onkeydown="if(event.key==='Enter'||event.key===' ')qbOpenDetail(this.getAttribute('data-qid'))">
+      <td><strong>${qbEsc(rawId)}</strong></td>
+      <td>${title}</td>
+      <td>${cat}</td>
+      <td>${diff}</td>
+    </tr>`;
+  }).join('');
+
+  resultsEl.innerHTML = `<table class="source-table" style="margin-top:8px"><tbody>${rows}</tbody></table>`;
+}
+
+// ---- AI-F1: QB Explain (POST /api/ai/question-bank/explain) ----
+// Generative AI explanation of one exact approved, publishable record.
+// Approved source ALWAYS remains above and visually stronger than AI prose.
+// Provider name, model ID, API URL never exposed to the user.
+
+async function qbAiExplain() {
+  const qid = QB_SELECTED_ID;
+  if (!qid) return;
+
+  const statusEl = document.getElementById('qb-ai-explain-status');
+  const panel = document.getElementById('qb-ai-explain-panel');
+  const textEl = document.getElementById('qb-ai-explain-text');
+  const disclosureEl = document.getElementById('qb-ai-explain-disclosure');
+  const evidenceEl = document.getElementById('qb-ai-explain-evidence');
+  const limitationsEl = document.getElementById('qb-ai-explain-limitations');
+  const btn = document.getElementById('qb-ai-explain-btn');
+
+  if (!statusEl || !panel || !textEl) return;
+
+  if (btn) btn.setAttribute('disabled', 'disabled');
+  statusEl.setAttribute('role', 'status');
+  statusEl.textContent = t('qb.ai.explain_loading');
+  panel.style.display = 'none';
+
+  let data;
+  try {
+    data = await apiRequest('POST', '/api/ai/question-bank/explain', { question_id: qid });
+  } catch (err) {
+    const status = (err && err.status) ? err.status : 0;
+    statusEl.setAttribute('role', 'alert');
+    if (status === 404) {
+      statusEl.textContent = t('qb.ai.explain_error_404');
+    } else if (status === 503 || status === 500) {
+      statusEl.textContent = t('qb.ai.explain_error_503');
+    } else {
+      statusEl.textContent = t('qb.ai.explain_error_generic');
+    }
+    if (btn) btn.removeAttribute('disabled');
+    return;
+  }
+
+  statusEl.textContent = '';
+
+  // Disclosure -- always visible above AI prose
+  if (disclosureEl) disclosureEl.textContent = t('qb.ai.disclosure');
+
+  // AI prose -- textContent only, never innerHTML from provider response
+  if (textEl) textEl.textContent = data.explanation || '';
+
+  // Evidence anchor -- list the exact source record(s) returned
+  if (evidenceEl) {
+    const evList = Array.isArray(data.evidence) ? data.evidence : [];
+    if (evList.length) {
+      let evHtml = `<strong>${qbEsc(t('qb.ai.evidence_label'))}</strong><ul style="margin:4px 0 0 16px;padding:0">`;
+      for (const ev of evList) {
+        const label = qbEsc(`${ev.source_type || ''} #${ev.source_id || ''}`);
+        const titleStr = CURRENT_LANG === 'tr'
+          ? (ev.title_tr || ev.title_en || '')
+          : (ev.title_en || ev.title_tr || '');
+        evHtml += `<li>${label}${titleStr ? ' — ' + qbEsc(titleStr) : ''}</li>`;
+      }
+      evHtml += '</ul>';
+      evidenceEl.innerHTML = evHtml;
+    } else {
+      evidenceEl.textContent = '';
+    }
+  }
+
+  // Limitations
+  if (limitationsEl) {
+    const lims = Array.isArray(data.limitations) ? data.limitations : [];
+    if (lims.length) {
+      let limHtml = `<em>${qbEsc(t('qb.ai.limitations_label'))}</em><ul style="margin:4px 0 0 16px;padding:0">`;
+      for (const lim of lims) {
+        limHtml += `<li>${qbEsc(String(lim))}</li>`;
+      }
+      limHtml += '</ul>';
+      limitationsEl.innerHTML = limHtml;
+    } else {
+      limitationsEl.textContent = '';
+    }
+  }
+
+  panel.style.display = '';
+  if (btn) btn.removeAttribute('disabled');
 }
 
 function qbActionButton(labelKey, onclick, danger) {
