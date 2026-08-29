@@ -147,42 +147,51 @@ When required engineering evidence or provider capability is unavailable, TorqPr
 
 ---
 
-# Production AI Provider Architecture
+# AI Provider Architecture (v3.1.0)
 
-Starting with `v3.1.0-alpha.1`, TorqPro includes its first production-oriented external AI provider integration.
-
-The provider layer remains separated from deterministic engineering logic.
+TorqPro v3.1.0 includes a governed AI gateway with two optional real
+provider implementations. The provider layer is strictly separated from
+deterministic engineering logic.
 
 ## Provider Abstraction
 
-External AI providers implement the TorqPro `AIModelClient` abstraction.
+```
+AI Gateway
+├─ Ollama local — optional, zero external API fee
+│   (requires operator-managed Ollama server and model)
+├─ Anthropic — optional paid provider path
+│   (requires TORQPRO_ANTHROPIC_API_KEY, disabled by default)
+└─ deterministic engineering remains authoritative
+```
 
-This enables providers to be integrated without introducing provider-specific logic into the engineering calculation layer.
+Provider configuration is backend-controlled. Normal users do not see
+or select provider names, model identifiers, or API endpoints.
 
-The architecture supports:
+**No automatic local → paid fallback.** Ollama failure raises
+`ModelUnavailableError` and stops; it never silently routes to
+Anthropic. (`PAID_CLOUD_AUTO_FALLBACK = NO`)
 
-* provider registration
-* provider discovery
-* provider availability checks
-* explicit provider selection where supported
-* provider-independent orchestration
-* controlled future provider expansion
+## Ollama Local Provider
 
-Automatic provider fallback is not enabled in `v3.1.0-alpha.1`.
+* `OllamaModelClient` via `httpx` (no SDK dependency)
+* Configured via `TORQPRO_OLLAMA_ENABLED`, `TORQPRO_OLLAMA_BASE_URL`,
+  `TORQPRO_OLLAMA_MODEL`, `TORQPRO_OLLAMA_TIMEOUT_SECONDS`,
+  `TORQPRO_OLLAMA_KEEP_ALIVE` (default `"10m"`)
+* Default model: `qwen3:8b`. One target machine was validated with
+  `qwen2.5:3b`; this is not a universal hard-coded product default.
+  Local model availability and performance depend on operator hardware.
+* Local Ollama inference has **zero external API fee.**
+* `MODEL_AUTO_DOWNLOAD = NO` — TorqPro never calls `ollama pull`.
+* `MODEL_AUTO_SUBSTITUTION = NO` — missing models are reported, not silently replaced.
 
----
+## Anthropic Provider
 
-# OpenAI Provider
+* `AnthropicModelClient` via `httpx` (no SDK dependency)
+* Default model: `claude-sonnet-5`; `max_tokens: 16000`
+* Disabled by default; requires `TORQPRO_ANTHROPIC_ENABLED=true` and
+  `TORQPRO_ANTHROPIC_API_KEY` set via secure environment injection.
+* **Never commit API keys to source control.**
 
-`v3.1.0-alpha.1` introduces the first external AI provider implementation.
-
-## Integration
-
-* `OpenAIModelClient`
-* OpenAI Responses API
-* direct `httpx` transport
-* non-streaming request model
-* environment-based provider configuration
 * bounded timeout behavior
 * bounded retry handling
 * strict response validation
@@ -338,14 +347,14 @@ Raw secrets are not part of the audit contract.
 | Item                      | Value                                                                           |
 | ------------------------- | ------------------------------------------------------------------------------- |
 | Product                   | **TorqPro AI**                                                                  |
-| Current Version           | **v3.1.0-alpha.1**                                                              |
-| Release Stage             | **Alpha / Pre-release**                                                         |
-| Release Status            | **Production AI Provider Integration**                                          |
-| Current Engineering Focus | **External AI Provider Integration + Deterministic Engineering + AI Reasoning** |
-| Stable Baseline           | `v3.0.0`                                                                        |
-| Release Commit            | `b0332e2e0054d8d3775732e49592d49746173907`                                      |
-| Full Test Suite           | **3395 passed, 13 skipped**                                                     |
-| New Tests                 | **24**                                                                          |
+| Current Version           | **v3.1.0**                                                                      |
+| Release Stage             | **Stable**                                                                      |
+| Release Status            | **AI Gateway + UX Accessibility + Responsive + State Improvements**             |
+| Current Engineering Focus | **Deterministic Engineering + Governed AI + Accessibility**                     |
+| Previous Stable Baseline  | `v3.0.0` (`50f1a0f`)                                                            |
+| Release Commit            | `e395635299e0f6b92409f94d912433986f13cfec`                                      |
+| Full Test Suite           | **3867 passed, 13 skipped, 1 known env exception**                              |
+| JS Tests                  | **2647 assertions, 19 files, 0 fail**                                           |
 | Existing-Test Regressions | **0**                                                                           |
 | Next Phase                | **Provider wiring / AI workflow expansion — scope TBD**                         |
 
