@@ -347,13 +347,13 @@ Raw secrets are not part of the audit contract.
 | Item                      | Value                                                                           |
 | ------------------------- | ------------------------------------------------------------------------------- |
 | Product                   | **TorqPro AI**                                                                  |
-| Current Version           | **v3.1.0**                                                                      |
+| Current Version           | **v3.1.1**                                                                      |
 | Release Stage             | **Stable**                                                                      |
-| Release Status            | **AI Gateway + UX Accessibility + Responsive + State Improvements**             |
+| Release Status            | **OCR Deployment Packaging + Test Maintenance**                                 |
 | Current Engineering Focus | **Deterministic Engineering + Governed AI + Accessibility**                     |
-| Previous Stable Baseline  | `v3.0.0` (`50f1a0f`)                                                            |
-| Release Commit            | `e395635299e0f6b92409f94d912433986f13cfec`                                      |
-| Full Test Suite           | **3867 passed, 13 skipped, 1 known env exception**                              |
+| Previous Stable Baseline  | `v3.1.0` (`1041b17`)                                                            |
+| Release Commit            | `33efc4ac8ff37f40aa8d659c4fd596d3a74c320b`                                      |
+| Full Test Suite           | **3868 passed, 13 skipped, 0 failed**                                           |
 | JS Tests                  | **2647 assertions, 19 files, 0 fail**                                           |
 | Existing-Test Regressions | **0**                                                                           |
 | Next Phase                | **Provider wiring / AI workflow expansion — scope TBD**                         |

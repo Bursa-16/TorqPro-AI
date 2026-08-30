@@ -1038,3 +1038,39 @@ JSON-to-SQLite persistence redesign for the Question Bank/washer-
 resolution stores; a large connection-count or query-shape refactor;
 any hard, cross-machine performance regression threshold. No new
 major roadmap phase is defined as of this release.
+
+## v3.1.1 — OCR Deployment Packaging & Test Maintenance — 2026-08-30
+
+Patch release on top of `v3.1.0` (`1041b17029601e858d1647902d395ba926e378bd`).
+Two commits; no application, API, domain, frontend, or dependency
+behavior changed.
+
+**OCR deployment packaging** (`c40efab219d7a3d705691ec8fa44b2fc4b53c9b5`):
+
+- `Dockerfile`: added `tesseract-ocr`, `tesseract-ocr-eng`,
+  `tesseract-ocr-tur` system packages in a single `RUN` layer with
+  `--no-install-recommends` and `apt` list cleanup. The Python-side
+  `pytesseract` wrapper and the `ocr_adapter` fail-closed logic were
+  already complete in v3.1.0; only the OS-level binary was absent
+  from the image.
+- `.github/workflows/ci.yml`: same three Tesseract packages installed
+  on the `ubuntu-latest` CI runner before Python dependency
+  installation. No existing test commands changed; no error masking
+  added.
+- Closes the v3.1.0 known environment exception:
+  `tests/documents/test_ocr_adapter.py::TestRealOcrExtraction::test_turkish_characters_recognized`
+  now passes in both Docker and CI without being skipped or deleted.
+
+**Version-centralization test maintenance**
+(`33efc4ac8ff37f40aa8d659c4fd596d3a74c320b`):
+
+- `tests/test_version_centralization.py`: removed four stale
+  hardcoded `"3.0.0"` assertions and the stale `_is_2_9_2` function
+  name. All version checks now read the authoritative `VERSION` file
+  and compare live application state against it. Added SemVer format
+  validation. No test deleted; no `skip`/`xfail` added.
+
+**Validation:** full suite 3868 passed, 13 skipped, 0 failed.
+OCR adapter tests 22/22 passed (including `test_turkish_characters_recognized`).
+`git diff --check` clean. `pip-audit` unchanged (no dependency version
+modified).
