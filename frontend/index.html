@@ -6959,11 +6959,22 @@ const _AI_PROVIDER_PILL = {
   'unknown':             'pill pill-info',
 };
 
+// Allowlist of readiness_status values the backend may legitimately return.
+// Any value not in this set is treated as 'unknown' so no raw backend string
+// leaks into the UI and no missing i18n key warning is generated.
+const _KNOWN_PROVIDER_STATUSES = new Set([
+  'not_applicable', 'enabled', 'disabled',
+  'server_unavailable', 'server_reachable',
+  'model_missing', 'model_ready', 'unknown',
+]);
+
+function _normalizeProviderStatus(status) {
+  return _KNOWN_PROVIDER_STATUSES.has(status) ? status : 'unknown';
+}
+
 function _providerStatusLabel(status) {
-  const key = 'ai.provider.status_' + status;
-  const mapped = t(key);
-  // t() returns the key itself when not found; fall back to raw value.
-  return (mapped && mapped !== key) ? mapped : status;
+  const normalized = _normalizeProviderStatus(status);
+  return t('ai.provider.status_' + normalized);
 }
 
 function renderProviderStatus(providers) {
@@ -6978,7 +6989,7 @@ function renderProviderStatus(providers) {
   const modelHdr = aiEsc(t('ai.provider.model'));
   const statHdr  = aiEsc(t('ai.provider.status'));
   let rows = providers.map(function(p) {
-    const pillClass = _AI_PROVIDER_PILL[p.readiness_status] || 'pill pill-info';
+    const pillClass = _AI_PROVIDER_PILL[_normalizeProviderStatus(p.readiness_status || 'unknown')] || 'pill pill-info';
     const label = aiEsc(_providerStatusLabel(p.readiness_status || 'unknown'));
     const model = p.model_identifier ? aiEsc(p.model_identifier) : '—';
     return '<tr>' +

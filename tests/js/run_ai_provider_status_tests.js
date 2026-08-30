@@ -65,7 +65,8 @@ const trKeys = extractProviderKeys(rawHtml.slice(_trStart));
 const CONST_NAMES = ['I18N', 'CURRENT_LANG', 'AI_REQUEST_IN_FLIGHT'];
 const FUNCTION_NAMES = [
   't', 'aiEsc',
-  'loadProviderStatus', 'renderProviderStatus', '_providerStatusLabel',
+  'loadProviderStatus', 'renderProviderStatus',
+  '_providerStatusLabel', '_normalizeProviderStatus',
 ];
 
 function buildExtractedSource() {
@@ -83,6 +84,8 @@ function buildExtractedSource() {
   }
   // _AI_PROVIDER_PILL is a const, not a function
   parts.push(extractConstDecl(script, '_AI_PROVIDER_PILL'));
+  // _KNOWN_PROVIDER_STATUSES and _normalizeProviderStatus added in Faz 3.2.0C
+  parts.push(extractConstDecl(script, '_KNOWN_PROVIDER_STATUSES'));
   for (const n of FUNCTION_NAMES) parts.push(extractFunctionDecl(script, n));
   return parts.join('\n\n');
 }
@@ -120,6 +123,10 @@ function newContext(apiRequestImpl, byIdSeed) {
 
   vm.createContext(sandbox);
   vm.runInContext(EXTRACTED, sandbox, { filename: 'provider_status_extracted.js' });
+  // Expose helpers directly on the context object for direct unit testing.
+  sandbox._normalizeProviderStatus = vm.runInContext('_normalizeProviderStatus', sandbox);
+  sandbox._providerStatusLabel     = vm.runInContext('_providerStatusLabel', sandbox);
+  sandbox.t                        = vm.runInContext('t', sandbox);
   return sandbox;
 }
 
@@ -337,6 +344,60 @@ function bodyHtml(ctx) {
       }
     }
   }
+})();
+
+// ── TEST 19: unknown/future status → normalized to 'unknown' pill-info ────────
+(async function testFutureStatusNormalizedToUnknown() {
+  const ctx = newContext(async () => ({
+    providers: fakeProviders({ readiness_status: 'future_status_xyz' }),
+  }));
+  await ctx.loadProviderStatus();
+  const html = bodyHtml(ctx);
+  checkIncludes('future_status_xyz renders pill-info (normalized)', html, 'pill-info');
+  checkNotIncludes('future_status_xyz does NOT expose raw status string', html, 'future_status_xyz');
+  checkNotIncludes('future_status_xyz does NOT generate missing i18n key', html, 'ai.provider.status_future_status_xyz');
+})().catch(e => { check('TEST 19 threw: ' + e.message, false); });
+
+// ── TEST 20: _normalizeProviderStatus('future_xyz') returns 'unknown' ─────────
+(function testNormalizeFunctionDirectly() {
+  const ctx = newContext();
+  check('_normalizeProviderStatus("future_xyz") === "unknown"',
+    ctx._normalizeProviderStatus('future_status_xyz') === 'unknown');
+  check('_normalizeProviderStatus("model_ready") === "model_ready"',
+    ctx._normalizeProviderStatus('model_ready') === 'model_ready');
+  check('_normalizeProviderStatus("unknown") === "unknown"',
+    ctx._normalizeProviderStatus('unknown') === 'unknown');
+  check('_normalizeProviderStatus("") === "unknown"',
+    ctx._normalizeProviderStatus('') === 'unknown');
+})();
+
+// ── TEST 21: _providerStatusLabel uses ai.provider.status_unknown for unknown ─
+(function testStatusLabelUsesKnownKey() {
+  const ctx = newContext();
+  // For a known status, must produce the i18n value
+  const knownLabel = ctx._providerStatusLabel('model_ready');
+  check('known status label not empty', knownLabel.length > 0);
+  check('known status label not raw key', knownLabel !== 'ai.provider.status_model_ready');
+  // For unknown status, must produce the i18n value for 'unknown', not raw string
+  const unknownLabel = ctx._providerStatusLabel('future_status_xyz');
+  check('unknown status label not empty', unknownLabel.length > 0);
+  check('unknown label is NOT the raw backend value', unknownLabel !== 'future_status_xyz');
+  check('unknown label is NOT the missing i18n key', unknownLabel !== 'ai.provider.status_future_status_xyz');
+  // The label must equal what t('ai.provider.status_unknown') would return
+  const expectedUnknown = ctx.t('ai.provider.status_unknown');
+  check('unknown status label equals t(ai.provider.status_unknown)', unknownLabel === expectedUnknown);
+})();
+
+// ── TEST 22: unknown status EN label matches i18n table ───────────────────────
+(function testUnknownLabelEnglish() {
+  check('EN ai.provider.status_unknown is "? Unknown"',
+    enKeys['ai.provider.status_unknown'] === '? Unknown');
+})();
+
+// ── TEST 23: unknown status TR label matches i18n table ───────────────────────
+(function testUnknownLabelTurkish() {
+  check('TR ai.provider.status_unknown is "? Bilinmiyor"',
+    trKeys['ai.provider.status_unknown'] === '? Bilinmiyor');
 })();
 
 // ── summary ───────────────────────────────────────────────────────────────────
