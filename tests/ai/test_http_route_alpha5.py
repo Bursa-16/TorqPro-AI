@@ -86,8 +86,17 @@ def test_providers_endpoint_lists_deterministic_provider_with_no_secret_field(
     body = response.json()
     names = [p["name"] for p in body["providers"]]
     assert "deterministic" in names
+    # v3.2.0: readiness_status added (backward-compatible new field).
+    # No secret field (base_url, api_key, token, etc.) must ever appear.
+    _EXPECTED_KEYS = {"name", "model_identifier", "available", "readiness_status"}
+    _FORBIDDEN_KEYS = {"base_url", "api_key", "secret", "token", "timeout_seconds"}
     for provider in body["providers"]:
-        assert set(provider.keys()) == {"name", "model_identifier", "available"}
+        assert set(provider.keys()) == _EXPECTED_KEYS, (
+            f"Unexpected provider keys: {set(provider.keys())} (expected {_EXPECTED_KEYS})"
+        )
+        assert not (_FORBIDDEN_KEYS & set(provider.keys())), (
+            f"Secret field leaked in provider response: {_FORBIDDEN_KEYS & set(provider.keys())}"
+        )
 
 
 # --------------------------------------------------------- GET /api/ai/audit(/id)

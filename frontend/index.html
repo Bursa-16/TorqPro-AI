@@ -1201,6 +1201,23 @@ textarea:focus-visible,
     risk calculation of its own.
   </div>
 
+  <div class="card" id="ai-provider-status-card">
+    <div class="card-header">
+      <div>
+        <div class="card-title" data-i18n="ai.provider.card_title">AI Provider Status</div>
+        <div class="card-sub" data-i18n="ai.provider.card_sub" style="margin-bottom:0"></div>
+      </div>
+      <button type="button" class="btn btn-secondary" id="ai-provider-refresh-btn"
+              onclick="loadProviderStatus()" aria-label="Refresh provider status / Sağlayıcı durumunu yenile"
+              data-i18n-aria-label="ai.provider.refresh" style="padding:4px 12px;font-size:12px">
+        <span data-i18n="ai.provider.refresh">Refresh</span>
+      </button>
+    </div>
+    <div id="ai-provider-status-body" role="status" aria-live="polite">
+      <span class="fc-muted" data-i18n="ai.provider.loading">Checking…</span>
+    </div>
+  </div>
+
   <div class="card">
     <div class="card-title" data-i18n="ai.input_title">Assembly Inputs</div>
     <div class="card-sub" data-i18n="ai.input_sub">All fields are optional. Leave a field empty if you do not have that information.</div>
@@ -3876,6 +3893,23 @@ const I18N = {
     'ai.no_recommendation': 'No recommendation available',
     'ai.report_preview_title': 'Report Preview',
     'ai.assembly_readiness': 'Assembly Readiness',
+    'ai.provider.card_title': 'AI Provider Status',
+    'ai.provider.card_sub': 'Live readiness is checked on page load and on Refresh. Ollama requires the server to be running and the configured model to be pulled.',
+    'ai.provider.name': 'Provider',
+    'ai.provider.model': 'Model',
+    'ai.provider.status': 'Status',
+    'ai.provider.refresh': 'Refresh',
+    'ai.provider.loading': 'Checking…',
+    'ai.provider.no_optional': 'No optional AI providers are configured. Deterministic engineering calculations are always available.',
+    'ai.provider.request_failed': 'Could not retrieve provider status.',
+    'ai.provider.status_not_applicable': '● Active (Deterministic)',
+    'ai.provider.status_enabled': '● Enabled',
+    'ai.provider.status_disabled': '● Disabled',
+    'ai.provider.status_server_unavailable': '✕ Server Unavailable',
+    'ai.provider.status_server_reachable': '⚠ Server Reachable',
+    'ai.provider.status_model_missing': '⚠ Model Not Loaded',
+    'ai.provider.status_model_ready': '● Ready',
+    'ai.provider.status_unknown': '? Unknown',
     'sidebar.jointanalysis': 'Joint Analysis',
     'ja.page_title': 'Joint Analysis',
     'ja.page_subtitle': 'Torque, preload, stiffness and safety assessment from existing verified formulas',
@@ -5862,6 +5896,23 @@ const I18N = {
     'ai.no_recommendation': 'Öneri bulunmuyor',
     'ai.report_preview_title': 'Rapor Önizleme',
     'ai.assembly_readiness': 'Montaj Hazırlığı',
+    'ai.provider.card_title': 'AI Sağlayıcı Durumu',
+    'ai.provider.card_sub': 'Hazırlık durumu sayfa açılışında ve Yenile ile kontrol edilir. Ollama için sunucunun çalışır olması ve yapılandırılan modelin yüklü olması gerekir.',
+    'ai.provider.name': 'Sağlayıcı',
+    'ai.provider.model': 'Model',
+    'ai.provider.status': 'Durum',
+    'ai.provider.refresh': 'Yenile',
+    'ai.provider.loading': 'Kontrol ediliyor…',
+    'ai.provider.no_optional': 'İsteğe bağlı AI sağlayıcı yapılandırılmamış. Deterministik mühendislik hesapları her zaman kullanılabilir.',
+    'ai.provider.request_failed': 'Sağlayıcı durumu alınamadı.',
+    'ai.provider.status_not_applicable': '● Aktif (Deterministik)',
+    'ai.provider.status_enabled': '● Etkin',
+    'ai.provider.status_disabled': '● Devre Dışı',
+    'ai.provider.status_server_unavailable': '✕ Sunucu Erişilemez',
+    'ai.provider.status_server_reachable': '⚠ Sunucu Erişilebilir',
+    'ai.provider.status_model_missing': '⚠ Model Yüklü Değil',
+    'ai.provider.status_model_ready': '● Hazır',
+    'ai.provider.status_unknown': '? Bilinmiyor',
     'sidebar.jointanalysis': 'Bağlantı Analizi',
     'ja.page_title': 'Bağlantı Analizi',
     'ja.page_subtitle': 'Mevcut, doğrulanmış formüllerden tork, ön yük, rijitlik ve güvenlik değerlendirmesi',
@@ -6883,6 +6934,95 @@ function aiBuildPayload() {
   Object.keys(payload).forEach(k => { if (payload[k] === undefined) delete payload[k]; });
   return payload;
 }
+
+// ---- AI Provider Status (Faz 3.2.0B) --------------------------------
+// Fetches GET /api/ai/providers and renders a status table in the
+// #ai-provider-status-card on the Assembly Intelligence page.
+//
+// Design principles:
+// - Uses the existing apiRequest() wrapper (auth header, error handling).
+// - Never calls fetch() directly; never contacts Ollama from the browser.
+// - Secrets, base URLs, API keys and configuration are never in the response
+//   (guaranteed by the backend ProviderInfo schema).
+// - Failure is isolated: an error here does not affect aiAssessAssembly().
+// - Deterministic engineering authority is unchanged: this function
+//   only reads provider availability, never influences any calculation.
+
+const _AI_PROVIDER_PILL = {
+  'not_applicable':      'pill pill-info',
+  'enabled':             'pill pill-ok',
+  'model_ready':         'pill pill-ok',
+  'server_reachable':    'pill pill-warn',
+  'model_missing':       'pill pill-warn',
+  'server_unavailable':  'pill pill-nok',
+  'disabled':            'pill pill-info',
+  'unknown':             'pill pill-info',
+};
+
+function _providerStatusLabel(status) {
+  const key = 'ai.provider.status_' + status;
+  const mapped = t(key);
+  // t() returns the key itself when not found; fall back to raw value.
+  return (mapped && mapped !== key) ? mapped : status;
+}
+
+function renderProviderStatus(providers) {
+  const body = document.getElementById('ai-provider-status-body');
+  if (!body) return;
+  if (!providers || providers.length === 0) {
+    body.innerHTML = '<span class="fc-muted" data-i18n="ai.provider.loading">' +
+      aiEsc(t('ai.provider.loading')) + '</span>';
+    return;
+  }
+  const nameHdr  = aiEsc(t('ai.provider.name'));
+  const modelHdr = aiEsc(t('ai.provider.model'));
+  const statHdr  = aiEsc(t('ai.provider.status'));
+  let rows = providers.map(function(p) {
+    const pillClass = _AI_PROVIDER_PILL[p.readiness_status] || 'pill pill-info';
+    const label = aiEsc(_providerStatusLabel(p.readiness_status || 'unknown'));
+    const model = p.model_identifier ? aiEsc(p.model_identifier) : '—';
+    return '<tr>' +
+      '<td style="padding:6px 10px;font-size:13px">' + aiEsc(p.name) + '</td>' +
+      '<td style="padding:6px 10px;font-size:12px;color:var(--text2)">' + model + '</td>' +
+      '<td style="padding:6px 10px"><span class="' + pillClass + '">' + label + '</span></td>' +
+      '</tr>';
+  }).join('');
+  const allDeterministic = providers.every(function(p) {
+    return p.readiness_status === 'not_applicable';
+  });
+  const tableHtml =
+    '<table style="width:100%;border-collapse:collapse">' +
+      '<thead><tr>' +
+        '<th style="text-align:left;padding:4px 10px;font-size:11px;color:var(--text3);font-weight:500">' + nameHdr + '</th>' +
+        '<th style="text-align:left;padding:4px 10px;font-size:11px;color:var(--text3);font-weight:500">' + modelHdr + '</th>' +
+        '<th style="text-align:left;padding:4px 10px;font-size:11px;color:var(--text3);font-weight:500">' + statHdr + '</th>' +
+      '</tr></thead>' +
+      '<tbody>' + rows + '</tbody>' +
+    '</table>';
+  const noOptionalNote = allDeterministic
+    ? '<div class="fc-muted" style="margin-top:8px;font-size:12px" id="ai-provider-no-optional">' +
+        aiEsc(t('ai.provider.no_optional')) + '</div>'
+    : '';
+  body.innerHTML = tableHtml + noOptionalNote;
+}
+
+async function loadProviderStatus() {
+  const body = document.getElementById('ai-provider-status-body');
+  const btn  = document.getElementById('ai-provider-refresh-btn');
+  if (!body) return;
+  body.innerHTML = '<span class="fc-muted">' + aiEsc(t('ai.provider.loading')) + '</span>';
+  if (btn) btn.disabled = true;
+  try {
+    const data = await apiRequest('/api/ai/providers');
+    renderProviderStatus(data.providers || []);
+  } catch (e) {
+    body.innerHTML = '<span class="alert alert-danger" style="display:inline-block;padding:4px 10px;font-size:12px">' +
+      aiEsc(t('ai.provider.request_failed')) + '</span>';
+  } finally {
+    if (btn) btn.disabled = false;
+  }
+}
+// ---- End AI Provider Status ------------------------------------------
 
 async function aiAssessAssembly() {
   if (AI_REQUEST_IN_FLIGHT) return; // double-submit guard
@@ -8783,7 +8923,7 @@ function showPage(id, el) {
   const pg = document.getElementById('page-' + id);
   if (pg) pg.classList.add('active');
   document.querySelectorAll('.sidebar-item').forEach(i => i.classList.remove('active'));
-  if(id==='arsiv')renderArchive();if(id==='validation'){renderValidationDatasets();refreshValidationPanel();}if(id==='dataadmin'){loadDataPackages();}if(id==='calibration'){loadCalibrationCases();}if(id==='versions'){loadDataVersions();}if(id==='qualitygate'){loadQualityGate();}if(id==='projects'){loadProjects();}if(id==='releasepackage'){populateReleaseProjects();}if(id==='organization'){loadOrganization();}if(id==='deployment'){loadDeploymentProfile();}if(id==='mobileaccess'){loadMobileAccess();document.querySelector('.sidebar')?.classList.remove('mobile-open');}if(id==='clouddeploy'){loadCloudReadiness();}if(id==='golivewizard'){loadGoLiveProfile();}if(id==='runtimehealth'){if(CURRENT_ROLE!=='admin'){tpAlert(t('ui.admin_required'),'warn');showPage('dashboard');return;}loadRuntimeHealth();}if(id==='migration'){loadMigrationHistory();}if(id==='diagnostics'){runDiagnostics();}if(id==='license'){loadLicense();}if(id==='usage'){loadUsage();}if(id==='traceability'){populateReleaseProjects();}if(id==='revisions'){loadRevisions();}if(id==='approvals'){loadApprovalQueue();}if(id==='goldencases'){loadGoldenCases();}if(id==='admin'){if(CURRENT_ROLE!=='admin'){tpAlert(t('ui.admin_required'),'warn');showPage('dashboard');return;}loadAdminUsers();loadAudit();loadSystemHealth();}if(id==='frictioncondition'){loadFrictionConditionWorkspace();}if(id==='strengthclasses'){loadStrengthClassesWorkspace();}if(id==='materialintelligence'){loadMaterialIntelligenceWorkspace();}if(id==='washerresolution'){loadWasherResolutionReport();loadWasherResolutionQueue();}if(id==='governance'){govInit();}if(id==='questionbank'){qbInit();}if(id==='documentintelligence'){diInit();}
+  if(id==='arsiv')renderArchive();if(id==='validation'){renderValidationDatasets();refreshValidationPanel();}if(id==='dataadmin'){loadDataPackages();}if(id==='calibration'){loadCalibrationCases();}if(id==='versions'){loadDataVersions();}if(id==='qualitygate'){loadQualityGate();}if(id==='projects'){loadProjects();}if(id==='releasepackage'){populateReleaseProjects();}if(id==='organization'){loadOrganization();}if(id==='deployment'){loadDeploymentProfile();}if(id==='mobileaccess'){loadMobileAccess();document.querySelector('.sidebar')?.classList.remove('mobile-open');}if(id==='clouddeploy'){loadCloudReadiness();}if(id==='golivewizard'){loadGoLiveProfile();}if(id==='runtimehealth'){if(CURRENT_ROLE!=='admin'){tpAlert(t('ui.admin_required'),'warn');showPage('dashboard');return;}loadRuntimeHealth();}if(id==='migration'){loadMigrationHistory();}if(id==='diagnostics'){runDiagnostics();}if(id==='license'){loadLicense();}if(id==='usage'){loadUsage();}if(id==='traceability'){populateReleaseProjects();}if(id==='revisions'){loadRevisions();}if(id==='approvals'){loadApprovalQueue();}if(id==='goldencases'){loadGoldenCases();}if(id==='admin'){if(CURRENT_ROLE!=='admin'){tpAlert(t('ui.admin_required'),'warn');showPage('dashboard');return;}loadAdminUsers();loadAudit();loadSystemHealth();}if(id==='frictioncondition'){loadFrictionConditionWorkspace();}if(id==='strengthclasses'){loadStrengthClassesWorkspace();}if(id==='materialintelligence'){loadMaterialIntelligenceWorkspace();}if(id==='washerresolution'){loadWasherResolutionReport();loadWasherResolutionQueue();}if(id==='governance'){govInit();}if(id==='questionbank'){qbInit();}if(id==='documentintelligence'){diInit();}if(id==='assemblyintelligence'){loadProviderStatus();}
 }
 
 // ========== DOCUMENT INTELLIGENCE (Stage 2 / Slice 5) ==========

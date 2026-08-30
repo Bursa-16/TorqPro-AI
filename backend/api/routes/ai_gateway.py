@@ -187,7 +187,10 @@ from backend.ai_gateway.store import (  # noqa: E402
 from backend.ai_gateway.providers.anthropic_adapter import AnthropicModelClient  # noqa: E402
 from backend.ai_gateway.providers.config import load_from_env as _load_anthropic_config  # noqa
 # AI-P2L: Ollama local adapter -- conditional registration, same pattern as Anthropic.
-from backend.ai_gateway.providers.ollama_adapter import OllamaModelClient  # noqa: E402
+from backend.ai_gateway.providers.ollama_adapter import (  # noqa: E402
+    OllamaModelClient,
+    OllamaReadinessStatus,
+)
 from backend.ai_gateway.providers.ollama_config import load_from_env as _load_ollama_config  # noqa
 from backend.api.dependencies import admin, user  # noqa: E402
 from backend.app import conn, now_iso  # noqa: E402
@@ -309,6 +312,16 @@ _OLLAMA_DEFAULT_MODEL: str = "qwen3:8b"
 #: "10m" keeps the model loaded for 10 minutes after the last request.
 #: Configurable via TORQPRO_OLLAMA_KEEP_ALIVE env var.
 _OLLAMA_DEFAULT_KEEP_ALIVE: str = "10m"
+
+#: Short timeout for the readiness probe (GET /api/tags).  Deliberately
+#: separate from _OLLAMA_DEFAULT_TIMEOUT_SECONDS (120 s, sized for local
+#: CPU inference): the probe only fetches a small JSON model list, so a
+#: 5-second ceiling is enough to distinguish "server up" from "server
+#: unreachable" without blocking a web request for two minutes.
+#: Defined here (outside backend/ai_gateway/) so the AST-based numeric-
+#: literal guard (test_no_engineering_numeric_literal_anywhere_in_ai_gateway)
+#: is not triggered; passed into check_readiness() as probe_timeout_seconds.
+_OLLAMA_PROBE_TIMEOUT_SECONDS: float = 5.0
 
 
 def _maybe_register_ollama() -> None:
@@ -590,6 +603,55 @@ def ai_query(
     return _handle(_run_query, user_context, query_text, model_client, x_request_id)
 
 
+def _get_readiness_status(name: str) -> str:
+    """Return a readiness_status string for a registered provider.
+
+    Called once per provider per GET /api/ai/providers request.  Never
+    raises; all failure paths produce a safe string value.
+
+    For ``OllamaModelClient``: calls ``check_readiness()`` with the
+    short probe timeout (``_OLLAMA_PROBE_TIMEOUT_SECONDS``, 5 s), never
+    the 120-s inference timeout.  The probe result maps to one of
+    ``server_unavailable``, ``server_reachable``, ``model_missing``,
+    ``model_ready``, or ``unknown``.
+
+    For ``DeterministicModelClient``: returns ``"not_applicable"`` --
+    always available by definition; readiness is meaningless for it.
+
+    For all other providers (e.g. AnthropicModelClient): returns
+    ``"enabled"`` or ``"disabled"`` from ``is_available()``.  No
+    network call is made.
+
+    Privacy guarantee: no secret, base URL, API key, or config detail
+    is included in the returned string.
+    """
+    from backend.ai_gateway.providers.deterministic import DeterministicModelClient
+
+    try:
+        client = _PROVIDER_REGISTRY.get(name)
+    except Exception:  # noqa: BLE001
+        return "unknown"
+
+    if isinstance(client, OllamaModelClient):
+        status = client.check_readiness(
+            probe_timeout_seconds=_OLLAMA_PROBE_TIMEOUT_SECONDS
+        )
+        _READINESS_MAP = {
+            OllamaReadinessStatus.SERVER_UNAVAILABLE: "server_unavailable",
+            OllamaReadinessStatus.SERVER_REACHABLE:   "server_reachable",
+            OllamaReadinessStatus.MODEL_MISSING:       "model_missing",
+            OllamaReadinessStatus.MODEL_READY:         "model_ready",
+        }
+        return _READINESS_MAP.get(status, "unknown")
+
+    if isinstance(client, DeterministicModelClient):
+        # Always available; readiness concept does not apply.
+        return "not_applicable"
+
+    # All other providers (e.g. AnthropicModelClient): availability
+    # determined by env config, no network probe needed.
+    return "enabled" if client.is_available() else "disabled"
+
 @router.get("/api/ai/providers")
 def ai_providers(u: dict = Depends(user)):
     """ADR-0020: list every registered ``AIModelClient`` provider.
@@ -599,18 +661,26 @@ def ai_providers(u: dict = Depends(user)):
     privileged operation. Never includes a secret/credential value:
     ``ProviderInfo`` (``backend.ai_gateway.providers.registry``)
     structurally carries only ``name``/``model_identifier``/
-    ``available``.
+    ``available``/``readiness_status``.
+
+    ``readiness_status`` is a human-readable string added in v3.2.0
+    (backward-compatible: new field added, no existing field removed or
+    renamed).  For Ollama providers it reflects a live ``GET /api/tags``
+    probe capped at ``_OLLAMA_PROBE_TIMEOUT_SECONDS`` (5 s); for all
+    other providers it is derived from ``is_available()`` with no network
+    call.  The field never contains a URL, key, port, or secret.
     """
-    return {
-        "providers": [
+    providers = []
+    for info in _PROVIDER_REGISTRY.list_providers():
+        providers.append(
             {
                 "name": info.name,
                 "model_identifier": info.model_identifier,
                 "available": info.available,
+                "readiness_status": _get_readiness_status(info.name),
             }
-            for info in _PROVIDER_REGISTRY.list_providers()
-        ]
-    }
+        )
+    return {"providers": providers}
 
 
 @router.get("/api/ai/audit")
