@@ -179,9 +179,11 @@ def test_prefers_reduced_motion_preserved():
 
 def test_reduced_motion_covers_btn():
     """The reduced-motion block must suppress .btn transitions."""
-    m = re.search(r'@media\(prefers-reduced-motion:reduce\)\{[^}]+\}', html)
-    assert m, "prefers-reduced-motion block not found"
-    assert "btn" in m.group(0), "prefers-reduced-motion block must cover .btn transitions"
+    # Use a broader search that covers the full multi-rule @media block.
+    idx = html.find('@media(prefers-reduced-motion:reduce)')
+    assert idx != -1, "prefers-reduced-motion block not found"
+    block = html[idx:idx+600]  # covers the full block generously
+    assert "btn" in block, "prefers-reduced-motion block must cover .btn transitions"
 
 def test_motion_tokens_are_only_in_root_not_hardcoded():
     """Ensure .btn transition uses token, not a hardcoded duration."""

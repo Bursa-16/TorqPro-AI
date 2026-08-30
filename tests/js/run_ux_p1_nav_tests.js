@@ -44,7 +44,7 @@ function checkNotIncludes(name, str, sub) {
  * Extract the full sidebar HTML from the live index.html.
  */
 function getSidebar() {
-  const m = html.match(/<div class="sidebar">([\s\S]*?)<\/div>\s*\n\s*<div class="content">/);
+  const m = html.match(/<(?:div|nav)[^>]*class="sidebar"[^>]*>([\s\S]*?)<\/(?:div|nav)>\s*\n\s*<div class="content">/);
   return m ? m[1] : '';
 }
 

@@ -93,7 +93,7 @@ def test_frontend_has_no_hardcoded_version_in_title_or_login_or_topbar():
     assert not re.search(r"v\d", title)
     login_sub = re.search(r'<div class="login-sub">(.*?)</div>', html).group(1)
     assert not re.search(r"v\d", login_sub)  # only the id="login-version" placeholder, no literal
-    logo = re.search(r'<div class="logo">(.*?)</div>', html).group(1)
+    logo = re.search(r'<div[^>]*class="logo"[^>]*>(.*?)</div>', html, re.DOTALL).group(1)
     assert not re.search(r"v\d", logo)
 
 

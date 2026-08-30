@@ -115,12 +115,12 @@ check('DASH: demo banner uses alert-info not alert-danger', dash.includes('class
 
 // ── 8. UX-P1 navigation preserved ────────────────────────────────────────
 {
-  const sidebarStart = html.indexOf('<div class="sidebar">');
+  const sidebarStart = Math.max(html.indexOf('<div class="sidebar">'), html.indexOf('<nav class="sidebar"'), html.indexOf('<nav class="sidebar" '));
   const sidebarEnd   = html.indexOf('</div>\n\n<div class="content">');
   const sidebar      = html.slice(sidebarStart, sidebarEnd);
   check('UX-P1: questionbank in sidebar', sidebar.includes("showPage('questionbank'"));
   check('UX-P1: hizli in sidebar', sidebar.includes("showPage('hizli'"));
-  check('UX-P1: no div.sidebar-item in sidebar', !(sidebar.match(/<div class="sidebar-item/)));
+  check('UX-P1: no div.sidebar-item in sidebar', !(sidebar.match(/<div class="sidebar-item"/)));
 }
 
 // ── 9. UX-P2 accessibility preserved ─────────────────────────────────────

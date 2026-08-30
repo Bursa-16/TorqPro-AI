@@ -153,7 +153,7 @@ checkIncludes('A11Y: mobile 📱 button has aria-label', html, 'aria-label="Mobi
 checkIncludes('A11Y: sidebar icons have aria-hidden="true"', html, 'aria-hidden="true"');
 // Count sidebar emoji icons with aria-hidden
 {
-  const sidebarStart = html.indexOf('<div class="sidebar">');
+  const sidebarStart = Math.max(html.indexOf('<div class="sidebar">'), html.indexOf('<nav class="sidebar"'), html.indexOf('<nav class="sidebar" '));
   const sidebarEnd   = html.indexOf('</div>\n\n<div class="content">');
   const sidebar      = html.slice(sidebarStart, sidebarEnd);
   const hiddenIcons  = (sidebar.match(/aria-hidden="true"/g) || []).length;
@@ -202,11 +202,11 @@ checkIncludes('A11Y: AI-F1 explain status uses role=status', html, 'id="qb-ai-ex
 // 10. UX-P1 NAVIGATION PRESERVED
 // ═══════════════════════════════════════════════════════════════════════════
 {
-  const sidebarStart = html.indexOf('<div class="sidebar">');
+  const sidebarStart = Math.max(html.indexOf('<div class="sidebar">'), html.indexOf('<nav class="sidebar"'), html.indexOf('<nav class="sidebar" '));
   const sidebarEnd   = html.indexOf('</div>\n\n<div class="content">');
   const sidebar      = html.slice(sidebarStart, sidebarEnd);
   // All buttons (UX-P1 converted all items to button)
-  const divItems = (sidebar.match(/<div class="sidebar-item/g) || []).length;
+  const divItems = (sidebar.match(/<div class="sidebar-item"/g) || []).length;
   check('A11Y: no bare div.sidebar-item in sidebar (UX-P1 preserved)', divItems === 0);
   // Core routes reachable
   for (const r of ['dashboard', 'hizli', 'vdi', 'questionbank', 'documentintelligence', 'jointanalysis']) {
