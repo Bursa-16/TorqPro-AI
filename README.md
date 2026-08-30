@@ -347,16 +347,16 @@ Raw secrets are not part of the audit contract.
 | Item                      | Value                                                                           |
 | ------------------------- | ------------------------------------------------------------------------------- |
 | Product                   | **TorqPro AI**                                                                  |
-| Current Version           | **v3.1.1**                                                                      |
+| Current Version           | **v3.2.0**                                                                      |
 | Release Stage             | **Stable**                                                                      |
-| Release Status            | **OCR Deployment Packaging + Test Maintenance**                                 |
+| Release Status            | **AI Provider Readiness Status UI**                                             |
 | Current Engineering Focus | **Deterministic Engineering + Governed AI + Accessibility**                     |
-| Previous Stable Baseline  | `v3.1.0` (`1041b17`)                                                            |
-| Release Commit            | `33efc4ac8ff37f40aa8d659c4fd596d3a74c320b`                                      |
-| Full Test Suite           | **3868 passed, 13 skipped, 0 failed**                                           |
-| JS Tests                  | **2647 assertions, 19 files, 0 fail**                                           |
+| Previous Stable Baseline  | `v3.1.1` (`2599f163`)                                                           |
+| Release Commit            | see `git log --oneline -1`                                                      |
+| Full Test Suite           | **3896 passed, 13 skipped, 0 failed**                                           |
+| JS Tests                  | **Provider harness: 90/90; suite: 2647 assertions, 19 files, 0 fail**          |
 | Existing-Test Regressions | **0**                                                                           |
-| Next Phase                | **Provider wiring / AI workflow expansion — scope TBD**                         |
+| Next Phase                | **Engineering result explanation / provider expansion — scope TBD**             |
 
 ---
 

@@ -1039,6 +1039,37 @@ resolution stores; a large connection-count or query-shape refactor;
 any hard, cross-machine performance regression threshold. No new
 major roadmap phase is defined as of this release.
 
+## v3.2.0 — AI Provider Readiness Status UI — 2026-08-30
+
+Minor release on top of `v3.1.1`
+(`2599f163f1c5b7e51a0468ca7a44aa3cc3505dea`).
+Two feature commits; no deterministic engineering calculation, API
+contract, or dependency version changed.
+
+**Provider readiness status API/UI**
+(`2e60c7a16314e1465d51817aab249ad3fc2cfcfd`):
+
+- `GET /api/ai/providers` extended with `readiness_status` field
+  (backward-compatible; existing fields unchanged). Response never
+  contains `api_key`, `base_url`, `timeout`, or `keep_alive`.
+- Ollama liveness checked via a dedicated 5-second `GET /api/tags`
+  probe — independent from the 120-second inference timeout; fail-closed.
+- Assembly Intelligence page: new **AI Provider Status** card with
+  manual refresh and pill-coded readiness indicators (no polling).
+- 17 EN + 17 TR `ai.provider.*` i18n keys.
+- `aiAssessAssembly()` and engineering calculation paths unchanged.
+
+**Unknown provider status normalization**
+(`07c8ab4e06622337a93a7664088035e0d88ac0a8`):
+
+- Any `readiness_status` value outside the known allowlist is
+  normalized to `"unknown"` before i18n lookup, displaying as
+  **? Unknown** (EN) / **? Bilinmiyor** (TR) with `pill-info`.
+- No missing-i18n warning for future/unknown status values.
+
+**Validation:** full suite 3896 passed, 13 skipped, 0 failed.
+Provider JS harness 90/90 assertions.
+
 ## v3.1.1 — OCR Deployment Packaging & Test Maintenance — 2026-08-30
 
 Patch release on top of `v3.1.0` (`1041b17029601e858d1647902d395ba926e378bd`).
