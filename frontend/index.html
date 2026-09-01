@@ -77,7 +77,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);font-size:va
 .form-row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:12px}
 .form-group{display:flex;flex-direction:column;gap:4px}
 .form-label{font-size:var(--fs-base);font-weight:var(--fw-medium);color:var(--text2);display:block;margin-bottom:var(--space-1);line-height:var(--lh-normal)}
-.form-input,.form-select{background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text);padding:var(--space-3) var(--space-4);font-size:var(--fs-md);outline:none;transition:border-color var(--dur-normal) var(--ease-std);width:100%}
+.form-input,.form-select,textarea{background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text);padding:var(--space-3) var(--space-4);font-size:var(--fs-md);outline:none;transition:border-color var(--dur-normal) var(--ease-std);width:100%}
 .form-input:focus,.form-select:focus{border-color:var(--accent)}
 .form-select option{background:var(--surface2)}
 .form-hint{font-size:11px;color:var(--text3);margin-top:2px}
@@ -1280,6 +1280,44 @@ textarea:focus-visible,
   </div>
 
   <div id="ai-result"></div>
+
+  <!-- AI SORU / ASK AI SECTION -->
+  <div class="card" id="ai-ask-card">
+    <div class="card-header">
+      <div>
+        <div class="card-title" data-i18n="ai.ask.title">AI'ye Sor</div>
+        <div class="card-sub" data-i18n="ai.ask.subtitle" style="margin-bottom:0">Bağlantı sistemi hakkında serbest metin sorusu sorun.</div>
+      </div>
+    </div>
+
+    <div class="alert alert-warn" style="margin-top:8px" data-i18n="ai.ask.disclaimer">
+      AI yanıtı mühendislik hesabının yerine geçmez; norm ve deterministik hesap sonuçları önceliklidir.
+    </div>
+
+    <div style="margin-top:12px">
+      <label class="form-label" for="ai-ask-input" data-i18n="ai.ask.prompt_label">Soru</label>
+      <textarea id="ai-ask-input" class="form-input" rows="3"
+        style="resize:vertical;min-height:72px;font-family:inherit"
+        data-i18n-placeholder="ai.ask.placeholder"
+        placeholder="Bu bağlantıda gevşeme riski var mı?"
+        aria-label="AI soru giriş alanı"
+        maxlength="4000"></textarea>
+      <div style="text-align:right;font-size:var(--fs-sm);color:var(--text3);margin-top:2px">
+        <span id="ai-ask-char-count">0</span>/4000
+      </div>
+    </div>
+
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px">
+      <button type="button" class="btn btn-primary" id="ai-ask-btn"
+        onclick="aiAskQuestion()" data-i18n="ai.ask.btn_ask">AI'ye Sor</button>
+      <button type="button" class="btn btn-secondary" id="ai-ask-with-form-btn"
+        onclick="aiAskWithFormData()" data-i18n="ai.ask.btn_with_form">Form Verileriyle Değerlendir</button>
+      <button type="button" class="btn btn-secondary" id="ai-ask-clear-btn"
+        onclick="aiAskClear()" data-i18n="ai.ask.btn_clear">Temizle</button>
+    </div>
+
+    <div id="ai-ask-response" role="status" aria-live="polite" style="margin-top:16px"></div>
+  </div>
 </div>
 
 <!-- JOINT ANALYSIS & TORQUE OPTIMIZATION (Faz 2.8.7) -->
@@ -3926,6 +3964,20 @@ const I18N = {
     'ai.no_recommendation': 'No recommendation available',
     'ai.report_preview_title': 'Report Preview',
     'ai.assembly_readiness': 'Assembly Readiness',
+    'ai.ask.title': 'Ask AI',
+    'ai.ask.subtitle': 'Ask a free-text question about this fastener joint.',
+    'ai.ask.disclaimer': 'AI output does not replace engineering calculation; standards and deterministic results remain authoritative.',
+    'ai.ask.prompt_label': 'Question',
+    'ai.ask.placeholder': 'Is there a loosening risk in this joint?',
+    'ai.ask.btn_ask': 'Ask AI',
+    'ai.ask.btn_with_form': 'Evaluate with Form Data',
+    'ai.ask.btn_clear': 'Clear',
+    'ai.ask.loading': 'AI is thinking…',
+    'ai.ask.empty': 'Your answer will appear here.',
+    'ai.ask.error_empty': 'Please enter a question.',
+    'ai.ask.error_unavailable': 'AI is not available right now. Check provider status and try again.',
+    'ai.ask.error_backend': 'Could not reach the AI endpoint. The server may not support this feature yet.',
+    'ai.ask.char_hint': 'Max 4000 characters.',
     'ai.provider.card_title': 'AI Provider Status',
     'ai.provider.card_sub': 'Live readiness is checked on page load and on Refresh. Ollama requires the server to be running and the configured model to be pulled.',
     'ai.provider.name': 'Provider',
@@ -5935,6 +5987,20 @@ const I18N = {
     'ai.no_recommendation': 'Öneri bulunmuyor',
     'ai.report_preview_title': 'Rapor Önizleme',
     'ai.assembly_readiness': 'Montaj Hazırlığı',
+    'ai.ask.title': "AI'ye Sor",
+    'ai.ask.subtitle': 'Bu bağlantı sistemi hakkında serbest metin sorusu sorun.',
+    'ai.ask.disclaimer': 'AI yanıtı mühendislik hesabının yerine geçmez; norm ve deterministik hesap sonuçları önceliklidir.',
+    'ai.ask.prompt_label': 'Soru',
+    'ai.ask.placeholder': 'Bu bağlantıda gevşeme riski var mı?',
+    'ai.ask.btn_ask': "AI'ye Sor",
+    'ai.ask.btn_with_form': 'Form Verileriyle Değerlendir',
+    'ai.ask.btn_clear': 'Temizle',
+    'ai.ask.loading': 'AI düşünüyor…',
+    'ai.ask.empty': 'Yanıtınız burada görünecek.',
+    'ai.ask.error_empty': 'Lütfen bir soru girin.',
+    'ai.ask.error_unavailable': 'AI şu an kullanılamıyor. Sağlayıcı durumunu kontrol edin ve tekrar deneyin.',
+    'ai.ask.error_backend': 'AI uç noktasına ulaşılamadı. Sunucu bu özelliği henüz desteklemiyor olabilir.',
+    'ai.ask.char_hint': 'En fazla 4000 karakter.',
     'ai.provider.card_title': 'AI Sağlayıcı Durumu',
     'ai.provider.card_sub': 'Hazırlık durumu sayfa açılışında ve Yenile ile kontrol edilir. Ollama için sunucunun çalışır olması ve yapılandırılan modelin yüklü olması gerekir.',
     'ai.provider.name': 'Sağlayıcı',
@@ -8770,6 +8836,150 @@ async function loadTopbarAiStatus() {
     badge.textContent = t('topbar.ai_unavailable');
     badge.className = 'pill pill-warn';
   }
+}
+
+// ── AI Ask / Ask AI (Montaj Zekâsı serbest soru girişi) ─────────────────────
+// Uses POST /api/ai/query with existing AUTH_TOKEN.
+// Fail-closed: any error → safe localized error message; never exposes internals.
+// Does NOT override deterministic engineering results.
+
+(function(){
+  const inp = document.getElementById('ai-ask-input');
+  const cnt = document.getElementById('ai-ask-char-count');
+  if (inp && cnt) {
+    inp.addEventListener('input', function(){
+      cnt.textContent = inp.value.length;
+    });
+  }
+})();
+
+function _aiAskSetLoading(loading) {
+  const btn  = document.getElementById('ai-ask-btn');
+  const btn2 = document.getElementById('ai-ask-with-form-btn');
+  if (btn)  btn.disabled  = loading;
+  if (btn2) btn2.disabled = loading;
+}
+
+function _aiAskRenderResponse(html_content, type) {
+  // type: 'answer' | 'error' | 'loading' | 'empty'
+  const panel = document.getElementById('ai-ask-response');
+  if (!panel) return;
+  const classes = {
+    answer:  'alert alert-info',
+    error:   'alert alert-warn',
+    loading: 'alert alert-info',
+    empty:   '',
+  };
+  panel.innerHTML = '<div class="' + (classes[type] || '') + '">' + html_content + '</div>';
+}
+
+async function _aiAskSubmit(query_text) {
+  const panel = document.getElementById('ai-ask-response');
+  if (!query_text || !query_text.trim()) {
+    _aiAskRenderResponse(aiEsc(t('ai.ask.error_empty')), 'error');
+    return;
+  }
+  _aiAskSetLoading(true);
+  _aiAskRenderResponse(
+    '<span style="opacity:.7">' + aiEsc(t('ai.ask.loading')) + '</span>',
+    'loading'
+  );
+  try {
+    if (!AUTH_TOKEN) {
+      _aiAskRenderResponse(aiEsc(t('ai.ask.error_unavailable')), 'error');
+      return;
+    }
+    const resp = await fetch('/api/ai/query', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + AUTH_TOKEN,
+      },
+      body: JSON.stringify({ query_text: query_text.trim() }),
+    });
+    if (resp.status === 404 || resp.status === 405) {
+      // Endpoint not implemented yet — clear backend gap message
+      _aiAskRenderResponse(aiEsc(t('ai.ask.error_backend')), 'error');
+      return;
+    }
+    if (resp.status === 401 || resp.status === 403) {
+      _aiAskRenderResponse(aiEsc(t('ai.ask.error_unavailable')), 'error');
+      return;
+    }
+    if (!resp.ok) {
+      _aiAskRenderResponse(aiEsc(t('ai.ask.error_unavailable')), 'error');
+      return;
+    }
+    const data = await resp.json();
+    const answer = (data && data.text) ? data.text : '';
+    if (!answer) {
+      _aiAskRenderResponse(aiEsc(t('ai.ask.error_unavailable')), 'error');
+      return;
+    }
+    // Render answer safely — escape HTML then restore safe newlines
+    const safe = aiEsc(answer).replace(/\n/g, '<br>');
+    _aiAskRenderResponse(
+      '<div style="font-size:var(--fs-md);line-height:var(--lh-relaxed);white-space:pre-wrap">' + safe + '</div>',
+      'answer'
+    );
+  } catch (e) {
+    _aiAskRenderResponse(aiEsc(t('ai.ask.error_unavailable')), 'error');
+  } finally {
+    _aiAskSetLoading(false);
+  }
+}
+
+async function aiAskQuestion() {
+  const inp = document.getElementById('ai-ask-input');
+  const query = inp ? inp.value : '';
+  await _aiAskSubmit(query);
+}
+
+async function aiAskWithFormData() {
+  // Collect visible Montaj Girdileri form values and append to prompt
+  const inp    = document.getElementById('ai-ask-input');
+  const prompt = (inp ? inp.value.trim() : '');
+
+  const fields = [
+    ['ai-bolt-designation',           'Bolt'],
+    ['ai-nut-designation',            'Nut'],
+    ['ai-bolt-strength-class',        'Strength class'],
+    ['ai-nut-property-class',         'Nut property class'],
+    ['ai-nominal-diameter',           'Nominal diameter (mm)'],
+    ['ai-thread-designation',         'Thread'],
+    ['ai-bolt-size',                  'Bolt size'],
+    ['ai-washer-standard',            'Washer standard'],
+    ['ai-friction-condition-id',      'Friction condition'],
+    ['ai-standard-name',              'Standard'],
+    ['ai-intended-operating-temperature', 'Temperature (°C)'],
+    ['ai-intended-coating',           'Coating'],
+  ];
+  const parts = [];
+  fields.forEach(function(pair) {
+    const el = document.getElementById(pair[0]);
+    if (el && el.value && el.value.trim()) {
+      parts.push(pair[1] + ': ' + el.value.trim());
+    }
+  });
+  const formContext = parts.length
+    ? '\n\n[Form data]\n' + parts.join(', ')
+    : '';
+  const combined = (prompt + formContext).trim();
+  if (!combined) {
+    _aiAskRenderResponse(aiEsc(t('ai.ask.error_empty')), 'error');
+    return;
+  }
+  await _aiAskSubmit(combined);
+}
+
+function aiAskClear() {
+  const inp   = document.getElementById('ai-ask-input');
+  const panel = document.getElementById('ai-ask-response');
+  const cnt   = document.getElementById('ai-ask-char-count');
+  if (inp)   inp.value   = '';
+  if (cnt)   cnt.textContent = '0';
+  if (panel) panel.innerHTML = '<div>' + aiEsc(t('ai.ask.empty')) + '</div>';
+  if (inp)   inp.focus();
 }
 
 function guvenliCikis(){
