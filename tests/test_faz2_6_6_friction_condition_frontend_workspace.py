@@ -35,7 +35,7 @@ FRONTEND_PATH = REPO_ROOT / "frontend" / "index.html"
 
 
 def _auth():
-    r = client.post("/api/login", json={"username": "Protype Lab", "password": "A1234"})
+    r = client.post("/api/login", json={"username": "demo", "password": "A1234"})
     assert r.status_code == 200, r.text
     return {"Authorization": "Bearer " + r.json()["token"]}
 

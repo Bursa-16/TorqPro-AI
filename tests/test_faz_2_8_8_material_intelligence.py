@@ -7,7 +7,7 @@ engineering/production ready" invariant (mirrors Faz 2.6.4's own
 assertion for friction), TR/EN message parity, determinism, the
 advisory-layer import boundary, and the 4 new API endpoints. Reuses
 existing fixtures/conventions (tests/conftest.py's isolated TestClient
-DB, the "Protype Lab" / "A1234" seeded login used across other API
+DB, the "demo" / "A1234" seeded login used across other API
 tests).
 """
 
@@ -27,7 +27,7 @@ client = TestClient(app)
 
 
 def auth():
-    r = client.post("/api/login", json={"username": "Protype Lab", "password": "A1234"})
+    r = client.post("/api/login", json={"username": "demo", "password": "A1234"})
     assert r.status_code == 200, r.text
     return {"Authorization": "Bearer " + r.json()["token"]}
 

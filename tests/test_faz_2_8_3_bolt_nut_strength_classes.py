@@ -5,7 +5,7 @@ validation, library filtering, strength-class compatibility engine,
 manual-override resolution, the 5 new API endpoints, and the
 strength-class report collector/renderer. Reuses existing fixtures/
 conventions (tests/conftest.py's isolated TestClient DB, the
-"Protype Lab" / "A1234" seeded login used across other API tests).
+"demo" / "A1234" seeded login used across other API tests).
 """
 
 from __future__ import annotations
@@ -26,7 +26,7 @@ client = TestClient(app)
 
 
 def auth():
-    r = client.post("/api/login", json={"username": "Protype Lab", "password": "A1234"})
+    r = client.post("/api/login", json={"username": "demo", "password": "A1234"})
     assert r.status_code == 200, r.text
     return {"Authorization": "Bearer " + r.json()["token"]}
 

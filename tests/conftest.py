@@ -31,7 +31,7 @@ _appmod.migrate()
 # whole suite so future files don't have to keep re-deriving it locally.
 # ---------------------------------------------------------------------------
 
-DEFAULT_USERNAME = "Protype Lab"
+DEFAULT_USERNAME = "demo"
 DEFAULT_PASSWORD = "A1234"
 
 
@@ -56,7 +56,7 @@ def client():
 @pytest.fixture(scope="session")
 def auth_headers(client):
     """Shared bearer-token auth headers for the default admin user
-    ("Protype Lab" / "A1234"). Session-scoped: the access token is valid
+    ("demo" / "A1234"). Session-scoped: the access token is valid
     for ACCESS_TOKEN_MINUTES (480 minutes in backend/app.py) -- far
     longer than a full local test run -- so one login is reused for the
     whole session instead of every opted-in test/file re-authenticating.

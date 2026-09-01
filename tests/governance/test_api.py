@@ -90,7 +90,7 @@ def test_actor_is_derived_from_authenticated_user(client, auth_headers, gov_stor
         "/api/governance/review/agg-1/submit", json=_submit_body(), headers=auth_headers
     )
     assert r.status_code == 201
-    assert r.json()["event"]["actor"] == "Protype Lab"
+    assert r.json()["event"]["actor"] == "demo"
 
 
 def test_actor_in_request_body_is_rejected(client, auth_headers, gov_store):

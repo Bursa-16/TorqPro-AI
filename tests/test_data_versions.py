@@ -5,7 +5,7 @@ from fastapi.testclient import TestClient
 from backend.app import app
 client=TestClient(app)
 def auth():
-    r=client.post("/api/login",json={"username":"Protype Lab","password":"A1234"});assert r.status_code==200,r.text
+    r=client.post("/api/login",json={"username":"demo","password":"A1234"});assert r.status_code==200,r.text
     return {"Authorization":"Bearer "+r.json()["token"]}
 def test_version_activation():
     h=auth();content=json.dumps([{"id":str(uuid.uuid4()),"thread":"M10","value":1000}])

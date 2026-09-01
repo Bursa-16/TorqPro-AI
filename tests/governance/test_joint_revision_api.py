@@ -331,7 +331,7 @@ def test_joint_revision_route_reachable_via_testclient_in_a_clean_process(tmp_pa
         "from backend.app import app, migrate; migrate(); "
         "from fastapi.testclient import TestClient; "
         "c = TestClient(app); "
-        "r = c.post('/api/login', json={'username': 'Protype Lab', 'password': 'A1234'}); "
+        "r = c.post('/api/login', json={'username': 'demo', 'password': 'A1234'}); "
         "assert r.status_code == 200, r.text; "
         "token = r.json()['token']; "
         "headers = {'Authorization': 'Bearer ' + token}; "

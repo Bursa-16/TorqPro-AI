@@ -5,7 +5,7 @@ from fastapi.testclient import TestClient
 from backend.app import app
 client=TestClient(app)
 def token():
-    r=client.post("/api/login",json={"username":"Protype Lab","password":"A1234"});assert r.status_code==200,r.text;return r.json()["token"]
+    r=client.post("/api/login",json={"username":"demo","password":"A1234"});assert r.status_code==200,r.text;return r.json()["token"]
 def test_health():
     r=client.get("/api/health");assert r.status_code==200;assert r.json()["database_ok"] is True
 def test_system():

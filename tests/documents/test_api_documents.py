@@ -40,7 +40,7 @@ def _second_user_headers(client):
     collision with other test files creating their own second users
     in the same shared session DB."""
     admin_client_login = client.post(
-        "/api/login", json={"username": "Protype Lab", "password": "A1234"}
+        "/api/login", json={"username": "demo", "password": "A1234"}
     )
     admin_token = admin_client_login.json()["token"]
     admin_headers = {"Authorization": "Bearer " + admin_token}

@@ -23,7 +23,7 @@ import uuid
 import pytest
 from fastapi.testclient import TestClient
 
-DEFAULT_USERNAME_FOR_NEGATIVE_TEST = "Protype Lab"
+DEFAULT_USERNAME_FOR_NEGATIVE_TEST = "demo"
 
 
 def test_client_fixture_returns_working_test_client(client):

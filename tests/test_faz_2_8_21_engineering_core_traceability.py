@@ -33,7 +33,7 @@ REPO_ROOT = Path(__file__).resolve().parent.parent
 
 
 def auth():
-    r = client.post("/api/login", json={"username": "Protype Lab", "password": "A1234"})
+    r = client.post("/api/login", json={"username": "demo", "password": "A1234"})
     assert r.status_code == 200, r.text
     return {"Authorization": "Bearer " + r.json()["token"]}
 

@@ -10,7 +10,7 @@ from backend.joints import service as joints_svc
 client = TestClient(app)
 
 
-def token(u="Protype Lab", p="A1234"):
+def token(u="demo", p="A1234"):
     r = client.post("/api/login", json={"username": u, "password": p})
     assert r.status_code == 200, r.text
     return r.json()["token"]

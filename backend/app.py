@@ -379,9 +379,9 @@ def migrate():
         if "project_id" not in calc_cols:c.execute("ALTER TABLE calculations ADD COLUMN project_id INTEGER")
         cols=[r["name"] for r in c.execute("PRAGMA table_info(audit_log)").fetchall()]
         if "request_id" not in cols:c.execute("ALTER TABLE audit_log ADD COLUMN request_id TEXT")
-        if not c.execute("SELECT 1 FROM users WHERE username='protype lab'").fetchone():
-            c.execute("INSERT INTO users(username,display_name,password_hash,is_active,role,created_at) VALUES(?,?,?,?,?,?)",("protype lab","Protype Lab",hp("A1234"),1,"admin",now_iso()))
-        else:c.execute("UPDATE users SET role='admin' WHERE username='protype lab'")
+        if not c.execute("SELECT 1 FROM users WHERE username='demo'").fetchone():
+            c.execute("INSERT INTO users(username,display_name,password_hash,is_active,role,created_at) VALUES(?,?,?,?,?,?)",("demo","demo",hp("A1234"),1,"admin",now_iso()))
+        else:c.execute("UPDATE users SET role='admin' WHERE username='demo'")
         c.execute("INSERT INTO schema_info(id,version,updated_at) VALUES(1,?,?) ON CONFLICT(id) DO UPDATE SET version=excluded.version,updated_at=excluded.updated_at",(SCHEMA_VERSION,now_iso()))
         if not c.execute("SELECT 1 FROM organization_settings WHERE id=1").fetchone():
             c.execute("INSERT INTO organization_settings(id,name,report_title,footer,updated_at) VALUES(1,?,?,?,?)",

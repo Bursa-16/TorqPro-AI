@@ -261,7 +261,7 @@ def test_normal_api_endpoints_unaffected_by_production_docs_toggle(tmp_path):
         "from fastapi.testclient import TestClient; "
         "c = TestClient(app); "
         "r1 = c.get('/api/health'); "
-        "r2 = c.post('/api/login', json={'username': 'Protype Lab', 'password': 'A1234'}); "
+        "r2 = c.post('/api/login', json={'username': 'demo', 'password': 'A1234'}); "
         "print('STATUS', r1.status_code, r2.status_code)"
     )
     result = _run_in_fresh_process(script, tmp_path, extra_env={"TORQPRO_ENV": "production"})

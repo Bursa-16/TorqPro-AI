@@ -7,4 +7,4 @@ TORQPRO 24 — KURULUM SİHİRBAZI VE İLK YAYIN
 - Docker ve health readiness kontrolü
 
 Çalıştırma: TorqPro_24_Baslat.bat
-Giriş: Protype Lab / A1234
+Giriş: demo / A1234

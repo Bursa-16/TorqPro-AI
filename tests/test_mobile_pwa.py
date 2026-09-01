@@ -5,7 +5,7 @@ from fastapi.testclient import TestClient
 from backend.app import app
 client=TestClient(app)
 def auth():
-    r=client.post("/api/login",json={"username":"Protype Lab","password":"A1234"});assert r.status_code==200,r.text
+    r=client.post("/api/login",json={"username":"demo","password":"A1234"});assert r.status_code==200,r.text
     return {"Authorization":"Bearer "+r.json()["token"]}
 def test_manifest_and_service_worker():
     assert client.get("/manifest.webmanifest").status_code==200

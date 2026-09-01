@@ -33,7 +33,7 @@ REPORT_URL = "/api/library/washers/resolutions/report"
 
 
 def _login():
-    r = client.post("/api/login", json={"username": "Protype Lab", "password": "A1234"})
+    r = client.post("/api/login", json={"username": "demo", "password": "A1234"})
     assert r.status_code == 200, r.text
     return {"Authorization": "Bearer " + r.json()["token"]}
 
