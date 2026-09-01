@@ -3976,7 +3976,7 @@ const I18N = {
     'ai.ask.empty': 'Your answer will appear here.',
     'ai.ask.error_empty': 'Please enter a question.',
     'ai.ask.error_unavailable': 'AI is not available right now. Check provider status and try again.',
-    'ai.ask.error_backend': 'Could not reach the AI endpoint. The server may not support this feature yet.',
+    'ai.ask.error_backend': 'AI query is not available. The backend has no active model provider wired. Check AI provider status.',
     'ai.ask.char_hint': 'Max 4000 characters.',
     'ai.provider.card_title': 'AI Provider Status',
     'ai.provider.card_sub': 'Live readiness is checked on page load and on Refresh. Ollama requires the server to be running and the configured model to be pulled.',
@@ -5999,7 +5999,7 @@ const I18N = {
     'ai.ask.empty': 'Yanıtınız burada görünecek.',
     'ai.ask.error_empty': 'Lütfen bir soru girin.',
     'ai.ask.error_unavailable': 'AI şu an kullanılamıyor. Sağlayıcı durumunu kontrol edin ve tekrar deneyin.',
-    'ai.ask.error_backend': 'AI uç noktasına ulaşılamadı. Sunucu bu özelliği henüz desteklemiyor olabilir.',
+    'ai.ask.error_backend': 'AI sorgusu kullanılamıyor. Arka uçta aktif bir model sağlayıcısı bağlı değil. AI sağlayıcı durumunu kontrol edin.',
     'ai.ask.char_hint': 'En fazla 4000 karakter.',
     'ai.provider.card_title': 'AI Sağlayıcı Durumu',
     'ai.provider.card_sub': 'Hazırlık durumu sayfa açılışında ve Yenile ile kontrol edilir. Ollama için sunucunun çalışır olması ve yapılandırılan modelin yüklü olması gerekir.',
@@ -8789,6 +8789,29 @@ async function doLogin() {
 // ── Topbar AI Provider Status (Faz 3.2.0B surface, Stage 3 shell integration) ──
 // Calls GET /api/ai/providers using the existing AUTH_TOKEN.
 // Fail-closed: any error → safe "unavailable" pill. Never exposes raw errors.
+// _probeAiQuery: confirms POST /api/ai/query is actually wired to a
+// working provider. Returns true only if the endpoint returns 2xx.
+// Used to reconcile /api/ai/providers readiness with actual query
+// capability, since GET /api/ai/providers and POST /api/ai/query use
+// independent provider selection paths (ADR-0020 deliberate scope gap).
+// The probe uses a minimal, safe query text; any 503 means the query
+// endpoint is not wired to a real provider regardless of readiness status.
+async function _probeAiQuery() {
+  try {
+    const r = await fetch('/api/ai/query', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + AUTH_TOKEN,
+      },
+      body: JSON.stringify({ query_text: 'status' }),
+    });
+    return r.ok; // 2xx → query endpoint is wired and functional
+  } catch (e) {
+    return false;
+  }
+}
+
 async function loadTopbarAiStatus() {
   const badge = document.getElementById('topbar-ai-status');
   if (!badge) return;
@@ -8810,9 +8833,12 @@ async function loadTopbarAiStatus() {
     // Determine aggregate status: ready if any non-deterministic provider is ready
     const optionals = providers.filter(function(p){ return p.name !== 'deterministic'; });
     if (optionals.length === 0) {
-      // Only deterministic — AI is always available in deterministic sense
-      badge.textContent = t('topbar.ai_ready');
-      badge.className = 'pill pill-info';
+      // Only deterministic provider registered.
+      // Probe the actual query endpoint: deterministic provider returns a fixed
+      // text response; if wired, badge shows ready. If 503, endpoint is not wired.
+      const queryWorks = await _probeAiQuery();
+      badge.textContent = queryWorks ? t('topbar.ai_ready') : t('topbar.ai_unavailable');
+      badge.className   = queryWorks ? 'pill pill-info'    : 'pill pill-warn';
       return;
     }
     const hasReady = optionals.some(function(p){
@@ -8822,19 +8848,28 @@ async function loadTopbarAiStatus() {
       return p.readiness_status === 'server_reachable' || p.readiness_status === 'model_missing';
     });
     if (hasReady) {
-      badge.textContent = t('topbar.ai_ready');
-      badge.className = 'pill pill-ok';
+      // Provider registry says a model is ready — verify the query endpoint
+      // is actually wired (ADR-0020 may leave get_model_client() disconnected).
+      const queryWorks = await _probeAiQuery();
+      if (queryWorks) {
+        badge.textContent = t('topbar.ai_ready');
+        badge.className   = 'pill pill-ok';
+      } else {
+        // Provider is ready but query endpoint returns 503 — be honest.
+        badge.textContent = t('topbar.ai_unavailable');
+        badge.className   = 'pill pill-warn';
+      }
     } else if (hasPartial) {
       badge.textContent = t('topbar.ai_offline');
-      badge.className = 'pill pill-warn';
+      badge.className   = 'pill pill-warn';
     } else {
       badge.textContent = t('topbar.ai_unavailable');
-      badge.className = 'pill pill-warn';
+      badge.className   = 'pill pill-warn';
     }
   } catch (e) {
     // Network error, not authenticated yet, or any unexpected failure
     badge.textContent = t('topbar.ai_unavailable');
-    badge.className = 'pill pill-warn';
+    badge.className   = 'pill pill-warn';
   }
 }
 
@@ -8904,6 +8939,14 @@ async function _aiAskSubmit(query_text) {
     }
     if (resp.status === 401 || resp.status === 403) {
       _aiAskRenderResponse(aiEsc(t('ai.ask.error_unavailable')), 'error');
+      return;
+    }
+    if (resp.status === 503) {
+      // Backend has no model provider wired to this endpoint yet.
+      // Show the backend-gap message (more precise than generic unavailable)
+      // and refresh the topbar badge so it stays consistent.
+      _aiAskRenderResponse(aiEsc(t('ai.ask.error_backend')), 'error');
+      loadTopbarAiStatus();  // re-probe so topbar reflects real state
       return;
     }
     if (!resp.ok) {
