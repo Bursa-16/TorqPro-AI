@@ -205,3 +205,86 @@ def test_showpage_expands_collapsed_group():
 ])
 def test_stage2_tokens_still_present(token):
     assert f"{token}:" in html, f"Stage 2 token {token!r} must not be removed"
+
+
+# ── Branding: TorqPro AI ─────────────────────────────────────────────────────
+
+def test_login_logo_shows_torqpro_ai():
+    assert 'TorqPro AI' in html, "Login logo must show 'TorqPro AI'"
+    # Must not be plain "TorqPro" without "AI" suffix in login logo
+    assert 'class="login-logo">🔧 TorqPro AI' in html, (
+        "login-logo must contain 'TorqPro AI'"
+    )
+
+def test_topbar_logo_shows_torqpro_ai():
+    assert 'TorqPro AI <span id="topbar-version">' in html, (
+        "Topbar logo text must be 'TorqPro AI'"
+    )
+
+def test_html_title_is_torqpro_ai():
+    assert '<title>TorqPro AI</title>' in html, (
+        "<title> must be 'TorqPro AI'"
+    )
+
+def test_document_title_uses_torqpro_ai():
+    assert "'TorqPro AI '" in html or '"TorqPro AI "' in html, (
+        "document.title construction must use 'TorqPro AI'"
+    )
+
+def test_mobile_topbar_shows_torqpro_ai():
+    assert '<strong>TorqPro AI</strong>' in html, (
+        "Mobile topbar must show 'TorqPro AI'"
+    )
+
+# ── AI topbar status badge ───────────────────────────────────────────────────
+
+def test_topbar_ai_status_badge_present():
+    assert 'id="topbar-ai-status"' in html, (
+        "topbar must contain #topbar-ai-status badge"
+    )
+
+def test_topbar_ai_status_has_aria_live():
+    m = re.search(r'id="topbar-ai-status"[^>]*aria-live="[^"]+"', html)
+    assert m, "#topbar-ai-status must have aria-live attribute"
+
+def test_topbar_ai_status_i18n_en_keys():
+    for key in ['topbar.ai_loading', 'topbar.ai_ready', 'topbar.ai_unavailable', 'topbar.ai_offline']:
+        assert f"'{key}':" in html, f"EN i18n key '{key}' missing"
+
+def test_topbar_ai_status_i18n_tr_keys():
+    # TR values must differ from EN
+    assert "'topbar.ai_ready': '✓ AI Hazır'" in html, "TR ai_ready key missing"
+    assert "'topbar.ai_unavailable': 'AI Durumu: Kullanılamıyor'" in html, "TR ai_unavailable key missing"
+
+def test_load_topbar_ai_status_function_present():
+    assert "async function loadTopbarAiStatus(" in html, (
+        "loadTopbarAiStatus() function must be present"
+    )
+
+def test_load_topbar_ai_status_uses_api_endpoint():
+    assert "fetch('/api/ai/providers'" in html, (
+        "loadTopbarAiStatus must call /api/ai/providers"
+    )
+
+def test_load_topbar_ai_status_uses_auth_token():
+    fn_start = html.find("async function loadTopbarAiStatus(")
+    fn_end   = html.find('\n}', fn_start) + 2
+    fn_body  = html[fn_start:fn_end]
+    assert "AUTH_TOKEN" in fn_body, (
+        "loadTopbarAiStatus must use AUTH_TOKEN for authenticated call"
+    )
+
+def test_load_topbar_ai_status_fail_closed():
+    """Function must have catch block that shows safe unavailable state."""
+    fn_start = html.find("async function loadTopbarAiStatus(")
+    fn_end   = html.find('\n}', fn_start + 100) + 2
+    fn_body  = html[fn_start:fn_end + 2000]  # capture generous body
+    assert "catch" in fn_body, "loadTopbarAiStatus must have catch block"
+    assert "ai_unavailable" in fn_body, (
+        "catch block must show ai_unavailable i18n key"
+    )
+
+def test_load_topbar_ai_status_called_after_login():
+    assert "loadTopbarAiStatus()" in html, (
+        "loadTopbarAiStatus() must be called after login success"
+    )

@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>TorqPro</title>
+<title>TorqPro AI</title>
 <link rel="manifest" href="/manifest.webmanifest">
 <meta name="theme-color" content="#111827">
 <!-- Demo/full sürüm bayrağı. Varsayılan HER ZAMAN "full" olmalı; demo paketleri
@@ -97,7 +97,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);font-size:va
 .result-key{font-size:13px;color:var(--text2)}
 .result-val{font-size:14px;font-weight:600;color:var(--text)}
 .result-val.ok{color:var(--success)}.result-val.nok{color:var(--danger)}.result-val.warn{color:var(--warning)}
-.pill{display:inline-flex;align-items:center;gap:var(--space-1);padding:3px var(--space-4);border-radius:var(--radius-pill);font-size:var(--fs-base);font-weight:var(--fw-medium)}
+.pill{display:inline-flex;align-items:center;gap:var(--space-1);padding:3px var(--space-4);border-radius:var(--radius-pill);font-size:var(--fs-base);font-weight:var(--fw-medium);white-space:nowrap}
 .pill-ok{background:rgba(34,197,94,.15);color:var(--success)}
 .pill-nok{background:rgba(239,68,68,.15);color:var(--danger)}
 .pill-warn{background:rgba(245,158,11,.15);color:var(--warning)}
@@ -550,12 +550,12 @@ textarea:focus-visible,
 </style>
 </head>
 <body>
-<div class="mobile-topbar" role="banner"><button class="mobile-menu-btn" onclick="toggleMobileMenu()" aria-expanded="false" aria-controls="mainSidebar" aria-label="Toggle navigation / Menüyü aç kapat">☰</button><strong>TorqPro</strong><button class="mobile-menu-btn" aria-label="Mobile Access" onclick="showPage('mobileaccess',this)">📱</button></div>
+<div class="mobile-topbar" role="banner"><button class="mobile-menu-btn" onclick="toggleMobileMenu()" aria-expanded="false" aria-controls="mainSidebar" aria-label="Toggle navigation / Menüyü aç kapat">☰</button><strong>TorqPro AI</strong><button class="mobile-menu-btn" aria-label="Mobile Access" onclick="showPage('mobileaccess',this)">📱</button></div>
 
 <!-- LOGIN -->
 <div class="login-overlay" id="loginOverlay">
   <div class="login-box">
-    <div class="login-logo">🔧 TorqPro</div>
+    <div class="login-logo">🔧 TorqPro AI</div>
     <div class="login-sub"><span data-i18n="login.subtitle">Bağlantı Elemanları Analiz Yazılımı</span> · <span id="login-version">v…</span></div>
     <div class="login-field">
       <label class="login-label" data-i18n="login.username_label">Kullanıcı Adı</label>
@@ -576,9 +576,9 @@ textarea:focus-visible,
 <!-- ANA UYGULAMA -->
 <div class="app" id="mainApp" style="display:none">
 <div class="topbar" role="banner">
-  <div class="logo" aria-label="TorqPro">
+  <div class="logo" aria-label="TorqPro AI">
     <span class="logo-mark" aria-hidden="true">🔧</span>
-    TorqPro <span id="topbar-version">v…</span>
+    TorqPro AI <span id="topbar-version">v…</span>
   </div>
   <div class="topbar-right" id="topbarRight">
     <div class="lang-switch" role="group" aria-label="Language / Dil">
@@ -586,6 +586,7 @@ textarea:focus-visible,
       <button type="button" class="lang-btn" data-lang="en" onclick="setLanguage('en')" aria-pressed="false">EN</button>
     </div>
     <span class="pill pill-ok" data-i18n="topbar.system_active">● Sistem Aktif</span>
+    <span id="topbar-ai-status" class="pill pill-info" aria-live="polite" data-i18n="topbar.ai_loading">AI…</span>
     <span id="topbar-user" style="font-size:var(--fs-sm);color:var(--text3)"></span>
   </div>
 </div>
@@ -2504,7 +2505,7 @@ textarea:focus-visible,
   // never a stale fabricated version.
   function _applyVersion(v) {
     const suffix = t('app.title_suffix');
-    document.title = v ? ('TorqPro ' + v + ' — ' + suffix) : ('TorqPro — ' + suffix);
+    document.title = v ? ('TorqPro AI ' + v + ' — ' + suffix) : ('TorqPro AI — ' + suffix);
     const loginVersionEl = document.getElementById('login-version');
     if (loginVersionEl) loginVersionEl.textContent = v || t('app.version_unavailable');
     const topbarVersionEl = document.getElementById('topbar-version');
@@ -2634,6 +2635,10 @@ const I18N = {
 
     // ---- topbar ----
     'topbar.system_active': '● System Active',
+    'topbar.ai_loading': 'AI…',
+    'topbar.ai_ready': '✓ AI Ready',
+    'topbar.ai_unavailable': 'AI Status: Unavailable',
+    'topbar.ai_offline': 'AI Offline',
     'app.title_suffix': 'Fastener Analysis Software',
     'app.version_unavailable': 'v?',
 
@@ -5662,6 +5667,10 @@ const I18N = {
 
     // ---- topbar ----
     'topbar.system_active': '● Sistem Aktif',
+    'topbar.ai_loading': 'AI…',
+    'topbar.ai_ready': '✓ AI Hazır',
+    'topbar.ai_unavailable': 'AI Durumu: Kullanılamıyor',
+    'topbar.ai_offline': 'AI Çevrimdışı',
     'app.title_suffix': 'Bağlantı Elemanları Analiz Yazılımı',
     'app.version_unavailable': 'v?',
 
@@ -8708,12 +8717,66 @@ async function doLogin() {
       document.getElementById('topbarRight').insertAdjacentHTML('beforeend',
         '<span id="topbar-user-info" style="font-size:12px;color:var(--text3)">👤 '+CURRENT_USER+'</span>');
     }
-    document.getElementById('adminSidebar').style.display=CURRENT_ROLE==='admin'?'':'none';document.getElementById('dataAdminSidebar').style.display=CURRENT_ROLE==='admin'?'':'none';document.getElementById('versionSidebar').style.display=CURRENT_ROLE==='admin'?'':'none';document.getElementById('qualitySidebar').style.display=CURRENT_ROLE==='admin'?'':'none';document.getElementById('enterpriseSidebar').style.display=CURRENT_ROLE==='admin'?'':'none';document.getElementById('deploymentSidebar').style.display=CURRENT_ROLE==='admin'?'':'none';document.getElementById('cloudSidebar').style.display=CURRENT_ROLE==='admin'?'':'none';document.getElementById('goliveSidebar').style.display=CURRENT_ROLE==='admin'?'':'none';err.textContent=''; await renderArchive();
+    document.getElementById('adminSidebar').style.display=CURRENT_ROLE==='admin'?'':'none';document.getElementById('dataAdminSidebar').style.display=CURRENT_ROLE==='admin'?'':'none';document.getElementById('versionSidebar').style.display=CURRENT_ROLE==='admin'?'':'none';document.getElementById('qualitySidebar').style.display=CURRENT_ROLE==='admin'?'':'none';document.getElementById('enterpriseSidebar').style.display=CURRENT_ROLE==='admin'?'':'none';document.getElementById('deploymentSidebar').style.display=CURRENT_ROLE==='admin'?'':'none';document.getElementById('cloudSidebar').style.display=CURRENT_ROLE==='admin'?'':'none';document.getElementById('goliveSidebar').style.display=CURRENT_ROLE==='admin'?'':'none';err.textContent=''; await renderArchive(); loadTopbarAiStatus();
   } catch(e) { err.textContent='❌ '+e.message; }
 }
+// ── Topbar AI Provider Status (Faz 3.2.0B surface, Stage 3 shell integration) ──
+// Calls GET /api/ai/providers using the existing AUTH_TOKEN.
+// Fail-closed: any error → safe "unavailable" pill. Never exposes raw errors.
+async function loadTopbarAiStatus() {
+  const badge = document.getElementById('topbar-ai-status');
+  if (!badge) return;
+  badge.textContent = t('topbar.ai_loading');
+  badge.className = 'pill pill-info';
+  try {
+    if (!AUTH_TOKEN) { throw new Error('not_authenticated'); }
+    const resp = await fetch('/api/ai/providers', {
+      headers: { 'Authorization': 'Bearer ' + AUTH_TOKEN }
+    });
+    if (!resp.ok) {
+      // 401/403/5xx → show unavailable, never expose status code
+      badge.textContent = t('topbar.ai_unavailable');
+      badge.className = 'pill pill-warn';
+      return;
+    }
+    const data = await resp.json();
+    const providers = Array.isArray(data.providers) ? data.providers : [];
+    // Determine aggregate status: ready if any non-deterministic provider is ready
+    const optionals = providers.filter(function(p){ return p.name !== 'deterministic'; });
+    if (optionals.length === 0) {
+      // Only deterministic — AI is always available in deterministic sense
+      badge.textContent = t('topbar.ai_ready');
+      badge.className = 'pill pill-info';
+      return;
+    }
+    const hasReady = optionals.some(function(p){
+      return p.readiness_status === 'model_ready' || p.readiness_status === 'enabled';
+    });
+    const hasPartial = optionals.some(function(p){
+      return p.readiness_status === 'server_reachable' || p.readiness_status === 'model_missing';
+    });
+    if (hasReady) {
+      badge.textContent = t('topbar.ai_ready');
+      badge.className = 'pill pill-ok';
+    } else if (hasPartial) {
+      badge.textContent = t('topbar.ai_offline');
+      badge.className = 'pill pill-warn';
+    } else {
+      badge.textContent = t('topbar.ai_unavailable');
+      badge.className = 'pill pill-warn';
+    }
+  } catch (e) {
+    // Network error, not authenticated yet, or any unexpected failure
+    badge.textContent = t('topbar.ai_unavailable');
+    badge.className = 'pill pill-warn';
+  }
+}
+
 function guvenliCikis(){
   const topbarUser = document.getElementById('topbar-user');
   if (topbarUser) topbarUser.textContent = '';
+  const topbarAi = document.getElementById('topbar-ai-status');
+  if (topbarAi) { topbarAi.textContent = t('topbar.ai_loading'); topbarAi.className = 'pill pill-info'; }
   confirmDialog({
     title: 'Çıkış yapmak istediğinizden emin misiniz?',
     confirmText: 'Çıkış Yap',
