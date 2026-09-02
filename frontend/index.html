@@ -559,12 +559,12 @@ textarea:focus-visible,
     <div class="login-sub"><span data-i18n="login.subtitle">Bağlantı Elemanları Analiz Yazılımı</span> · <span id="login-version">v…</span></div>
     <div class="login-field">
       <label class="login-label" data-i18n="login.username_label">Kullanıcı Adı</label>
-      <input class="login-input" type="text" id="loginUser" data-i18n-placeholder="login.username_placeholder" placeholder="Kullanıcı adınız"
+      <input class="login-input" type="text" id="loginUser" value="demo" data-i18n-placeholder="login.username_placeholder" placeholder="Kullanıcı adınız"
         autocomplete="username" onkeydown="if(event.key==='Enter')doLogin()" aria-label="Kullanıcı adı / Username">
     </div>
     <div class="login-field">
       <label class="login-label" data-i18n="login.password_label">Şifre</label>
-      <input class="login-input" type="password" id="loginPass" placeholder="••••••••"
+      <input class="login-input" type="password" id="loginPass" value="A1234" placeholder="••••••••"
         autocomplete="current-password" onkeydown="if(event.key==='Enter')doLogin()" aria-label="Parola / Password">
     </div>
     <button class="login-btn" onclick="doLogin()" data-i18n="login.submit">Giriş Yap</button>
