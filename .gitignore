@@ -8,3 +8,6 @@ torqpro.log
 runtime/
 .coverage
 tests/performance/baseline_results.json
+frontend/dist/
+torqpro.db-shm
+torqpro.db-wal
