@@ -1,0 +1,133 @@
+@import "tailwindcss";
+
+@theme {
+  /* === TorqPro Design Tokens === */
+  /* Core surfaces */
+  --color-tp-bg: #0c0e14;
+  --color-tp-surface: #141722;
+  --color-tp-surface-2: #1c2030;
+  --color-tp-surface-3: #242838;
+
+  /* Borders */
+  --color-tp-border: #2a2f42;
+  --color-tp-border-strong: #3a4060;
+
+  /* Engineering accent — steel blue */
+  --color-tp-accent: #4a7cc9;
+  --color-tp-accent-light: #6b9bdd;
+  --color-tp-accent-muted: #3a5e94;
+
+  /* Status: validated / pass — controlled teal */
+  --color-tp-valid: #1b9e7a;
+  --color-tp-valid-muted: #134d3c;
+
+  /* Warning — controlled amber */
+  --color-tp-warn: #c8860e;
+  --color-tp-warn-muted: #4a3408;
+
+  /* Error — muted industrial red */
+  --color-tp-error: #c04040;
+  --color-tp-error-muted: #3a1616;
+
+  /* AI context — controlled violet */
+  --color-tp-ai: #7c5cbf;
+  --color-tp-ai-muted: #2a1e40;
+
+  /* Text hierarchy */
+  --color-tp-text: #dce0f0;
+  --color-tp-text-2: #8890b0;
+  --color-tp-text-3: #555c78;
+
+  /* Typography */
+  --font-family-sans: 'Inter', 'Segoe UI', system-ui, sans-serif;
+  --font-family-mono: 'JetBrains Mono', 'Fira Code', monospace;
+
+  /* Radius — precision engineering feel */
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 8px;
+
+  /* Spacing scale */
+  --spacing-panel: 16px;
+  --spacing-section: 24px;
+
+  /* ── VISUAL-02C Surface Tokens ─────────────────────────────────────────── */
+  /* Five perceptible layers — each has a distinct material identity         */
+  --color-tp-nav:        #0e1118;   /* sidebar / header navigation surface   */
+  --color-tp-workspace:  #111827;   /* engineering workspace — blue-tinted   */
+  --color-tp-module:     #162035;   /* raised module surface — blue-slate    */
+  --color-tp-result:     #0d1a2e;   /* result / analysis surface — deep navy */
+  --color-tp-validation: #0d1f18;   /* validation surface — green-tinted     */
+  --color-tp-ai-surface: #120e22;   /* AI advisory surface — violet-tinted   */
+
+  /* ── VISUAL-02C Accent Tokens ─────────────────────────────────────────── */
+  --color-tp-calc:       #22b8cf;   /* calculation cyan — active computation */
+  --color-tp-calc-muted: #0a2a30;   /* calculation surface tint              */
+
+  /* ── VISUAL-02C Border Tokens ─────────────────────────────────────────── */
+  --color-tp-border-2:       #2a3558;  /* module edge — readable division    */
+  --color-tp-border-accent:  #4a7cc9;  /* active engineering left edge       */
+  --color-tp-border-calc:    #22b8cf;  /* active calculation state           */
+  --color-tp-border-valid:   #1b9e7a;  /* validated module left edge         */
+  --color-tp-border-warn:    #c8860e;  /* warning module left edge           */
+  --color-tp-border-error:   #c04040;  /* critical module edge — use 3px     */
+  --color-tp-border-ai:      #7c5cbf;  /* AI panel left edge                 */
+
+  /* ── VISUAL-02C Chart Palette (tokens only — no chart deps added) ──────── */
+  --color-tp-chart-1:   #4a7cc9;   /* primary series — steel blue           */
+  --color-tp-chart-2:   #22b8cf;   /* secondary series — cyan               */
+  --color-tp-chart-3:   #1b9e7a;   /* valid / target — green                */
+  --color-tp-chart-4:   #c8860e;   /* warning — amber                       */
+  --color-tp-chart-5:   #c04040;   /* critical — red                        */
+  --color-tp-chart-ref: #8890b0;   /* reference / nominal — muted slate     */
+
+  /* ── VISUAL-02A layout vars (moved inside @theme block) ─────────────────  */
+  --sidebar-w-expanded: 208px;
+  --sidebar-w-collapsed: 48px;
+  --header-h: 48px;
+  --breadcrumb-h: 28px;
+  --color-tp-surface-hover: #1e2336;
+}
+
+/* Global resets */
+body {
+  background: var(--color-tp-bg);
+  color: var(--color-tp-text);
+  font-family: var(--font-family-sans);
+  font-size: 14px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ── VISUAL-02C Gradient helpers ────────────────────────────────────────── */
+/* Applied via style prop or @apply where inline gradient is needed         */
+/* Forbidden: gradient on text, animated gradients, radial glows            */
+
+/* Module header band: top of any tp-module surface */
+.tp-module-header {
+  background: linear-gradient(to bottom, #1e2d46 0px, var(--color-tp-module) 24px);
+}
+
+/* Result block depth */
+.tp-result-gradient {
+  background: linear-gradient(to bottom, #122240 0%, var(--color-tp-result) 100%);
+}
+
+/* Status left-bleed: reinforces left-border signal */
+.tp-status-bleed-valid  { background: linear-gradient(to right, color-mix(in srgb, var(--color-tp-valid) 12%, transparent) 0%, transparent 180px); }
+.tp-status-bleed-warn   { background: linear-gradient(to right, color-mix(in srgb, var(--color-tp-warn) 12%, transparent) 0%, transparent 180px); }
+.tp-status-bleed-error  { background: linear-gradient(to right, color-mix(in srgb, var(--color-tp-error) 14%, transparent) 0%, transparent 180px); }
+.tp-status-bleed-ai     { background: linear-gradient(to right, color-mix(in srgb, var(--color-tp-ai) 10%, transparent) 0%, transparent 180px); }
+
+/* ── VISUAL-02C Module-type marker classes ───────────────────────────────── */
+/* Used as data-type attribute target for future CSS selection if needed    */
+.tp-module-input      { background-color: var(--color-tp-module); }
+.tp-module-result     { background-color: var(--color-tp-result); }
+.tp-module-validation { background-color: var(--color-tp-validation); }
+.tp-module-ai         { background-color: var(--color-tp-ai-surface); }
+.tp-module-chart      { background-color: var(--color-tp-bg); }
+
+/* Tabular numerals for engineering values */
+.tabular-nums { font-variant-numeric: tabular-nums; }
+.eng-value { font-size: 1.5rem; font-weight: 700; font-variant-numeric: tabular-nums; letter-spacing: -0.02em; }
+.eng-unit { font-size: 0.75rem; color: var(--color-tp-text-3); margin-left: 2px; }

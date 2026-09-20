@@ -79,10 +79,16 @@ def test_query_success_response_includes_schema_version(client, auth_headers):
         assert field in body
 
 
-def test_query_error_response_does_not_gain_schema_version(client, auth_headers):
-    # No dependency_overrides active -- exercises the real, always-
-    # failing default provider (see route_module.get_model_client
-    # docstring), which maps to 503.
+def test_query_error_response_does_not_gain_schema_version(
+    client, auth_headers, monkeypatch
+):
+    # v3.2.0: the production default falls back to the deterministic
+    # provider, so the 503 error path requires a registry with no
+    # query-capable provider at all (explicit fail-closed path).  Error
+    # responses must still never gain a schema_version field.
+    from backend.ai_gateway.providers.registry import ProviderRegistry
+
+    monkeypatch.setattr(route_module, "_PROVIDER_REGISTRY", ProviderRegistry())
     response = client.post(
         _QUERY_ENDPOINT,
         json={"query_text": "cıvata sıkma torku nedir"},

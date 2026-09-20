@@ -29,24 +29,32 @@ repository permitted to import ``backend.ai_gateway`` (see
 -- this phase adds new imports from that package, but does not add a
 second consumer.
 
-**Default model provider for POST /api/ai/query (unchanged from
-alpha.4, deliberate safety decision):** no concrete, network-calling
-``AIModelClient`` is wired as this route's default in this phase
-either. :func:`get_model_client` still returns
-:class:`_UnavailableModelClient`, whose ``complete()`` always raises,
-normalized by the orchestrator into ``ModelUnavailableError`` (ADR-0017
-Karar 9, case 1) and mapped below to ``503``. This is a deliberate
-scope boundary for this phase: ADR-0020 adds a *listable* provider
-registry (``GET /api/ai/providers``, see below) containing the new
-offline-safe ``DeterministicModelClient``, but does **not** change
-which client ``POST /api/ai/query`` actually uses by default --
-rewiring that default is a separate, out-of-scope decision left to a
-later phase, so the already-tested alpha.4 "unavailable by default"
-behavior (``tests/ai/test_http_route.py``) is left completely
-unchanged. Tests override :func:`get_model_client` (FastAPI
-``dependency_overrides``) with ``backend.ai_gateway.llm_client.
-FakeModelClient`` (or, from this phase on, with a registry-selected
-``DeterministicModelClient``) to exercise the complete HTTP pipeline.
+**Default model provider for POST /api/ai/query (v3.2.0 readiness
+consistency fix):** :func:`get_model_client` no longer returns a
+static always-failing placeholder.  It now resolves the production
+default from the same ``_PROVIDER_REGISTRY`` that
+``GET /api/ai/providers`` reports, so the topbar readiness badge and
+the query endpoint can no longer contradict each other:
+
+1. A registered ``OllamaModelClient`` whose live ``check_readiness``
+   probe (short probe timeout, never the inference timeout) reports
+   ``MODEL_READY`` for the configured model is used -- real
+   local-model inference via the available local Ollama model.
+2. Otherwise the always-registered, offline-safe
+   ``DeterministicModelClient`` answers with its fixed,
+   self-identifying text (``model_name == "deterministic"``) -- an
+   honest safe answer, never a silent claim of real-model capability.
+3. Only when the registry contains no usable provider at all does
+   :class:`_UnavailableModelClient` remain: its failure is normalized
+   by the orchestrator into ``ModelUnavailableError`` (ADR-0017
+   Karar 9, case 1) and mapped below to ``503`` -- explicit
+   fail-closed, never a fabricated success.
+
+PAID_CLOUD_AUTO_FALLBACK = NO: Anthropic is never auto-selected here;
+it remains reachable only via explicit provider selection.  Tests
+override :func:`get_model_client` (FastAPI ``dependency_overrides``)
+with ``backend.ai_gateway.llm_client.FakeModelClient`` to exercise
+the complete HTTP pipeline without any provider.
 
 **Audit sink (ADR-0020, superseding the alpha.4 in-memory-only note
 below):** ``handle_query`` still requires an ``AuditSink`` argument by
@@ -167,6 +175,7 @@ from backend.ai_gateway.llm_client import AIModelClient, ModelResponse, PromptCo
 from backend.ai_gateway.output_validator import validate_model_response  # noqa: E402
 from backend.ai_gateway.orchestrator import handle_query  # noqa: E402
 from backend.ai_gateway.permission import UserContext, ensure_read_only_action  # noqa: E402
+from backend.ai_gateway.providers.deterministic import DeterministicModelClient  # noqa: E402
 from backend.ai_gateway.providers.registry import build_default_registry  # noqa: E402
 from backend.ai_gateway.reasoning import engine as reasoning_engine  # noqa: E402
 from backend.ai_gateway.reasoning import evidence_adapter as reasoning_evidence_adapter  # noqa
@@ -379,17 +388,59 @@ class _UnavailableModelClient(AIModelClient):
         )
 
 
+def _select_default_query_client() -> AIModelClient:
+    """Resolve the production default ``AIModelClient`` for this route
+    from ``_PROVIDER_REGISTRY`` (v3.2.0 readiness consistency fix).
+
+    Selection order -- deterministic, never a silent substitution:
+
+    1. ``OllamaModelClient`` when its live ``check_readiness`` probe
+       (``_OLLAMA_PROBE_TIMEOUT_SECONDS``, never the 120-s inference
+       timeout) reports ``MODEL_READY`` for the configured model --
+       real local-model inference via the available local Ollama
+       model.
+    2. ``DeterministicModelClient`` -- always registered, always
+       available, self-identifying fixed answer (honest offline-safe
+       fallback; never presented as a real-model response).
+    3. ``_UnavailableModelClient`` -- only when no usable provider is
+       registered; fails explicitly (503 via ``_handle``) rather than
+       succeeding silently.
+
+    Anthropic is deliberately never auto-selected here
+    (PAID_CLOUD_AUTO_FALLBACK = NO).
+    """
+    for info in _PROVIDER_REGISTRY.list_providers():
+        client = _PROVIDER_REGISTRY.get(info.name)
+        if isinstance(client, OllamaModelClient):
+            status = client.check_readiness(
+                probe_timeout_seconds=_OLLAMA_PROBE_TIMEOUT_SECONDS
+            )
+            if status == OllamaReadinessStatus.MODEL_READY:
+                return client
+    for info in _PROVIDER_REGISTRY.list_providers():
+        client = _PROVIDER_REGISTRY.get(info.name)
+        if isinstance(client, DeterministicModelClient):
+            return client
+    return _UnavailableModelClient()
+
+
 def get_model_client() -> AIModelClient:
     """FastAPI dependency seam for the ``AIModelClient`` used by this
-    route. Returns :class:`_UnavailableModelClient` by default.
+    route.
+
+    v3.2.0: returns :func:`_select_default_query_client`'s choice --
+    a ready Ollama model when available, else the honest deterministic
+    fallback, else the explicit 503 placeholder.  This keeps
+    ``GET /api/ai/providers`` readiness and actual query capability
+    consistent: when the topbar badge says ready, the query endpoint
+    returns a safe answer, and if the query endpoint cannot answer,
+    the badge cannot claim readiness.
 
     Tests override this dependency (``app.dependency_overrides``) with
     ``backend.ai_gateway.llm_client.FakeModelClient`` to exercise the
-    full HTTP pipeline without a real model. Production traffic always
-    receives the default, always-failing placeholder until a real
-    provider is introduced in a later, separately-approved phase.
+    full HTTP pipeline without any provider.
     """
-    return _UnavailableModelClient()
+    return _select_default_query_client()
 
 
 class AIQueryRequest(BaseModel):

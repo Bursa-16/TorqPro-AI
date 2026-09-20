@@ -283,16 +283,30 @@ def test_deterministic_engine_repeated_calls_produce_identical_results(client, a
     assert r1.json()["safety"] == r2.json()["safety"]
 
 
-def test_offline_ai_provider_behavior_is_stable_under_repeated_requests(client, auth_headers):
-    """POST /api/ai/query's default provider is always-unavailable in
-    production (v3.0.0-alpha.4/alpha.5) -- repeated calls must
-    consistently return 503, never flip to a different status/error
-    shape across repeated calls (no hidden retry-dependent state)."""
+def test_offline_ai_provider_behavior_is_stable_under_repeated_requests(
+    client, auth_headers, monkeypatch
+):
+    """POST /api/ai/query's default provider is the deterministic
+    offline-safe provider as of v3.2.0 (readiness-consistency fix):
+    repeated calls must consistently return 200 with the versioned
+    schema -- never flip to a different status/error shape across
+    repeated calls (no hidden retry-dependent state).  The registry is
+    patched hermetically to a deterministic-only set so the local
+    TORQPRO_OLLAMA_* environment cannot influence the test."""
+    from backend.ai_gateway.providers.registry import build_default_registry
+    from backend.api.routes import ai_gateway as route_module
+
+    monkeypatch.setattr(
+        route_module, "_PROVIDER_REGISTRY", build_default_registry()
+    )
     statuses = set()
+    schema_versions = set()
     for _ in range(5):
         r = client.post("/api/ai/query", headers=auth_headers, json={"query_text": "reliability check"})
         statuses.add(r.status_code)
-    assert statuses == {503}
+        schema_versions.add(r.json().get("schema_version"))
+    assert statuses == {200}
+    assert schema_versions == {"1.0"}
 
 
 def test_db_reopen_reconnect_after_close(tmp_path):

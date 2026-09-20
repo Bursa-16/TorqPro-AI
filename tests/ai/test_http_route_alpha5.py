@@ -186,9 +186,16 @@ def test_successful_query_audit_never_carries_raw_query_or_response_text(
 # ---------------------------------------------- persistent audit write path (failure)
 
 
-def test_provider_failure_query_is_persisted_as_a_failure_record(client, auth_headers):
-    # No fake_model_override -> default _UnavailableModelClient -> 503,
-    # exactly like the pre-existing alpha.4 behavior.
+def test_provider_failure_query_is_persisted_as_a_failure_record(
+    client, auth_headers, monkeypatch
+):
+    # v3.2.0: the production default falls back to the deterministic
+    # provider, so a 503 requires a registry with no query-capable
+    # provider at all (explicit fail-closed path).  An empty registry
+    # restores the historical always-failing default hermetically.
+    from backend.ai_gateway.providers.registry import ProviderRegistry
+
+    monkeypatch.setattr(route_module, "_PROVIDER_REGISTRY", ProviderRegistry())
     correlation_id = f"alpha5-fail-corr-{uuid.uuid4().hex[:8]}"
     response = client.post(
         _QUERY_ENDPOINT,
@@ -207,12 +214,15 @@ def test_provider_failure_query_is_persisted_as_a_failure_record(client, auth_he
 
 
 def test_provider_failure_error_category_never_leaks_exception_message(
-    client, auth_headers
+    client, auth_headers, monkeypatch
 ):
     """error_category is always the exception's class name, never its
     message string -- a provider error message could carry a header/
     token/URL fragment (see backend.ai_gateway.store module
     docstring, Privacy)."""
+    from backend.ai_gateway.providers.registry import ProviderRegistry
+
+    monkeypatch.setattr(route_module, "_PROVIDER_REGISTRY", ProviderRegistry())
     correlation_id = f"alpha5-fail-detail-{uuid.uuid4().hex[:8]}"
     client.post(
         _QUERY_ENDPOINT,
@@ -229,16 +239,29 @@ def test_provider_failure_error_category_never_leaks_exception_message(
     assert "No AI model provider is configured" not in matching[0]["error_category"]
 
 
-# ----------------------------------------------------- alpha.4 regression (unchanged)
+# --------------------------------------------- default provider regression (v3.2.0)
 
 
-def test_default_provider_still_returns_503_without_override(client, auth_headers):
+def test_default_provider_returns_safe_answer_without_override(
+    client, auth_headers, monkeypatch
+):
+    """v3.2.0 readiness-consistency regression guard: with no
+    dependency_overrides active, the production default (a
+    deterministic-only registry) must return a safe, versioned 200
+    answer -- never the old contradicting 503 while the readiness
+    badge reports a ready provider."""
+    from backend.ai_gateway.providers.registry import build_default_registry
+
+    monkeypatch.setattr(
+        route_module, "_PROVIDER_REGISTRY", build_default_registry()
+    )
     response = client.post(
         _QUERY_ENDPOINT,
         json={"query_text": "alpha5-regression-default-provider-test"},
         headers=auth_headers,
     )
-    assert response.status_code == 503
+    assert response.status_code == 200
+    assert response.json()["schema_version"] == "1.0"
 
 
 def test_happy_path_response_shape_is_unchanged_by_alpha5(

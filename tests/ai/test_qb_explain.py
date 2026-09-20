@@ -537,9 +537,16 @@ def test_provider_output_oversized_fails_closed(client, auth_headers, qb_store_p
 # 20. Provider unavailable => safe failure
 # ---------------------------------------------------------------------------
 
-def test_provider_unavailable_safe_failure(client, auth_headers, qb_store_path):
+def test_provider_unavailable_safe_failure(
+    client, auth_headers, qb_store_path, monkeypatch
+):
     record = _register_and_validate(_make_record(), qb_store_path)
-    # No override -> default _UnavailableModelClient always raises.
+    # v3.2.0: the production default falls back to the deterministic
+    # provider, so a 503 requires a registry with no query-capable
+    # provider at all (explicit fail-closed path).
+    from backend.ai_gateway.providers.registry import ProviderRegistry
+
+    monkeypatch.setattr(route_module, "_PROVIDER_REGISTRY", ProviderRegistry())
     response = client.post(
         _EXPLAIN_ENDPOINT,
         json={"question_id": record.question_id},
@@ -777,20 +784,29 @@ def test_no_raw_prompt_or_response_in_audit(client, auth_headers, qb_store_path)
 
 
 # ---------------------------------------------------------------------------
-# 30. DeterministicModelClient not silently used as fallback
+# 30. Deterministic fallback is explicit and self-identifying (v3.2.0)
 # ---------------------------------------------------------------------------
 
-def test_deterministic_not_used_as_fallback(client, auth_headers, qb_store_path):
+def test_deterministic_fallback_is_explicit_and_labeled(
+    client, auth_headers, qb_store_path, monkeypatch
+):
+    """v3.2.0: with the deterministic-only default registry the explain
+    endpoint returns a safe 200 whose explanation self-identifies the
+    deterministic provider -- never a silent real-AI claim."""
+    from backend.ai_gateway.providers.registry import build_default_registry
+
     record = _register_and_validate(_make_record(), qb_store_path)
-    # No override -> default _UnavailableModelClient; must fail, not silently
-    # succeed with a DeterministicModelClient response.
+    monkeypatch.setattr(
+        route_module, "_PROVIDER_REGISTRY", build_default_registry()
+    )
     response = client.post(
         _EXPLAIN_ENDPOINT,
         json={"question_id": record.question_id},
         headers=auth_headers,
     )
-    assert response.status_code == 503
-    assert "schema_version" not in response.json()
+    assert response.status_code == 200
+    body = response.json()
+    assert "deterministic" in str(body.get("explanation", "")).lower()
 
 
 # ---------------------------------------------------------------------------

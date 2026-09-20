@@ -176,20 +176,117 @@ def test_insufficient_evidence_query_still_returns_structured_fields(
     assert body["validation_required"] is False
 
 
-# --------------------------------------------------------- 4. default provider -> 503
+# ------------------------- 4. default provider -> registry selection (v3.2.0)
 
 
-def test_default_provider_returns_503_without_override(client, auth_headers):
-    # No dependency_overrides active here -- exercises the real,
-    # production default (_UnavailableModelClient).
+def test_default_provider_returns_safe_answer_without_override(
+    client, auth_headers, monkeypatch
+):
+    """No dependency_overrides active -- exercises the real production
+    default.  v3.2.0 readiness-consistency fix: the default resolves
+    through the provider registry, so with a deterministic-only
+    registry the query endpoint must return a safe, versioned 200
+    answer -- never the old contradicting 503 while the readiness
+    badge reports a ready provider."""
+    from backend.ai_gateway.providers.registry import build_default_registry
+
+    # Hermetic: deterministic-only registry regardless of the local
+    # TORQPRO_OLLAMA_* environment.
+    monkeypatch.setattr(
+        route_module, "_PROVIDER_REGISTRY", build_default_registry()
+    )
     response = client.post(
         _ENDPOINT,
         json={"query_text": "herhangi bir soru"},
         headers=auth_headers,
     )
 
-    assert response.status_code == 503
-    assert "detail" in response.json()
+    assert response.status_code == 200
+    body = response.json()
+    assert body["schema_version"] == "1.0"
+
+
+def test_default_provider_prefers_ready_ollama_over_deterministic(monkeypatch):
+    """Unit contract for the default-selection order: a registered
+    Ollama provider whose live probe reports MODEL_READY must be
+    selected ahead of the deterministic fallback (real local-model
+    inference), and the probe must use the short probe timeout."""
+    from backend.ai_gateway.llm_client import ModelResponse
+    from backend.ai_gateway.providers.ollama_adapter import (
+        OllamaModelClient,
+        OllamaReadinessStatus,
+    )
+    from backend.ai_gateway.providers.registry import build_default_registry
+
+    probe_calls = []
+
+    class _ReadyOllama(OllamaModelClient):
+        # Test double: no network client; readiness under test control.
+        name = "ollama"
+        model_identifier = "qwen3:8b"
+
+        def __init__(self):
+            self._http_client = None
+
+        def is_available(self):
+            return True
+
+        def check_readiness(self, *, probe_timeout_seconds=None):
+            probe_calls.append(probe_timeout_seconds)
+            return OllamaReadinessStatus.MODEL_READY
+
+        def complete(self, prompt_context, *, timeout_seconds=None):
+            return ModelResponse(text="ok", model_name=self.name)
+
+    patched_registry = build_default_registry()
+    patched_registry.register(_ReadyOllama())
+    monkeypatch.setattr(route_module, "_PROVIDER_REGISTRY", patched_registry)
+
+    selected = route_module.get_model_client()
+
+    assert isinstance(selected, OllamaModelClient)
+    assert selected.name == "ollama"
+    assert probe_calls == [route_module._OLLAMA_PROBE_TIMEOUT_SECONDS]
+
+
+def test_default_provider_falls_back_to_deterministic_when_ollama_not_ready(
+    monkeypatch,
+):
+    """Ollama registered but not model-ready (server down / model
+    missing) -> the honest deterministic fallback answers; only an
+    empty registry yields the explicit 503 placeholder."""
+    from backend.ai_gateway.providers.deterministic import DeterministicModelClient
+    from backend.ai_gateway.providers.ollama_adapter import (
+        OllamaModelClient,
+        OllamaReadinessStatus,
+    )
+    from backend.ai_gateway.providers.registry import ProviderRegistry
+
+    class _NotReadyOllama(OllamaModelClient):
+        name = "ollama"
+        model_identifier = "qwen3:8b"
+
+        def __init__(self):
+            self._http_client = None
+
+        def is_available(self):
+            return True
+
+        def check_readiness(self, *, probe_timeout_seconds=None):
+            return OllamaReadinessStatus.SERVER_UNAVAILABLE
+
+    registry = ProviderRegistry()
+    registry.register(_NotReadyOllama())
+    registry.register(DeterministicModelClient())
+    monkeypatch.setattr(route_module, "_PROVIDER_REGISTRY", registry)
+
+    selected = route_module.get_model_client()
+    assert isinstance(selected, DeterministicModelClient)
+
+    monkeypatch.setattr(route_module, "_PROVIDER_REGISTRY", ProviderRegistry())
+    assert isinstance(
+        route_module.get_model_client(), route_module._UnavailableModelClient
+    )
 
 
 # ------------------------------------------------------------- 5. permission denial

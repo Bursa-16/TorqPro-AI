@@ -165,8 +165,14 @@ def _clear_client():
     app_module.app.dependency_overrides.pop(route_module.get_model_client, None)
 
 
-def test_unavailable_provider_safe_failure(client, auth_headers):
-    """Default _UnavailableModelClient -> 503, no raw error detail exposed."""
+def test_unavailable_provider_safe_failure(client, auth_headers, monkeypatch):
+    """Registry without any query-capable provider -> explicit
+    fail-closed 503, no raw error detail exposed.  (v3.2.0: the normal
+    deterministic-only default now answers 200; this 503 path requires
+    an empty registry.)"""
+    from backend.ai_gateway.providers.registry import ProviderRegistry
+
+    monkeypatch.setattr(route_module, "_PROVIDER_REGISTRY", ProviderRegistry())
     response = client.post(
         _QUERY_ENDPOINT,
         json={"query_text": "cıvata torku nedir"},
@@ -411,27 +417,53 @@ def test_deterministic_reasoning_fields_unchanged_regardless_of_provider_failure
 
 
 # ---------------------------------------------------------------------------
-# DeterministicModelClient not used as production fallback
+# Default fallback is the honest deterministic provider (v3.2.0)
 # ---------------------------------------------------------------------------
 
 
-def test_deterministic_client_not_used_as_default_query_provider(client, auth_headers):
-    """The default route provider (_UnavailableModelClient) must never be
-    replaced with DeterministicModelClient as a silent fallback -- the
-    default must always fail explicitly (503), never succeed silently."""
-    # No dependency_overrides active -> exercises the real default.
+def test_default_fallback_is_explicitly_deterministic(
+    client, auth_headers, monkeypatch
+):
+    """v3.2.0 readiness-consistency fix: with a deterministic-only
+    registry the production default answers with a versioned 200 via
+    DeterministicModelClient.  The fallback is honest, never silent:
+    the selector's choice self-identifies (name == "deterministic") and
+    its fixed answer text states it was produced without any external
+    AI call -- no fabricated real-model capability."""
+    from backend.ai_gateway.providers.registry import build_default_registry
+
+    monkeypatch.setattr(
+        route_module, "_PROVIDER_REGISTRY", build_default_registry()
+    )
+    selected = route_module.get_model_client()
+    assert isinstance(selected, DeterministicModelClient)
+    assert selected.name == "deterministic"
+
     response = client.post(
         _QUERY_ENDPOINT,
         json={"query_text": "cıvata torku nedir"},
         headers=auth_headers,
     )
-    # Must fail with 503 (ModelUnavailableError), not succeed with a
-    # DeterministicModelClient response.
+    assert response.status_code == 200
+    assert response.json()["schema_version"] == "1.0"
+
+
+def test_default_fails_closed_when_no_provider_is_query_capable(
+    client, auth_headers, monkeypatch
+):
+    """If the registry contains no query-capable provider at all, the
+    default must fail explicitly (503 via ModelUnavailableError) -- it
+    must never fabricate a success."""
+    from backend.ai_gateway.providers.registry import ProviderRegistry
+
+    monkeypatch.setattr(route_module, "_PROVIDER_REGISTRY", ProviderRegistry())
+    response = client.post(
+        _QUERY_ENDPOINT,
+        json={"query_text": "cıvata torku nedir"},
+        headers=auth_headers,
+    )
     assert response.status_code == 503
-    body = response.json()
-    # DeterministicModelClient would return a non-503 JSON body containing
-    # "schema_version" -- confirm neither is present.
-    assert "schema_version" not in body
+    assert "schema_version" not in response.json()
 
 
 def test_deterministic_client_is_usable_when_explicitly_chosen():
@@ -453,7 +485,8 @@ def test_deterministic_client_is_usable_when_explicitly_chosen():
 def test_qb_search_succeeds_with_unavailable_provider(client, auth_headers):
     """QB Search must succeed even when the default provider is unavailable --
     it makes zero provider calls."""
-    # No provider override, default is _UnavailableModelClient.
+    # No provider override; the default now falls back to the
+    # deterministic provider, which search never calls either way.
     response = client.post(
         _QB_SEARCH_ENDPOINT,
         json={"query_text": "torque"},
