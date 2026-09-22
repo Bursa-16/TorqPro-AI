@@ -347,13 +347,27 @@ Raw secrets are not part of the audit contract.
 | Item                      | Value                                                                           |
 | ------------------------- | ------------------------------------------------------------------------------- |
 | Product                   | **TorqPro AI**                                                                  |
-| Current Version           | **v3.2.0**                                                                      |
+| Current Version           | **v3.3.2**                                                                                 |
 | Release Stage             | **Stable**                                                                      |
-| Release Status            | **AI Provider Readiness Status UI**                                             |
+| Release Status            | **Tool Tracking Frontend/API Integration Released**                                           |
 | Current Engineering Focus | **Deterministic Engineering + Governed AI + Accessibility**                     |
-| Previous Stable Baseline  | `v3.1.1` (`2599f163`)                                                           |
-| Release Commit            | see `git log --oneline -1`                                                      |
-| Full Test Suite           | **3896 passed, 13 skipped, 0 failed**                                           |
+| Release Notes             | [`docs/releases/v3.3.2.md`](docs/releases/v3.3.2.md)                                         |
+
+### Tool Tracking - v3.3.2
+
+TorqPro AI v3.3.2 introduces the production-ready Tool Tracking workflow:
+
+- Native React Tool Tracking workspace
+- Persistent database-backed tool records
+- Role-aware create and update workflows
+- Capability-study history with latest-study projection
+- Soft deactivation with capability history preserved
+- Effective-status handling without Cm/Cmk or Cp/Cpk status inference
+- Live frontend/API integration
+- Responsive desktop and mobile workspace behavior
+| Previous Stable Baseline  | `v3.3.1`                                                         |
+| Release Commit            | `67c0845` - release: prepare TorqPro AI v3.3.2                    |
+| Tool Tracking Tests       | **127 passed, 0 failed**                                           |
 | JS Tests                  | **Provider harness: 90/90; suite: 2647 assertions, 19 files, 0 fail**          |
 | Existing-Test Regressions | **0**                                                                           |
 | Next Phase                | **Engineering result explanation / provider expansion — scope TBD**             |
@@ -436,7 +450,6 @@ The scope of the next development phase will be defined separately before implem
 
 | Validation Item              | Result                      |
 | ---------------------------- | --------------------------- |
-| Full Test Suite              | **3395 passed, 13 skipped** |
 | AI Test Suite                | **229 passed**              |
 | New Tests                    | **24**                      |
 | Existing-Test Regressions    | **0**                       |
