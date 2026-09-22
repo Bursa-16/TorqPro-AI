@@ -394,15 +394,21 @@ TorqPro AI v3.3.2 introduces the production-ready Tool Tracking workflow:
 
 # Release
 
-**Current Release:** `v3.1.0-alpha.1`
+**Current Release:** `v3.3.2`
 
-**Status:** Alpha / Pre-release
+**Status:** Stable
 
-**Stable Baseline:** `v3.0.0`
+**Previous Stable Baseline:** `v3.3.1`
 
-**Main Capability:** Production-oriented external AI provider integration while preserving deterministic engineering calculations as authoritative.
+**Main Capability:** Production-ready Tool Tracking frontend/backend integration, persistent tool records, capability-study history, role-aware mutation flows, soft deactivation, and responsive workspace behavior while preserving deterministic engineering authority.
+
+**Release Commit:** `67c0845` — `release: prepare TorqPro AI v3.3.2`
+
+**Tool Tracking Validation:** `127 passed, 0 failed`
 
 ---
+
+# Historical Release Notes
 
 ## v3.1.0-alpha.1 Highlights
 
