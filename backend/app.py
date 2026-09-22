@@ -425,6 +425,10 @@ def migrate():
         from backend.api.routes.ai_gateway import migrate_persistent_audit
         migrate_persistent_audit(c)
 
+        # VISUAL-02C-C2.1: Tool Tracking domain tables.
+        from backend.tools.repository import migrate as migrate_tools
+        migrate_tools(c)
+
         c.commit()
 
 @app.middleware("http")
@@ -2133,5 +2137,15 @@ app.include_router(torque_recommendation_router)
 # Reuses the same `user` auth dependency as every other endpoint.
 from backend.api.routes.documents import router as documents_router
 app.include_router(documents_router)
+
+# VISUAL-02C-C2.3: Tool Tracking read-only API (backend/api/routes/tools.py).
+# Additive only -- five new GET routes under /api/tools, nothing existing
+# renamed or removed. Thin HTTP adapter over backend.tools.service (C2.2);
+# reuses the same `user` auth dependency as every other endpoint. Imported
+# here for the same circular-import-avoidance reason as production_validation,
+# governance, joints, washer_resolution_closure, question_bank, ai_gateway,
+# torque_recommendation, and documents above.
+from backend.api.routes.tools import router as tools_router
+app.include_router(tools_router)
 
 app.mount("/",StaticFiles(directory=FRONT,html=True),name="frontend")

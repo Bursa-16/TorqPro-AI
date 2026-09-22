@@ -31,6 +31,22 @@ function savePrefs(p: SidebarPrefs) {
   try { localStorage.setItem(SIDEBAR_KEY, JSON.stringify(p)) } catch { /* ignore */ }
 }
 
+// ── Mobile breakpoint hook ────────────────────────────────────────────────────
+// Returns true when viewport width < 640px (Tailwind's `sm` breakpoint).
+// Forces sidebar into icon-rail mode on mobile regardless of persisted prefs.
+// Desktop prefs are unaffected — toggling back to wide viewport restores them.
+function useIsMobile(): boolean {
+  const [isMobile, setIsMobile] = useState(() => window.innerWidth < 640)
+  useEffect(() => {
+    const mq = window.matchMedia('(max-width: 639px)')
+    const handler = (e: MediaQueryListEvent) => setIsMobile(e.matches)
+    mq.addEventListener('change', handler)
+    setIsMobile(mq.matches)
+    return () => mq.removeEventListener('change', handler)
+  }, [])
+  return isMobile
+}
+
 // ── Icon helper ───────────────────────────────────────────────────────────────
 function Icon({ icon: Ic, size = 16 }: { icon: LucideIcon; size?: number }) {
   return <Ic size={size} strokeWidth={1.6} />
@@ -55,14 +71,18 @@ export default function Sidebar({ role }: { role: string | null }) {
   const location = useLocation()
   const navigate = useNavigate()
   const isAdmin = role === 'admin'
+  const isMobile = useIsMobile()
 
   const [prefs, setPrefs] = useState<SidebarPrefs>(loadPrefs)
   const [hovered, setHovered] = useState(false)
 
   const isCollapsed = prefs.collapsed
   const isPinned = prefs.pinned
-  // Unpinned + collapsed: expand on hover
-  const effectivelyExpanded = !isCollapsed || (!isPinned && hovered)
+  // On mobile: always render as collapsed icon-rail, never expand.
+  // Desktop: expand on hover when unpinned.
+  const effectivelyExpanded = isMobile
+    ? false
+    : (!isCollapsed || (!isPinned && hovered))
 
   const updatePrefs = useCallback((patch: Partial<SidebarPrefs>) => {
     setPrefs(prev => {
@@ -97,8 +117,8 @@ export default function Sidebar({ role }: { role: string | null }) {
     <aside
       style={{ width: sidebarWidth, minWidth: sidebarWidth, transition: 'width 150ms ease, min-width 150ms ease' }}
       className="bg-tp-nav border-r border-tp-border flex flex-col overflow-hidden shrink-0 h-full"
-      onMouseEnter={() => !isPinned && setHovered(true)}
-      onMouseLeave={() => !isPinned && setHovered(false)}
+      onMouseEnter={() => !isPinned && !isMobile && setHovered(true)}
+      onMouseLeave={() => !isPinned && !isMobile && setHovered(false)}
     >
       {/* Home / Dashboard — always visible */}
       <div className="shrink-0 pt-2 pb-1 px-1.5">
@@ -197,30 +217,32 @@ export default function Sidebar({ role }: { role: string | null }) {
         })}
       </nav>
 
-      {/* Footer: pin + collapse controls */}
-      <div className="shrink-0 border-t border-tp-border p-1.5 flex items-center gap-1">
-        {/* Pin/unpin — only shown when expanded */}
-        {effectivelyExpanded && (
+      {/* Footer: pin + collapse controls — hidden on mobile (always-collapsed, no user toggle needed) */}
+      {!isMobile && (
+        <div className="shrink-0 border-t border-tp-border p-1.5 flex items-center gap-1">
+          {/* Pin/unpin — only shown when expanded */}
+          {effectivelyExpanded && (
+            <button
+              onClick={() => updatePrefs({ pinned: !isPinned })}
+              title={isPinned ? 'Sabitlemeyi kaldır' : 'Sabitle'}
+              className="flex-1 flex items-center gap-1.5 px-2 py-1.5 rounded text-[11px]
+                         text-tp-text-3 hover:text-tp-text-2 hover:bg-tp-surface-2 transition-colors"
+            >
+              {isPinned ? <Pin size={12} /> : <PinOff size={12} />}
+              <span>{isPinned ? 'Sabitlendi' : 'Sabit değil'}</span>
+            </button>
+          )}
+          {/* Collapse/expand toggle */}
           <button
-            onClick={() => updatePrefs({ pinned: !isPinned })}
-            title={isPinned ? 'Sabitlemeyi kaldır' : 'Sabitle'}
-            className="flex-1 flex items-center gap-1.5 px-2 py-1.5 rounded text-[11px]
+            onClick={() => updatePrefs({ collapsed: !isCollapsed, pinned: true })}
+            title={isCollapsed ? 'Genişlet' : 'Daralt'}
+            className="flex items-center justify-center w-7 h-7 rounded
                        text-tp-text-3 hover:text-tp-text-2 hover:bg-tp-surface-2 transition-colors"
           >
-            {isPinned ? <Pin size={12} /> : <PinOff size={12} />}
-            <span>{isPinned ? 'Sabitlendi' : 'Sabit değil'}</span>
+            {isCollapsed ? <ChevronRight size={14} /> : <ChevronLeft size={14} />}
           </button>
-        )}
-        {/* Collapse/expand toggle */}
-        <button
-          onClick={() => updatePrefs({ collapsed: !isCollapsed, pinned: true })}
-          title={isCollapsed ? 'Genişlet' : 'Daralt'}
-          className="flex items-center justify-center w-7 h-7 rounded
-                     text-tp-text-3 hover:text-tp-text-2 hover:bg-tp-surface-2 transition-colors"
-        >
-          {isCollapsed ? <ChevronRight size={14} /> : <ChevronLeft size={14} />}
-        </button>
-      </div>
+        </div>
+      )}
     </aside>
   )
 }
