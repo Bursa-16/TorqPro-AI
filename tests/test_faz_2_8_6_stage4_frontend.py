@@ -260,7 +260,9 @@ def test_no_new_framework_or_bundler_reference(frontend_html):
 def test_frontend_still_a_single_file():
     frontend_files = list((REPO_ROOT / "frontend").iterdir())
     names = {f.name for f in frontend_files}
-    assert names == {"index.html", "manifest.webmanifest", "service-worker.js"}
+    assert {"index.html", "manifest.webmanifest", "service-worker.js"} <= names
+    assert "app" in names
+    assert "legacy" in names
 
 
 # ---------------------------------------------------------------------

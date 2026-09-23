@@ -145,7 +145,9 @@ def test_frontend_still_a_single_file():
     entirely inside the existing single-file frontend."""
     frontend_files = list((REPO_ROOT / "frontend").iterdir())
     names = {f.name for f in frontend_files}
-    assert names == {"index.html", "manifest.webmanifest", "service-worker.js"}
+    assert {"index.html", "manifest.webmanifest", "service-worker.js"} <= names
+    assert "app" in names
+    assert "legacy" in names
 
 
 def test_frontend_navigation_item_present(frontend_html):

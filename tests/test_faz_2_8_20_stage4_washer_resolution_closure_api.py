@@ -526,7 +526,7 @@ class TestBackwardCompatibility:
         # question_bank (Faz 2.9.2), ai_gateway (Faz v3.0.0-alpha.4),
         # torque_recommendation (Faz v3.0.0-beta.1),
         # documents (Stage 2 / Slice 4 -- MarkItDown document ingestion)
-        assert count == 8
+        assert count == 9
 
     def test_five_new_routes_registered_exactly_once(self):
         expected_new_paths = {
