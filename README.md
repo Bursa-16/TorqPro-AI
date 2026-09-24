@@ -1,585 +1,373 @@
-# TorqPro AI
+TorqPro AI repository:
+D:\TorqPro_TR_EN
+
+TASK:
+Update README.md to accurately represent the current TorqPro AI state after v3.3.4.
+
+IMPORTANT:
+This is a documentation-only task.
+Do NOT change application code.
+Do NOT modify tests.
+Do NOT modify VERSION.
+Do NOT create a release.
+Do NOT create or move tags.
+Do NOT push anything until validation is complete.
+Do NOT delete or overwrite unrelated working-tree changes.
+
+CURRENT RELEASE BASELINE
+
+Repository:
+Bursa-16/TorqPro-AI
+
+Branch:
+main
+
+Current release:
+v3.3.4
+
+Release commit:
+a8f621ae027f788f3fce6b10ffaccc12d426ac8d
+
+VERSION:
+3.3.4
+
+GitHub tag:
+v3.3.4
+
+Known validated release results:
+- Full pytest suite: 4152 passed, 20 skipped
+- GitHub Actions CI: PASS
+- GitHub Pages deployment: PASS
+- frontend build: PASS
+- frontend typecheck: PASS
+- quality gate: PASS
+- auth/security validation: PASS
+- git diff --check: PASS
+
+v3.3.4 scope:
+- GitHub Pages -> Render backend connectivity
+- production frontend API-base configuration
+- VITE_API_BASE_URL support
+- production API URL:
+  https://torqpro-ai.onrender.com/api
+- local development fallback remains:
+  /api
+- Vite local proxy remains:
+  http://127.0.0.1:8000
+- backend CORSMiddleware added
+- allowed GitHub Pages origin:
+  https://bursa-16.github.io
+- credentials enabled
+- OPTIONS/preflight support through CORSMiddleware
+
+IMPORTANT LIVE DEPLOYMENT STATUS:
+Do NOT claim that the Render deployment is already running v3.3.4.
+
+Current live Render health has been observed as:
+- HTTP 200
+- version: 3.2.0
+- database_ok: true
+
+Current live Render login POST works:
+- POST /api/login -> 200 with valid demo credentials
+
+But live CORS preflight currently returns:
+- OPTIONS /api/login -> 405
+- Access-Control-Allow-Origin missing
+
+Therefore the repository/release is v3.3.4, but the existing Render backend deployment has not yet been redeployed to the v3.3.4 backend commit.
+
+README must distinguish:
+1. CURRENT SOFTWARE RELEASE = v3.3.4
+2. LIVE RENDER BACKEND DEPLOYMENT = pending redeploy / currently older runtime
+
+Do NOT say the complete GitHub Pages -> Render browser login path is operational until the live Render deployment is updated and verified.
+
+==================================================
+README UPDATE REQUIREMENTS
+==================================================
 
-> **AI-powered fastener engineering, deterministic torque recommendation, validation, traceability, and knowledge platform.**
+1. Preserve the existing README structure where useful.
 
----
-
-## Overview
-
-TorqPro AI is a professional engineering platform for the design, analysis, validation, optimization, and governance of threaded joints and tightening processes.
-
-The platform combines deterministic engineering calculations, validated engineering knowledge, lifecycle management, traceability, and controlled AI-assisted engineering workflows.
-
-The core engineering philosophy is simple:
-
-> **Deterministic engineering calculations remain authoritative. AI is additive, explainable, traceable, and cannot override validated engineering results.**
-
-TorqPro AI is designed to support engineering decision-making without replacing validated engineering logic.
-
----
+2. Keep and preserve the core engineering philosophy:
 
-# Key Features
+"Deterministic engineering calculations remain authoritative. AI is additive, explainable, traceable, and cannot override validated engineering results."
 
-## Fastener Engineering
+3. Preserve the existing major sections unless they are genuinely obsolete:
+- Overview
+- Key Features
+- Fastener Engineering
+- Engineering Knowledge
+- AI-Assisted Engineering
+- Engineering Architecture
+- AI Engineering Principles
+- AI Provider Architecture
+- Provider Transport Layer
+- Privacy and Provider Safety
+- Torque Recommendation Engine
+- Engineering Reasoning Engine
+- Grounding and Evidence
+- Audit and Traceability
+- Product Direction
+- Engineering Principle
+- Release Philosophy
 
-* VDI 2230-based threaded joint engineering
-* Torque and preload calculations
-* Deterministic Torque Recommendation Engine
-* Torque-window evaluation
-* Friction condition and lubrication modelling
-* Thread geometry and fastener calculations
-* Bolt, nut and washer engineering libraries
-* Joint definition and revision management
-* Engineering formula validation
-* Fastener Assembly Intelligence
-* Torque Study workflows
-* Production validation
-* Fail-closed engineering recommendation logic
+4. Do NOT invent capabilities that are not supported by the repository.
 
----
+5. Audit current repository implementation before editing README.
 
-## Engineering Knowledge
+Inspect at minimum:
+- VERSION
+- backend/app.py
+- frontend/app/src
+- frontend/app/.env.production
+- frontend/app/vite.config.ts
+- backend API routes
+- docs/releases/
+- tests/
+- git log --oneline --decorate -30
+- git tag --sort=-version:refname
+- git status --short
 
-* Engineering Library
-* Question Bank infrastructure
-* Question retrieval
-* Question creation and editing
-* Lifecycle management
-* Tagging and search
-* Bulk lifecycle operations
-* Import / export
-* Statistics and dashboards
-* Trend and history analysis
-* Controlled engineering knowledge management
+6. Update all stale "Current Version", "Current Release", "Release Status",
+"Release Commit", validation counts and release references.
 
----
+7. Replace v3.3.2 as current release with:
 
-## AI-Assisted Engineering
+Current Version:
+v3.3.4
 
-TorqPro AI provides a controlled AI assistance layer built around deterministic engineering authority.
+Release Stage:
+Stable
 
-Capabilities include:
+Release Status:
+GitHub Pages / Render API Connectivity Hotfix Released
 
-* Engineering reasoning support
-* Grounded engineering responses
-* Evidence-aware answer composition
-* Explainability
-* Correlation and request traceability
-* Persistent AI audit records
-* Provider abstraction
-* Provider discovery
-* External AI provider integration
-* Fail-closed AI behavior
-* Advisory AI output separated from authoritative calculations
+Current Engineering Focus:
+Deterministic Engineering + Governed AI + Production Web Integration
 
-AI-generated text does not replace or modify validated deterministic engineering results.
+Release Commit:
+a8f621ae027f788f3fce6b10ffaccc12d426ac8d
 
----
+8. If docs/releases/v3.3.4.md exists, link to it.
 
-# Engineering Architecture
+If it does NOT exist:
+- do NOT invent the file
+- either omit the release-note link or explicitly state that README is the current release summary
+- do not create docs/releases/v3.3.4.md unless I explicitly authorize it
 
-TorqPro AI separates engineering authority from AI-assisted reasoning.
+9. Add a concise v3.3.4 section.
 
-The architecture is designed around the following principle:
+Suggested scope:
 
-```text
-Engineering Input
-      │
-      ▼
-Deterministic Engineering Engine
-      │
-      ├── Authoritative calculations
-      ├── Engineering limits
-      ├── Validation rules
-      └── Traceable results
-      │
-      ▼
-AI Context / Grounding Layer
-      │
-      ├── Engineering evidence
-      ├── Calculation context
-      ├── Approved knowledge
-      └── Traceability context
-      │
-      ▼
-AI Provider
-      │
-      ▼
-Evidence / Safety / Explainability
-      │
-      ▼
-Advisory Engineering Explanation
-```
+## GitHub Pages / Production API Connectivity — v3.3.4
 
-The AI layer cannot replace deterministic numeric output.
+TorqPro AI v3.3.4 introduces production frontend-to-backend connectivity support for the GitHub Pages deployment.
+
+Include factual bullets such as:
+- Production API base URL is environment-configurable.
+- GitHub Pages production frontend can target the Render API.
+- Local development retains the /api Vite proxy.
+- Backend CORS policy explicitly permits the GitHub Pages origin.
+- CORS is restricted to the intended GitHub Pages origin rather than a wildcard origin.
+- Existing deterministic engineering behavior remains unchanged.
+- No engineering calculation logic was changed by the connectivity hotfix.
+
+10. Add a deployment-status note.
+
+Use wording similar to:
+
+### Deployment Status
+
+The v3.3.4 source release and GitHub Pages frontend deployment are complete.
+
+The existing Render backend service must be redeployed to the v3.3.4 release commit before the browser-based GitHub Pages -> Render login path can use the new CORS configuration.
 
----
+Do NOT call this a product defect.
+It is a deployment synchronization status.
 
-# AI Engineering Principles
+11. Update validation section for v3.3.4.
 
-TorqPro AI follows several core engineering rules.
+Use verified results:
 
-### Deterministic Authority
+| Validation Item | Result |
+| --- | --- |
+| Full Python Test Suite | 4152 passed |
+| Skipped Tests | 20 |
+| Quality Gate | PASS |
+| Auth / Security Tests | PASS |
+| Frontend Build | PASS |
+| Frontend Typecheck | PASS |
+| GitHub Actions CI | PASS |
+| GitHub Pages Deployment | PASS |
+| git diff --check | PASS |
+| Existing-Test Regressions | 0 observed in validated suite |
 
-Validated engineering calculations remain the authoritative source for engineering results.
+Do not fabricate lint results if not independently verified.
 
-### AI Is Advisory
+12. Update Development Roadmap.
 
-AI may explain, contextualize, summarize, or reason from validated engineering information.
+Keep historical versions, but add at least:
+- v3.1.0 — Stable AI provider/runtime milestone if supported
+- v3.3.1 — previous stable baseline where appropriate
+- v3.3.2 — Tool Tracking frontend/API integration
+- v3.3.3 — CI compatibility / release stabilization
+- v3.3.4 — GitHub Pages / Render API connectivity hotfix
 
-It cannot override an authoritative calculation.
+Derive exact descriptions from git history and repository evidence.
 
-### Grounding
+Do NOT invent dates or features.
 
-AI responses are designed to use controlled engineering context and approved evidence.
+13. Correct inconsistencies in AI provider documentation.
 
-### Explainability
+The current README contains both:
+- Ollama / Anthropic provider architecture
+and
+- a separate OpenAI Configuration section.
 
-Engineering reasoning must remain understandable and traceable.
+Audit the repository and make the README reflect only currently implemented providers.
 
-### Auditability
+Do NOT remove valid historical information merely because it is old.
 
-AI operations are designed to support correlation IDs, audit records, provider metadata, result hashes, and safe error categorization.
+Clearly distinguish:
+- current production/provider architecture
+- optional providers
+- historical release information
 
-### Fail-Closed Behavior
+Do NOT claim a provider is available unless repository code supports it.
 
-When required engineering evidence or provider capability is unavailable, TorqPro does not fabricate an authoritative result.
+14. Preserve security guidance:
+- no API keys in source control
+- deterministic calculations remain authoritative
+- AI output remains advisory
+- fail-closed behavior
+- auditability / traceability
 
----
+15. Add or update a "Deployment Architecture" section if appropriate.
 
-# AI Provider Architecture (v3.1.0)
+Suggested architecture:
 
-TorqPro v3.1.0 includes a governed AI gateway with two optional real
-provider implementations. The provider layer is strictly separated from
-deterministic engineering logic.
+GitHub Pages
+    |
+    | HTTPS
+    v
+React / Vite Frontend
+    |
+    | Production API Base
+    v
+Render Backend / FastAPI
+    |
+    +-- Deterministic Engineering Services
+    +-- Engineering Libraries
+    +-- Production Validation
+    +-- Tool Tracking
+    +-- Engineering Knowledge
+    +-- Governed AI Gateway
+    +-- Audit / Traceability
 
-## Provider Abstraction
+Local development:
 
-```
-AI Gateway
-├─ Ollama local — optional, zero external API fee
-│   (requires operator-managed Ollama server and model)
-├─ Anthropic — optional paid provider path
-│   (requires TORQPRO_ANTHROPIC_API_KEY, disabled by default)
-└─ deterministic engineering remains authoritative
-```
+React / Vite
+    |
+    | /api proxy
+    v
+127.0.0.1:8000
+    |
+    v
+FastAPI backend
 
-Provider configuration is backend-controlled. Normal users do not see
-or select provider names, model identifiers, or API endpoints.
+Make clear that GitHub Pages hosts the static frontend only.
+Do not imply that the FastAPI backend runs on GitHub Pages.
 
-**No automatic local → paid fallback.** Ollama failure raises
-`ModelUnavailableError` and stops; it never silently routes to
-Anthropic. (`PAID_CLOUD_AUTO_FALLBACK = NO`)
+16. Add links if already valid:
 
-## Ollama Local Provider
+Repository:
+https://github.com/Bursa-16/TorqPro-AI
 
-* `OllamaModelClient` via `httpx` (no SDK dependency)
-* Configured via `TORQPRO_OLLAMA_ENABLED`, `TORQPRO_OLLAMA_BASE_URL`,
-  `TORQPRO_OLLAMA_MODEL`, `TORQPRO_OLLAMA_TIMEOUT_SECONDS`,
-  `TORQPRO_OLLAMA_KEEP_ALIVE` (default `"10m"`)
-* Default model: `qwen3:8b`. One target machine was validated with
-  `qwen2.5:3b`; this is not a universal hard-coded product default.
-  Local model availability and performance depend on operator hardware.
-* Local Ollama inference has **zero external API fee.**
-* `MODEL_AUTO_DOWNLOAD = NO` — TorqPro never calls `ollama pull`.
-* `MODEL_AUTO_SUBSTITUTION = NO` — missing models are reported, not silently replaced.
+GitHub Pages:
+https://bursa-16.github.io/TorqPro-AI/
 
-## Anthropic Provider
+Render API:
+https://torqpro-ai.onrender.com/
 
-* `AnthropicModelClient` via `httpx` (no SDK dependency)
-* Default model: `claude-sonnet-5`; `max_tokens: 16000`
-* Disabled by default; requires `TORQPRO_ANTHROPIC_ENABLED=true` and
-  `TORQPRO_ANTHROPIC_API_KEY` set via secure environment injection.
-* **Never commit API keys to source control.**
+Do not state that Render currently runs v3.3.4 until live verification proves it.
 
-* bounded timeout behavior
-* bounded retry handling
-* strict response validation
-* malformed-response fail-safe behavior
+17. Maintain professional engineering tone.
 
-The implementation does not introduce OpenAI-specific logic into deterministic engineering calculations.
+Avoid:
+- marketing exaggeration
+- unsupported "industry-leading" claims
+- unsupported AI capability claims
+- claims of autonomous engineering decisions
+- claims that AI overrides deterministic calculations
 
----
+18. Keep README suitable for:
+- engineering users
+- recruiters
+- technical reviewers
+- research/software evaluators
+- potential industrial customers
 
-## OpenAI Configuration
+19. Preserve this engineering principle prominently:
 
-The provider is configured through environment variables:
+"Calculate deterministically. Reason from evidence. Explain transparently. Preserve traceability."
 
-```text
-TORQPRO_OPENAI_API_KEY
-TORQPRO_OPENAI_MODEL
-TORQPRO_OPENAI_TIMEOUT_S
-TORQPRO_OPENAI_MAX_RETRIES
-```
+20. Review the README for duplicated or contradictory content.
 
-`TORQPRO_OPENAI_API_KEY` and `TORQPRO_OPENAI_MODEL` are required for the OpenAI provider to be considered available.
+In particular inspect:
+- Current Version
+- Release
+- Historical Release Notes
+- Validation
+- AI provider sections
+- deployment information
 
-No OpenAI model is hardcoded as the TorqPro product default.
+Resolve contradictions without deleting valuable technical history.
 
-Timeout and retry settings use bounded behavior.
+==================================================
+VALIDATION
+==================================================
 
----
+After editing README.md run:
 
-# Provider Transport Layer
+git diff --check README.md
 
-External AI network communication is isolated through a provider-agnostic transport layer.
+Then show:
 
-The transport layer is responsible for:
+git diff -- README.md
 
-* HTTP requests
-* timeout enforcement
-* bounded retry behavior
-* transient-error handling
-* safe transport exceptions
+Then verify with searches for stale current-release references:
 
-It contains no TorqPro engineering calculation logic.
+Select-String -Path README.md -Pattern "v3\.3\.2|v3\.3\.3|v3\.3\.4|Current Version|Current Release|Release Commit|Render|GitHub Pages"
 
-Retry behavior is restricted to transient failures such as:
+Interpretation:
+- Historical references to v3.3.2 / v3.3.3 are allowed.
+- They must not remain identified as the current release.
+- Current release must consistently be v3.3.4.
 
-* connection errors
-* timeout errors
-* HTTP `429`
-* selected HTTP `5xx` responses
+Also run:
 
-Normal non-429 `4xx` responses are not automatically retried.
+git status --short
 
----
+==================================================
+DO NOT COMMIT YET
+==================================================
 
-# Privacy and Provider Safety
+Do not commit or push.
 
-The external provider integration is designed to avoid accidental exposure of sensitive runtime information.
+Return a report with exactly:
 
-The provider/transport layer does not intentionally log or persist:
+README_UPDATE_STATUS
+CURRENT_VERSION
+CURRENT_RELEASE
+RELEASE_COMMIT
+SECTIONS_UPDATED
+STALE_CURRENT_VERSION_REFERENCES
+DEPLOYMENT_STATUS_DOCUMENTED
+PROVIDER_DOCUMENTATION_STATUS
+VALIDATION_RESULT
+README_ONLY_CHANGE
+OTHER_WORKTREE_CHANGES_PRESERVED
+READY_TO_COMMIT = YES / NO
 
-* API keys
-* Authorization headers
-* raw provider error bodies
-* raw prompts through the transport layer
-* raw provider responses through the transport layer
-
-Existing TorqPro audit mechanisms retain only safe metadata according to the platform's audit architecture.
-
----
-
-# Torque Recommendation Engine
-
-The deterministic Torque Recommendation Engine evaluates engineering inputs and produces controlled torque recommendations.
-
-The engine is designed around:
-
-* deterministic calculations
-* explicit engineering limits
-* traceable recommendation logic
-* controlled validation
-* fail-closed behavior
-* audit support
-
-AI cannot replace the deterministic recommendation.
-
-AI may be used later to explain an already validated recommendation.
-
----
-
-# Engineering Reasoning Engine
-
-The Engineering Reasoning Engine builds explainable reasoning around deterministic engineering results.
-
-Its purpose is to answer:
-
-* What was calculated?
-* Why was this recommendation produced?
-* Which engineering evidence supports it?
-* What requires engineering validation?
-* What assumptions or constraints are relevant?
-
-The reasoning layer does not become the source of authoritative numeric engineering output.
-
----
-
-# Grounding and Evidence
-
-TorqPro's AI architecture includes controlled grounding and evidence checking.
-
-The pipeline is designed around:
-
-```text
-Permission
-   ↓
-Context Builder
-   ↓
-Retrieval
-   ↓
-Optional Engineering Tools
-   ↓
-AI Provider
-   ↓
-Evidence Checker
-   ↓
-Composer
-   ↓
-Audit
-```
-
-Grounding and evidence validation remain provider-independent.
-
----
-
-# Audit and Traceability
-
-TorqPro AI includes persistent audit infrastructure for AI-assisted workflows.
-
-Audit capabilities include controlled metadata such as:
-
-* correlation ID
-* provider identity
-* model identifier
-* success/failure state
-* latency
-* safe error category
-* response hash where applicable
-
-Raw secrets are not part of the audit contract.
-
----
-
-# Current Version
-
-| Item                      | Value                                                                           |
-| ------------------------- | ------------------------------------------------------------------------------- |
-| Product                   | **TorqPro AI**                                                                  |
-| Current Version           | **v3.3.2**                                                                                 |
-| Release Stage             | **Stable**                                                                      |
-| Release Status            | **Tool Tracking Frontend/API Integration Released**                                           |
-| Current Engineering Focus | **Deterministic Engineering + Governed AI + Accessibility**                     |
-| Release Notes             | [`docs/releases/v3.3.2.md`](docs/releases/v3.3.2.md)                                         |
-
-### Tool Tracking - v3.3.2
-
-TorqPro AI v3.3.2 introduces the production-ready Tool Tracking workflow:
-
-- Native React Tool Tracking workspace
-- Persistent database-backed tool records
-- Role-aware create and update workflows
-- Capability-study history with latest-study projection
-- Soft deactivation with capability history preserved
-- Effective-status handling without Cm/Cmk or Cp/Cpk status inference
-- Live frontend/API integration
-- Responsive desktop and mobile workspace behavior
-| Previous Stable Baseline  | `v3.3.1`                                                         |
-| Release Commit            | `67c0845` - release: prepare TorqPro AI v3.3.2                    |
-| Tool Tracking Tests       | **127 passed, 0 failed**                                           |
-| JS Tests                  | **Provider harness: 90/90; suite: 2647 assertions, 19 files, 0 fail**          |
-| Existing-Test Regressions | **0**                                                                           |
-| Next Phase                | **Engineering result explanation / provider expansion — scope TBD**             |
-
----
-
-# Development Roadmap
-
-| Version            | Scope                                   | Status          |
-| ------------------ | --------------------------------------- | --------------- |
-| v3.0.0-alpha.1     | AI Architecture Foundation              | ✅ Completed     |
-| v3.0.0-alpha.2     | Retrieval & Grounding                   | ✅ Completed     |
-| v3.0.0-alpha.3     | Safety & Explainability                 | ✅ Completed     |
-| v3.0.0-alpha.4     | AI HTTP Exposure                        | ✅ Completed     |
-| v3.0.0-alpha.5     | Persistent Audit & Provider Abstraction | ✅ Completed     |
-| v3.0.0-alpha.6     | Frontend AI Integration                 | ✅ Completed     |
-| v3.0.0-beta.1      | Torque Recommendation Engine            | ✅ Completed     |
-| v3.0.0-beta.2      | Engineering Reasoning Engine            | ✅ Completed     |
-| v3.0.0-rc.1        | Performance, Security & Documentation   | ✅ Completed     |
-| v3.0.0             | Stable Release                          | ✅ Completed     |
-| **v3.1.0-alpha.1** | **Production AI Provider Integration**  | **✅ Completed** |
-
----
-
-# Release
-
-**Current Release:** `v3.3.2`
-
-**Status:** Stable
-
-**Previous Stable Baseline:** `v3.3.1`
-
-**Main Capability:** Production-ready Tool Tracking frontend/backend integration, persistent tool records, capability-study history, role-aware mutation flows, soft deactivation, and responsive workspace behavior while preserving deterministic engineering authority.
-
-**Release Commit:** `67c0845` — `release: prepare TorqPro AI v3.3.2`
-
-**Tool Tracking Validation:** `127 passed, 0 failed`
-
----
-
-# Historical Release Notes
-
-## v3.1.0-alpha.1 Highlights
-
-* Added `OpenAIModelClient`
-* Added OpenAI Responses API integration
-* Added provider-agnostic HTTP transport using `httpx`
-* Added environment-based API key and model configuration
-* Added bounded timeout and retry handling
-* Added safe handling of malformed and empty AI responses
-* Integrated OpenAI with the existing provider registry
-* Added provider discovery support
-* Preserved grounding and evidence-checking architecture
-* Preserved explainability
-* Preserved persistent audit and traceability
-* Preserved fail-closed behavior
-* Deterministic engineering calculations remain authoritative
-* AI output remains advisory
-* AI cannot override validated deterministic engineering results
-* No automatic provider fallback introduced
-* No hardcoded OpenAI product-default model introduced
-
----
-
-# Deferred
-
-The following items are intentionally outside the scope of `v3.1.0-alpha.1`:
-
-* Additional external AI providers
-* Automatic provider fallback
-* Default OpenAI wiring for `POST /api/ai/query`
-* Broader AI workflow expansion
-* Joint Analysis AI expansion
-* Friction / lubrication AI reasoning
-* Material intelligence AI integration
-* New AI-specific RBAC roles
-* AI write or approval actions
-
-The scope of the next development phase will be defined separately before implementation.
-
----
-
-# Validation
-
-`v3.1.0-alpha.1` completed the full validation process.
-
-| Validation Item              | Result                      |
-| ---------------------------- | --------------------------- |
-| AI Test Suite                | **229 passed**              |
-| New Tests                    | **24**                      |
-| Existing-Test Regressions    | **0**                       |
-| Dependency-Direction Tests   | **Passed**                  |
-| Safety / Static Guards       | **Passed**                  |
-| Numeric-Literal Safety Guard | **Passed**                  |
-| Flake8                       | **Clean**                   |
-| `git diff --check`           | **Clean**                   |
-| Bundle Clone Validation      | **Passed**                  |
-| Patch Application Validation | **Passed**                  |
-| Release Tree Equivalence     | **Confirmed**               |
-| Working Tree                 | **Clean**                   |
-| VERSION                      | **3.1.0-alpha.1**           |
-
----
-
-# Known Limitation
-
-No live OpenAI API request was executed during sandbox validation.
-
-The external provider integration was validated using mocked HTTP transport with zero live external network calls.
-
-Live provider validation requires:
-
-* valid OpenAI credentials
-* configured `TORQPRO_OPENAI_MODEL`
-* network access to the OpenAI API
-* deployment-environment validation
-
-This limitation does not affect the deterministic TorqPro engineering calculation layer.
-
----
-
-# Release Integrity
-
-The `v3.1.0-alpha.1` release was validated using:
-
-* full repository bundle
-* clean bundle-clone verification
-* release patch
-* independent patch-application verification
-* tree-hash equivalence
-* SHA256 artifact verification
-* full test-suite execution from a clean bundle clone
-
-The validated release tree hash is:
-
-```text
-455ff7e05fd02eaafc1a8362161350a57d5c0e9a
-```
-
----
-
-# Product Direction
-
-TorqPro AI is being developed as an engineering decision-support and governance platform for threaded joints and tightening processes.
-
-The product direction combines:
-
-1. **Deterministic Engineering**
-
-   * authoritative calculations
-   * validated formulas
-   * engineering limits
-   * controlled recommendation logic
-
-2. **Engineering Knowledge**
-
-   * structured engineering content
-   * lifecycle management
-   * controlled retrieval
-   * traceability
-
-3. **AI-Assisted Reasoning**
-
-   * grounded explanation
-   * engineering-context awareness
-   * controlled provider integration
-   * explainability
-   * auditability
-
-4. **Engineering Governance**
-
-   * validation
-   * lifecycle control
-   * revision traceability
-   * production support
-
-AI capability is developed around the deterministic engineering system rather than replacing it.
-
----
-
-# Engineering Principle
-
-> **Calculate deterministically. Reason from evidence. Explain transparently. Preserve traceability.**
-
----
-
-# Release Philosophy
-
-TorqPro development follows a controlled release process:
-
-```text
-Scope Discovery
-      ↓
-Architecture / Risk Review
-      ↓
-Implementation
-      ↓
-Targeted Validation
-      ↓
-Full Regression Validation
-      ↓
-Release Metadata
-      ↓
-Commit / Tag
-      ↓
-Bundle / Patch Verification
-      ↓
-Release
-```
-
-New AI capabilities must preserve deterministic engineering authority and must pass existing engineering safety, dependency-direction, and regression safeguards before release.
-
----
-
-**TorqPro AI — Engineering first. AI where it adds controlled, explainable value.**
+If READY_TO_COMMIT=YES, wait for my approval before committing.
