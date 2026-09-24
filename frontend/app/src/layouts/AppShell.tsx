@@ -4,6 +4,8 @@ import { ChevronRight } from 'lucide-react'
 import Sidebar from './Sidebar'
 import { BREADCRUMB_MAP } from '../lib/navigation'
 
+const logoSrc = `${import.meta.env.BASE_URL}torqpro-ai-logo.png`
+
 // AI provider status — hidden until AI-VERIFY-01 establishes a real runtime source.
 // AI runtime status is LOCAL_REPOSITORY_VERIFICATION_REQUIRED; no factual state to display yet.
 // This component renders nothing in VISUAL-02A. AI-VERIFY-01 will replace it with a live indicator.
@@ -45,11 +47,10 @@ export default function AppShell({ user, role, onLogout }: {
         {/* Logo — always navigates home */}
         <Link
           to="/app"
-          className="text-base font-bold text-tp-accent-light tracking-tight shrink-0
-                     hover:text-tp-accent transition-colors"
+          className="flex items-center gap-2 shrink-0 hover:opacity-90 transition-opacity"
         >
-          TorqPro
-          <span className="text-tp-text-3 font-normal text-[10px] ml-1.5">v3.3</span>
+          <img src={logoSrc} alt="TorqPro AI" className="h-8 w-auto object-contain" />
+          <span className="text-tp-text-3 font-normal text-[10px]">v3.3.4</span>
         </Link>
 
         {/* Breadcrumb */}

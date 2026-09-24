@@ -1,5 +1,7 @@
 import { useState, type FormEvent } from 'react'
 
+const logoSrc = `${import.meta.env.BASE_URL}torqpro-ai-logo.png`
+
 export default function LoginPage({ onLogin }: { onLogin: (u: string, p: string) => Promise<any> }) {
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
@@ -16,7 +18,9 @@ export default function LoginPage({ onLogin }: { onLogin: (u: string, p: string)
   return (
     <div className="min-h-screen flex items-center justify-center bg-tp-bg">
       <form onSubmit={submit} className="bg-tp-surface border border-tp-border-strong rounded-lg p-10 w-[360px]">
-        <div className="text-2xl font-bold text-tp-accent-light mb-1 text-center">TorqPro</div>
+        <div className="flex justify-center mb-6">
+          <img src={logoSrc} alt="TorqPro AI" className="w-56 h-auto object-contain" />
+        </div>
         <div className="text-xs text-tp-text-3 text-center mb-8">Fastener Engineering Intelligence</div>
         <div className="mb-4">
           <label className="block text-xs text-tp-text-2 mb-1">Kullanıcı adı</label>
@@ -33,7 +37,7 @@ export default function LoginPage({ onLogin }: { onLogin: (u: string, p: string)
           {loading ? 'Giriş yapılıyor...' : 'Giriş Yap'}
         </button>
         {error && <div className="text-tp-error text-xs mt-3 text-center">{error}</div>}
-        <div className="text-[10px] text-tp-text-3 text-center mt-6">Protype Lab — TorqPro v3.3</div>
+        <div className="text-[10px] text-tp-text-3 text-center mt-6">Protype Lab — TorqPro v3.3.4</div>
       </form>
     </div>
   )
