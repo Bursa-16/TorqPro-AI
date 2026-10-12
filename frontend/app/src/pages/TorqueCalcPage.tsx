@@ -1,12 +1,36 @@
 import { useState, useRef } from 'react'
 import StatusBadge from '../components/ui/StatusBadge'
-import JointVisualization from '../components/engineering/JointVisualization'
+import TorqueContextDiagram, { type TorqueVisualFocus } from '../components/engineering/TorqueContextDiagram'
 import ModuleGuideDrawer from '../components/guidance/ModuleGuideDrawer'
 import { engineeringCheck } from '../services/torque'
 import type { EngineeringCheckRequest, EngineeringCheckResult } from '../types/api'
 import { torqueGuide } from '../guides/torqueGuide'
 import type { ExampleValues } from '../guides/GuideSchema'
 import { EV } from '../components/engineering-visuals/engineeringVisualTokens'
+
+// ── Context panel titles ──────────────────────────────────────────────────────
+const CONTEXT_TITLE: Record<TorqueVisualFocus, string> = {
+  neutral:              'Bağlantı Diyagramı',
+  diameter_d:           'Çap (d)',
+  pitch_p:              'Adım (P)',
+  stress_area_as:       'As',
+  bearing_diameter_dw:  'Dw',
+  thread_friction:      'Diş Sürtünmesi',
+  bearing_friction:     'Oturma Yüzeyi Sürtünmesi',
+  yield_utilization:    'Akma Kullanım Oranı',
+  rp02:                 'Rp0.2',
+}
+const CONTEXT_SUB: Record<TorqueVisualFocus, string> = {
+  neutral:              '',
+  diameter_d:           'Cıvata nominal çapı',
+  pitch_p:              'Diş adımı',
+  stress_area_as:       'Çekme gerilme alanı',
+  bearing_diameter_dw:  'Etkin oturma çapı',
+  thread_friction:      'Diş temas yüzeyi',
+  bearing_friction:     'Baş/somun altı temas yüzeyi',
+  yield_utilization:    'Hedef akma oranı',
+  rp02:                 'Akma dayanımı (malzeme)',
+}
 
 const DEFAULTS: EngineeringCheckRequest = {
   diameter_mm: 10, pitch_mm: 1.5, stress_area_mm2: 58, rp02_mpa: 900,
@@ -20,12 +44,15 @@ const DEFAULTS: EngineeringCheckRequest = {
 // ── Field component ────────────────────────────────────────────────────────────
 function F({
   label, field, unit, form, onChange,
+  focusKey, onFocusField,
 }: {
   label: string
   field: keyof EngineeringCheckRequest
   unit?: string
   form: EngineeringCheckRequest
   onChange: (f: keyof EngineeringCheckRequest, v: string) => void
+  focusKey?: TorqueVisualFocus
+  onFocusField?: (k: TorqueVisualFocus) => void
 }) {
   return (
     <div className="flex flex-col gap-0.5">
@@ -35,6 +62,7 @@ function F({
           type="number" step="any"
           value={form[field]}
           onChange={e => onChange(field, e.target.value)}
+          onFocus={() => { if (focusKey) onFocusField?.(focusKey) }}
           className="w-full bg-tp-workspace border border-tp-border-2 rounded
                      px-2 py-1.5 text-[14px] text-tp-text tabular-nums
                      outline-none focus:border-tp-accent transition-colors"
@@ -81,6 +109,8 @@ export default function TorqueCalcPage() {
   const [loading, setLoading] = useState(false)
   const [advanced, setAdvanced] = useState(false)
   const [guideOpen, setGuideOpen] = useState(false)
+  // GEOMETRY-CONTEXT-01: visual focus state (HARD RULE 13)
+  const [visualFocus, setVisualFocus] = useState<TorqueVisualFocus>('neutral')
 
   // Snapshot for "Değerleri Geri Al"
   const snapshotRef = useRef<EngineeringCheckRequest | null>(null)
@@ -129,7 +159,7 @@ export default function TorqueCalcPage() {
     }, 2000)
   }
 
-  const fp = { form, onChange: update } as const
+  const fp = { form, onChange: update, onFocusField: setVisualFocus } as const
 
   const nutUtil = result?.nut_proof_util_pct ?? 0
   // NOTE: 75/90 are UNSOURCED UI-only thresholds — not authoritative engineering limits.
@@ -184,23 +214,42 @@ export default function TorqueCalcPage() {
           <div id="guide-anchor-geometri">
             <SectionLabel>Geometri</SectionLabel>
             <div className="grid grid-cols-4 gap-3">
-              <F label="Çap (d)" field="diameter_mm" unit="mm" {...fp} />
-              <F label="Adım (P)" field="pitch_mm" unit="mm" {...fp} />
-              <F label="As" field="stress_area_mm2" unit="mm²" {...fp} />
-              <F label="Dw" field="effective_bearing_diameter_mm" unit="mm" {...fp} />
+              <F label="Çap (d)" field="diameter_mm" unit="mm" focusKey="diameter_d" {...fp} />
+              <F label="Adım (P)" field="pitch_mm" unit="mm" focusKey="pitch_p" {...fp} />
+              <F label="As" field="stress_area_mm2" unit="mm²" focusKey="stress_area_as" {...fp} />
+              <F label="Dw" field="effective_bearing_diameter_mm" unit="mm" focusKey="bearing_diameter_dw" {...fp} />
             </div>
           </div>
+
+          {/* Mobile inline context visual (HARD RULE 06) */}
+          {visualFocus !== 'neutral' && (
+            <div className="block lg:hidden mt-3">
+              <div className="text-[10px] text-tp-text-3 mb-1 tracking-wide">
+                {CONTEXT_TITLE[visualFocus]}
+                {CONTEXT_SUB[visualFocus] && (
+                  <span className="ml-1 text-tp-text-3 normal-case">
+                    — {CONTEXT_SUB[visualFocus]}
+                  </span>
+                )}
+              </div>
+              <TorqueContextDiagram
+                focus={visualFocus}
+                result={result}
+                className="w-full max-h-[180px]"
+              />
+            </div>
+          )}
 
           {/* Primary: Friction */}
           <div id="guide-anchor-surtunme">
             <SectionLabel>Sürtünme (μ)</SectionLabel>
             <div className="grid grid-cols-3 gap-3 mb-1">
-              <F label="Diş min" field="mu_thread_min" {...fp} />
-              <F label="Diş nom" field="mu_thread_nom" {...fp} />
-              <F label="Diş max" field="mu_thread_max" {...fp} />
-              <F label="Oturma Yüzeyi μ min" field="mu_bearing_min" {...fp} />
-              <F label="Oturma Yüzeyi μ nom" field="mu_bearing_nom" {...fp} />
-              <F label="Oturma Yüzeyi μ max" field="mu_bearing_max" {...fp} />
+              <F label="Diş min" field="mu_thread_min" focusKey="thread_friction" {...fp} />
+              <F label="Diş nom" field="mu_thread_nom" focusKey="thread_friction" {...fp} />
+              <F label="Diş max" field="mu_thread_max" focusKey="thread_friction" {...fp} />
+              <F label="Oturma Yüzeyi μ min" field="mu_bearing_min" focusKey="bearing_friction" {...fp} />
+              <F label="Oturma Yüzeyi μ nom" field="mu_bearing_nom" focusKey="bearing_friction" {...fp} />
+              <F label="Oturma Yüzeyi μ max" field="mu_bearing_max" focusKey="bearing_friction" {...fp} />
             </div>
           </div>
 
@@ -208,8 +257,8 @@ export default function TorqueCalcPage() {
           <div id="guide-anchor-hedef">
             <SectionLabel>Hedef</SectionLabel>
             <div className="grid grid-cols-2 gap-3">
-              <F label="Akma kullanım oranı" field="target_yield_ratio" {...fp} />
-              <F label="Rp0.2" field="rp02_mpa" unit="MPa" {...fp} />
+              <F label="Akma kullanım oranı" field="target_yield_ratio" focusKey="yield_utilization" {...fp} />
+              <F label="Rp0.2" field="rp02_mpa" unit="MPa" focusKey="rp02" {...fp} />
             </div>
           </div>
 
@@ -360,11 +409,22 @@ export default function TorqueCalcPage() {
 
           <div className="h-px bg-tp-border/60 my-3" />
 
-          {/* 5. Joint visualization */}
-          <div className="text-[10px] text-tp-text-3 mb-1 tracking-wide">
-            Bağlantı Diyagramı
+          {/* 5. Contextual joint diagram (GEOMETRY-CONTEXT-01) */}
+          <div className="mb-1">
+            <div className="text-[10px] text-tp-text-3 tracking-wide">
+              {CONTEXT_TITLE[visualFocus]}
+            </div>
+            {CONTEXT_SUB[visualFocus] && (
+              <div className="text-[9px] text-tp-text-3 mt-0.5 leading-none">
+                {CONTEXT_SUB[visualFocus]}
+              </div>
+            )}
           </div>
-          <JointVisualization result={result} />
+          <TorqueContextDiagram
+            focus={visualFocus}
+            result={result}
+            className="w-full max-h-[260px]"
+          />
 
           {/* 6. Traceability footer */}
           <div className="mt-auto pt-3 text-[10px] text-tp-text-3 leading-relaxed">
