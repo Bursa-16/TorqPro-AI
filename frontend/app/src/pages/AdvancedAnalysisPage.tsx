@@ -24,6 +24,7 @@ import { useState } from 'react'
 import { Wrench, AlertTriangle, CheckCircle, Info, BookOpen } from 'lucide-react'
 import ModuleGuideDrawer from '../components/guidance/ModuleGuideDrawer'
 import { advancedAnalysisGuide } from '../guides/advancedAnalysisGuide'
+import { EV } from '../components/engineering-visuals/engineeringVisualTokens'
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 interface VdiInputs {
@@ -73,40 +74,41 @@ function calculate(inputs: VdiInputs): VdiResult {
 function ComplianceDiagram({ result }: { result: VdiResult | null }) {
   const phi = result?.phi ?? 0
   const x = Math.min(phi * 260 + 10, 268)
-  const color = !result ? '#6b7280'
-    : result.optimal ? '#16a37a'
-    : result.phi < 0.35 ? '#d4870a'
-    : '#dc2626'
+  // Needle color: computed result when value exists, schematic note when no input yet
+  // NOTE: Φ 0.20 / 0.35 zone markers are GUIDANCE REFERENCE only — not authoritative
+  // engineering thresholds. Needle and label use computedResult (neutral result color),
+  // not pass/warn/fail semantics.
+  const needleColor = result ? EV.computedResult : EV.schematicNote
 
   return (
-    <svg viewBox="0 0 260 130" className="w-full" aria-label="Uyum diyagramı">
+    <svg viewBox="0 0 260 130" className="w-full" aria-label="Uyum diyagramı" role="img">
+      {/* Light engineering canvas background */}
+      <rect x="0" y="0" width="260" height="130" rx="4" fill={EV.canvasBackground} />
       {/* Track */}
-      <rect x="10" y="50" width="240" height="12" rx="3" fill="#1e293b" />
-      {/* Green zone */}
-      <rect x="10" y="50" width="130" height="12" rx="3" fill="#16a37a" opacity="0.25" />
-      {/* Yellow zone */}
-      <rect x="140" y="50" width="60" height="12" rx="0" fill="#d4870a" opacity="0.25" />
-      {/* Red zone */}
-      <rect x="200" y="50" width="50" height="12" rx="3" fill="#dc2626" opacity="0.25" />
+      <rect x="10" y="50" width="240" height="12" rx="3" fill={EV.holeVoidFill} />
+      {/* Guidance-reference zone tints — not authoritative status bands */}
+      <rect x="10" y="50" width="130" height="12" rx="3" fill={EV.guidance} opacity="0.15" />
+      <rect x="140" y="50" width="60" height="12" rx="0" fill={EV.guidance} opacity="0.10" />
+      <rect x="200" y="50" width="50" height="12" rx="3" fill={EV.guidance} opacity="0.08" />
 
-      {/* Needle */}
+      {/* Needle — computed result position */}
       {result && (
-        <line x1={x} y1="40" x2={x} y2="74" stroke={color} strokeWidth="2" strokeLinecap="round" />
+        <line x1={x} y1="40" x2={x} y2="74" stroke={needleColor} strokeWidth="2.5" strokeLinecap="round" />
       )}
 
       {/* Scale labels */}
-      <text x="10" y="85" fill="#94a3b8" fontSize="8" textAnchor="start">0</text>
-      <text x="130" y="85" fill="#94a3b8" fontSize="8" textAnchor="middle">0.5</text>
-      <text x="250" y="85" fill="#94a3b8" fontSize="8" textAnchor="end">1.0</text>
+      <text x="10" y="87" fill={EV.schematicNote} fontSize="9" textAnchor="start">0</text>
+      <text x="130" y="87" fill={EV.schematicNote} fontSize="9" textAnchor="middle">0.5</text>
+      <text x="250" y="87" fill={EV.schematicNote} fontSize="9" textAnchor="end">1.0</text>
 
-      {/* Threshold markers */}
-      <line x1="64" y1="44" x2="64" y2="56" stroke="#16a37a" strokeWidth="1" strokeDasharray="2,2" />
-      <text x="64" y="43" fill="#16a37a" fontSize="7" textAnchor="middle">0.2</text>
-      <line x1="97" y1="44" x2="97" y2="56" stroke="#d4870a" strokeWidth="1" strokeDasharray="2,2" />
-      <text x="97" y="43" fill="#d4870a" fontSize="7" textAnchor="middle">0.35</text>
+      {/* Guidance reference markers (not authoritative thresholds) */}
+      <line x1="64" y1="44" x2="64" y2="56" stroke={EV.guidance} strokeWidth="1" strokeDasharray="2,2" />
+      <text x="64" y="43" fill={EV.guidance} fontSize="8" textAnchor="middle">0.2</text>
+      <line x1="97" y1="44" x2="97" y2="56" stroke={EV.guidance} strokeWidth="1" strokeDasharray="2,2" />
+      <text x="97" y="43" fill={EV.guidance} fontSize="8" textAnchor="middle">0.35</text>
 
-      {/* Phi label */}
-      <text x="130" y="115" fill={color} fontSize="11" fontWeight="700" textAnchor="middle">
+      {/* Phi computed result label */}
+      <text x="130" y="116" fill={needleColor} fontSize="12" fontWeight="700" textAnchor="middle">
         {result ? `Φ = ${result.phi.toFixed(3)}` : 'Φ = —'}
       </text>
     </svg>

@@ -6,6 +6,7 @@ import { engineeringCheck } from '../services/torque'
 import type { EngineeringCheckRequest, EngineeringCheckResult } from '../types/api'
 import { torqueGuide } from '../guides/torqueGuide'
 import type { ExampleValues } from '../guides/GuideSchema'
+import { EV } from '../components/engineering-visuals/engineeringVisualTokens'
 
 const DEFAULTS: EngineeringCheckRequest = {
   diameter_mm: 10, pitch_mm: 1.5, stress_area_mm2: 58, rp02_mpa: 900,
@@ -131,9 +132,11 @@ export default function TorqueCalcPage() {
   const fp = { form, onChange: update } as const
 
   const nutUtil = result?.nut_proof_util_pct ?? 0
-  const nutColor = nutUtil > 90 ? 'text-tp-error' : nutUtil > 75 ? 'text-tp-warn' : 'text-tp-valid'
-  const nutBadge = nutUtil > 90 ? 'error' as const : nutUtil > 75 ? 'warning' as const : 'validated' as const
-  const nutLabel = nutUtil > 90 ? 'Riskli' : nutUtil > 75 ? 'Sınırda' : 'Uygun'
+  // NOTE: 75/90 are UNSOURCED UI-only thresholds — not authoritative engineering limits.
+  // Display nut utilization as a neutral computed result, not pass/warn/fail.
+  const nutColor = 'text-tp-accent'
+  const nutBadge = 'info' as const
+  const nutLabel = 'Hesaplanan'
   const sfColor = (sf: number) => sf < 1 ? 'text-tp-error' : 'text-tp-valid'
 
   return (
@@ -330,7 +333,9 @@ export default function TorqueCalcPage() {
                   className="h-full rounded-full transition-all duration-500"
                   style={{
                     width: `${Math.min(nutUtil, 100)}%`,
-                    backgroundColor: nutUtil > 90 ? '#c04040' : nutUtil > 75 ? '#c8860e' : '#1b9e7a',
+                    // NOTE: 75/90 thresholds are UNSOURCED (UI-only).
+                    // Bar uses computedResult (neutral engineering result color).
+                    backgroundColor: EV.computedResult,
                   }}
                 />
               </div>
