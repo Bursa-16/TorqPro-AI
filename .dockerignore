@@ -1,0 +1,12 @@
+# CDR-01B1.5: Exclude build artifacts and caches from Docker build context.
+# frontend/dist is rebuilt inside the multi-stage build; stale local copies
+# are excluded so COPY --from=frontend-builder is always authoritative.
+frontend/app/node_modules
+frontend/dist
+__pycache__
+**/__pycache__
+*.pyc
+*.pyo
+.git
+.env
+runtime/

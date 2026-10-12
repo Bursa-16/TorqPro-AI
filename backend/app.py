@@ -2179,3 +2179,15 @@ from backend.api.routes.tools import router as tools_router
 app.include_router(tools_router)
 
 app.mount("/",StaticFiles(directory=FRONT,html=True),name="frontend")
+
+# CDR-01B1.5: SPA catch-all — serve index.html for any path that the static
+# mount does not resolve (i.e. client-side React routes such as /dashboard).
+# /api/* paths are handled before this mount and never reach here.
+from starlette.exceptions import HTTPException as StarletteHTTPException
+@app.exception_handler(StarletteHTTPException)
+async def _spa_fallback(request:Request,exc:StarletteHTTPException):
+    if exc.status_code==404 and not request.url.path.startswith("/api/"):
+        from fastapi.responses import FileResponse as _FR
+        return _FR(FRONT/"index.html")
+    from fastapi.responses import JSONResponse as _JR
+    return _JR({"detail":exc.detail},status_code=exc.status_code)
