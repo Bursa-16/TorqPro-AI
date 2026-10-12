@@ -390,9 +390,28 @@ def migrate():
         if "project_id" not in calc_cols:c.execute("ALTER TABLE calculations ADD COLUMN project_id INTEGER")
         cols=[r["name"] for r in c.execute("PRAGMA table_info(audit_log)").fetchall()]
         if "request_id" not in cols:c.execute("ALTER TABLE audit_log ADD COLUMN request_id TEXT")
-        if not c.execute("SELECT 1 FROM users WHERE username='demo'").fetchone():
-            c.execute("INSERT INTO users(username,display_name,password_hash,is_active,role,created_at) VALUES(?,?,?,?,?,?)",("demo","demo",hp("A1234"),1,"admin",now_iso()))
-        else:c.execute("UPDATE users SET role='admin' WHERE username='demo'")
+        # CDR-01B1: env-controlled demo user provisioning.
+        # The former hardcoded demo/A1234 admin credential has been removed.
+        # Set TORQPRO_DEMO_USER_ENABLED=true plus TORQPRO_DEMO_USERNAME and
+        # TORQPRO_DEMO_PASSWORD to provision a demo account at first startup.
+        # If the user already exists it is never modified (no password or role
+        # overwrite on restart). Role defaults to 'engineer' (least privilege).
+        # If enabled but required values are absent, provisioning is skipped
+        # and a warning is logged — fail-closed, no insecure fallback.
+        _demo_enabled=(os.getenv("TORQPRO_DEMO_USER_ENABLED") or "").strip().lower()=="true"
+        if _demo_enabled:
+            _demo_user=(os.getenv("TORQPRO_DEMO_USERNAME") or "").strip()
+            _demo_pass=(os.getenv("TORQPRO_DEMO_PASSWORD") or "").strip()
+            _demo_role=(os.getenv("TORQPRO_DEMO_ROLE") or "engineer").strip()
+            if not _demo_user or not _demo_pass:
+                log.warning("TORQPRO_DEMO_USER_ENABLED=true but TORQPRO_DEMO_USERNAME or TORQPRO_DEMO_PASSWORD is missing — demo user not provisioned")
+            elif _demo_role not in ("engineer","admin"):
+                log.warning("TORQPRO_DEMO_ROLE value '%s' is not recognised — demo user not provisioned",_demo_role)
+            elif not c.execute("SELECT 1 FROM users WHERE username=?",[_demo_user]).fetchone():
+                c.execute("INSERT INTO users(username,display_name,password_hash,is_active,role,created_at) VALUES(?,?,?,?,?,?)",
+                          (_demo_user,_demo_user,hp(_demo_pass),1,_demo_role,now_iso()))
+                log.info("Demo user '%s' provisioned with role '%s'",_demo_user,_demo_role)
+            # existing user: intentionally no password/role overwrite on restart
         c.execute("INSERT INTO schema_info(id,version,updated_at) VALUES(1,?,?) ON CONFLICT(id) DO UPDATE SET version=excluded.version,updated_at=excluded.updated_at",(SCHEMA_VERSION,now_iso()))
         if not c.execute("SELECT 1 FROM organization_settings WHERE id=1").fetchone():
             c.execute("INSERT INTO organization_settings(id,name,report_title,footer,updated_at) VALUES(1,?,?,?,?)",
