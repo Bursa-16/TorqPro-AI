@@ -8,7 +8,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { Wrench, BookOpen, X, Pencil, Trash2, PlusCircle } from 'lucide-react'
 import ModuleGuideDrawer from '../components/guidance/ModuleGuideDrawer'
-import { toolTrackingGuide } from '../guides/toolTrackingGuide'
+import { sikiciGuide as toolTrackingGuide } from '../guides/toolTrackingGuide'
 import { fetchTools, fetchToolsSummary, createTool, updateTool, deactivateTool, createCapabilityStudy } from '../services/toolTrackingApi'
 import { mapApiTool, OPERATIONAL_STATUS_OPTIONS } from '../types/toolTracking'
 import type { ToolTrackingRecord, ToolStatus, ToolsSummary, ToolCreatePayload, ToolPatchPayload, CapabilityStudyCreatePayload } from '../types/toolTracking'
