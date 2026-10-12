@@ -126,8 +126,8 @@ export default function Sidebar({ role }: { role: string | null }) {
           onClick={() => navigate('/app')}
           className={`w-full flex items-center gap-2.5 px-2 py-1.5 rounded text-[13px] transition-colors
             ${location.pathname === '/app'
-              ? 'text-tp-accent-light bg-tp-accent/10 border border-tp-accent/20'
-              : 'text-tp-text-2 hover:text-tp-text hover:bg-tp-surface-2 border border-transparent'
+              ? 'text-white bg-tp-accent/20 border border-tp-accent/40 font-semibold'
+              : 'text-tp-text-2 hover:text-white hover:bg-tp-surface-2 border border-transparent'
             }`}
         >
           <span className="shrink-0 w-4 flex justify-center">
@@ -157,8 +157,8 @@ export default function Sidebar({ role }: { role: string | null }) {
                         onClick={() => navigate(item.path)}
                         className={`w-full flex items-center justify-center p-2 rounded transition-colors
                           ${isActive
-                            ? 'text-tp-accent-light bg-tp-accent/10'
-                            : 'text-tp-text-3 hover:text-tp-text hover:bg-tp-surface-2'
+                            ? 'text-tp-accent-light bg-tp-accent/15 border border-tp-accent/40 shadow-[0_0_0_1px_rgba(74,124,201,0.15)]'
+                            : 'text-tp-text-2 hover:text-tp-text hover:bg-tp-surface-2 border border-transparent'
                           }`}
                       >
                         <Icon icon={item.icon} size={16} />
@@ -176,7 +176,7 @@ export default function Sidebar({ role }: { role: string | null }) {
               <Collapsible.Trigger asChild>
                 <button className={`w-full flex items-center justify-between px-2 py-1.5 rounded
                     text-[10px] font-semibold uppercase tracking-widest transition-colors
-                    ${hasActive ? 'text-tp-accent-light' : 'text-tp-text-3 hover:text-tp-text-2'}`}>
+                    ${hasActive ? 'text-tp-accent-light' : 'text-tp-text-2 hover:text-tp-text'}`}>
                   <span>{group.label}</span>
                   <span className="text-tp-text-3">
                     {isOpen ? <ChevronDown size={11} /> : <ChevronRight size={11} />}
@@ -199,8 +199,8 @@ export default function Sidebar({ role }: { role: string | null }) {
                         onClick={() => navigate(item.path)}
                         className={`w-full flex items-center gap-2.5 px-2 py-[5px] rounded text-[13px] transition-colors
                           ${isActive
-                            ? 'text-tp-accent-light bg-tp-accent/10 border-l-2 border-tp-accent font-medium'
-                            : 'text-tp-text-2 hover:text-tp-text hover:bg-tp-surface-2 border-l-2 border-transparent'
+                            ? 'text-white bg-tp-accent/20 border-l-[3px] border-tp-accent font-semibold shadow-[0_0_0_1px_rgba(74,124,201,0.12)]'
+                            : 'text-tp-text-2 hover:text-white hover:bg-tp-surface-2 border-l-[3px] border-transparent'
                           }`}
                       >
                         <span className="shrink-0 w-4 flex justify-center">

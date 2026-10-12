@@ -33,10 +33,11 @@
   --color-tp-ai: #7c5cbf;
   --color-tp-ai-muted: #2a1e40;
 
-  /* Text hierarchy */
-  --color-tp-text: #dce0f0;
-  --color-tp-text-2: #8890b0;
-  --color-tp-text-3: #555c78;
+  /* Text hierarchy — VISUAL-03C.1B-R1 contrast requirements:
+     MUST NOT use tp-text-3 for interactive labels on #0e1118/#0c0e14 backgrounds */
+  --color-tp-text: #dce0f0;       /* primary — near-white */
+  --color-tp-text-2: #b8c4d8;     /* secondary — was #8890b0, upgraded for readability */
+  --color-tp-text-3: #7880a0;     /* muted — was #555c78, upgraded; use for non-interactive only */
 
   /* Typography */
   --font-family-sans: 'Inter', 'Segoe UI', system-ui, sans-serif;
@@ -81,12 +82,48 @@
   --color-tp-chart-5:   #c04040;   /* critical — red                        */
   --color-tp-chart-ref: #8890b0;   /* reference / nominal — muted slate     */
 
+  /* ── VISUAL-03C.1B-R1 Engineering canvas tokens ─────────────────────────── */
+  /* Used by engineeringVisualTokens.ts — referenced here for CSS consumers   */
+  --color-tp-canvas-bg:      #F7F9FC;  /* light engineering drawing surface  */
+  --color-tp-canvas-border:  #D0D9E4;  /* canvas frame                       */
+  --color-tp-geom-primary:   #263445;  /* structural outline                 */
+  --color-tp-geom-secondary: #59697A;  /* secondary lines                    */
+
   /* ── VISUAL-02A layout vars (moved inside @theme block) ─────────────────  */
   --sidebar-w-expanded: 208px;
   --sidebar-w-collapsed: 48px;
   --header-h: 48px;
   --breadcrumb-h: 28px;
   --color-tp-surface-hover: #1e2336;
+
+  /* ── VISUAL-03C.2 Module-control state tokens ────────────────────────────  */
+  /* CSS authority for all sidebar / module-selector interactive states.       */
+  /* TypeScript counterpart: engineeringVisualTokens.ts MC object.             */
+
+  /* DEFAULT */
+  --tp-module-btn-bg:               transparent;
+  --tp-module-btn-text:             #b8c4d8;
+  --tp-module-btn-border:           transparent;
+
+  /* HOVER */
+  --tp-module-btn-bg-hover:         #1e2336;
+  --tp-module-btn-text-hover:       #dce0f0;
+  --tp-module-btn-border-hover:     transparent;
+
+  /* ACTIVE — 3-signal: bg + text + border */
+  --tp-module-btn-bg-active:        rgba(74,124,201,0.18);
+  --tp-module-btn-text-active:      #ffffff;
+  --tp-module-btn-border-active:    rgba(74,124,201,0.55);
+  /** Controlled bright edge — small outer glow, engineering-blue, no bloom */
+  --tp-module-btn-active-glow:      0 0 0 2px rgba(74,124,201,0.18);
+
+  /* FOCUS */
+  --tp-module-btn-focus-ring:       0 0 0 2px #4a7cc9, 0 0 0 4px rgba(74,124,201,0.18);
+
+  /* DISABLED */
+  --tp-module-btn-disabled-bg:      transparent;
+  --tp-module-btn-disabled-text:    #4a5070;
+  --tp-module-btn-disabled-border:  transparent;
 }
 
 /* Global resets */
@@ -131,3 +168,53 @@ body {
 .tabular-nums { font-variant-numeric: tabular-nums; }
 .eng-value { font-size: 1.5rem; font-weight: 700; font-variant-numeric: tabular-nums; letter-spacing: -0.02em; }
 .eng-unit { font-size: 0.75rem; color: var(--color-tp-text-3); margin-left: 2px; }
+
+/* ── VISUAL-03C.1B-R1 Global accessibility & focus ───────────────────────── */
+/* Keyboard focus ring — clearly visible, engineering-blue, low glow          */
+:focus-visible {
+  outline: 2px solid var(--color-tp-accent);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 4px rgba(74, 124, 201, 0.18);
+}
+
+/* Engineering canvas wrapper — ensures SVG sits against light surface        */
+.tp-engineering-canvas {
+  background-color: var(--color-tp-canvas-bg);
+  border: 1px solid var(--color-tp-canvas-border);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+
+/* ── VISUAL-03C.2 Module-button utility class ─────────────────────────────── */
+/* Consumes --tp-module-btn-* tokens. Apply to sidebar nav buttons,           */
+/* Scene01 module selector tabs, and any equivalent module-control element.   */
+.tp-module-btn {
+  background-color: var(--tp-module-btn-bg);
+  color: var(--tp-module-btn-text);
+  border-color: var(--tp-module-btn-border);
+  transition: background-color 120ms ease, color 120ms ease, border-color 120ms ease, box-shadow 120ms ease;
+}
+.tp-module-btn:hover {
+  background-color: var(--tp-module-btn-bg-hover);
+  color: var(--tp-module-btn-text-hover);
+  border-color: var(--tp-module-btn-border-hover);
+}
+.tp-module-btn.active,
+.tp-module-btn[data-active="true"] {
+  background-color: var(--tp-module-btn-bg-active);
+  color: var(--tp-module-btn-text-active);
+  border-color: var(--tp-module-btn-border-active);
+  box-shadow: var(--tp-module-btn-active-glow);
+}
+.tp-module-btn:focus-visible {
+  outline: none;
+  box-shadow: var(--tp-module-btn-focus-ring);
+}
+.tp-module-btn:disabled,
+.tp-module-btn[data-disabled="true"] {
+  background-color: var(--tp-module-btn-disabled-bg);
+  color: var(--tp-module-btn-disabled-text);
+  border-color: var(--tp-module-btn-disabled-border);
+  pointer-events: none;
+  opacity: 0.5;
+}
