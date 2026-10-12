@@ -7,8 +7,7 @@ export default function JointVisualization({ result }: { result: EngineeringChec
   const nutUtil  = result?.nut_proof_util_pct ?? 0
   const active   = result !== null
 
-  const utilColor = nutUtil > 90 ? EV.fail : nutUtil > 75 ? EV.warn : EV.valid
-  const barFill = active ? Math.min(80, Math.max(10, (nutUtil / 100) * 80)) : 0
+  const barFill = active ? Math.min(68, (nutUtil / 100) * 68) : 0
 
   return (
     <svg
@@ -22,13 +21,13 @@ export default function JointVisualization({ result }: { result: EngineeringChec
           <polygon points="0 0,8 3,0 6" fill={EV.computedResult} />
         </marker>
         <marker id="jv-util-up" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
-          <polygon points="0 0,8 3,0 6" fill={utilColor} />
+          <polygon points="0 0,8 3,0 6" fill={EV.computedResult} />
         </marker>
         <marker id="jv-util-dn" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
-          <polygon points="0 0,8 3,0 6" fill={utilColor} />
+          <polygon points="0 0,8 3,0 6" fill={EV.computedResult} />
         </marker>
         <marker id="jv-clamp"   markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
-          <polygon points="0 0,8 3,0 6" fill={EV.valid} />
+          <polygon points="0 0,8 3,0 6" fill={EV.guidance} />
         </marker>
       </defs>
 
@@ -90,7 +89,7 @@ export default function JointVisualization({ result }: { result: EngineeringChec
           <path d="M 166 46 A 26 26 0 0 1 190 58"
             fill="none" stroke={EV.computedResult} strokeWidth="2.2"
             markerEnd="url(#jv-blue)" />
-          <text x="196" y="50" fill={EV.computedResult} fontSize="12" fontWeight="700">T</text>
+          <text x="196" y="50" fill={EV.computedResult} fontSize="12" fontWeight="700">M_A</text>
           <text x="196" y="65" fill={EV.inputText} fontSize="10" fontWeight="500">
             {torque.toFixed(1)} Nm
           </text>
@@ -101,15 +100,15 @@ export default function JointVisualization({ result }: { result: EngineeringChec
       {active && (
         <g>
           <line x1="100" y1="118" x2="100" y2="72"
-            stroke={utilColor} strokeWidth="2.2"
+            stroke={EV.computedResult} strokeWidth="2.2"
             markerEnd="url(#jv-util-up)" />
           <line x1="100" y1="190" x2="100" y2="232"
-            stroke={utilColor} strokeWidth="2.2"
+            stroke={EV.computedResult} strokeWidth="2.2"
             markerEnd="url(#jv-util-dn)" />
-          <text x="100" y="94" fill={utilColor} fontSize="11" fontWeight="700" textAnchor="middle">
-            Fv
+          <text x="100" y="94" fill={EV.computedResult} fontSize="11" fontWeight="700" textAnchor="middle">
+            F_M
           </text>
-          <text x="100" y="108" fill={utilColor} fontSize="10" textAnchor="middle">
+          <text x="100" y="108" fill={EV.computedResult} fontSize="10" textAnchor="middle">
             {(preload / 1000).toFixed(1)} kN
           </text>
         </g>
@@ -119,15 +118,15 @@ export default function JointVisualization({ result }: { result: EngineeringChec
       {active && (
         <g>
           <line x1="198" y1="118" x2="198" y2="140"
-            stroke={EV.valid} strokeWidth="2.2"
+            stroke={EV.guidance} strokeWidth="2.2"
             markerEnd="url(#jv-clamp)" />
           <line x1="198" y1="190" x2="198" y2="168"
-            stroke={EV.valid} strokeWidth="2.2"
+            stroke={EV.guidance} strokeWidth="2.2"
             markerEnd="url(#jv-clamp)" />
-          <text x="240" y="154" fill={EV.valid} fontSize="11" fontWeight="700" textAnchor="middle">
+          <text x="240" y="154" fill={EV.guidance} fontSize="11" fontWeight="700" textAnchor="middle">
             Fc
           </text>
-          <text x="240" y="168" fill={EV.valid} fontSize="10" textAnchor="middle">
+          <text x="240" y="168" fill={EV.guidance} fontSize="10" textAnchor="middle">
             Clamp
           </text>
         </g>
@@ -138,7 +137,7 @@ export default function JointVisualization({ result }: { result: EngineeringChec
         fill={EV.holeVoidFill} stroke={EV.geometrySecondary} strokeWidth="0.8" />
       {active && (
         <rect x="36" y={124 + (68 - barFill)} width="9" height={barFill} rx="2.5"
-          fill={utilColor} opacity="0.85" />
+          fill={EV.computedResult} opacity="0.85" />
       )}
       <text x="40.5" y="202" fill={EV.guidance} fontSize="9" fontWeight="500" textAnchor="middle">
         {active ? `${nutUtil.toFixed(0)}%` : '—'}

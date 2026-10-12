@@ -21,7 +21,7 @@
  */
 
 import { useState } from 'react'
-import { Wrench, AlertTriangle, CheckCircle, Info, BookOpen } from 'lucide-react'
+import { Wrench, CheckCircle, Info, BookOpen } from 'lucide-react'
 import ModuleGuideDrawer from '../components/guidance/ModuleGuideDrawer'
 import { advancedAnalysisGuide } from '../guides/advancedAnalysisGuide'
 import { EV } from '../components/engineering-visuals/engineeringVisualTokens'
@@ -177,25 +177,6 @@ export default function AdvancedAnalysisPage() {
 
   const fp = { inputs, onChange: update } as const
 
-  // Derived status
-  const status = !result ? 'idle'
-    : result.optimal ? 'optimal'
-    : result.phi < 0.35 ? 'warn'
-    : 'critical'
-
-  const statusColor = {
-    idle: 'text-tp-text-3',
-    optimal: 'text-tp-valid',
-    warn: 'text-tp-warn',
-    critical: 'text-tp-error',
-  }[status]
-
-  const statusBg = {
-    idle: 'bg-tp-result border-tp-border-2',
-    optimal: 'bg-tp-validation border-tp-border-valid',
-    warn: 'bg-tp-warn-muted border-tp-border-warn',
-    critical: 'bg-tp-error-muted border-tp-border-error',
-  }[status]
 
   return (
     <div className="flex h-full overflow-hidden">
@@ -345,19 +326,16 @@ export default function AdvancedAnalysisPage() {
       {/* ── RIGHT: Results ────────────────────────────────────────────── */}
       <div className="w-[320px] shrink-0 px-5 py-4 flex flex-col gap-0 self-start sticky top-0 bg-tp-result">
 
-        {/* Primary result: status + Φ */}
-        <div className={`rounded-md p-4 border-l-2 mb-3 ${statusBg}`}>
+        {/* Primary result: Φ computed result — guidance reference only */}
+        <div className="rounded-md p-4 border-l-2 mb-3 bg-tp-result border-tp-border-2">
           <div className="text-[10px] text-tp-text-3 mb-2 tracking-wide uppercase">
             Genel Değerlendirme
           </div>
           {result ? (
             <div className="flex items-center gap-2 mb-1">
-              {result.optimal
-                ? <CheckCircle size={18} className="text-tp-valid shrink-0" />
-                : <AlertTriangle size={18} className={`shrink-0 ${result.phi < 0.35 ? 'text-tp-warn' : 'text-tp-error'}`} />
-              }
-              <span className={`text-[15px] font-bold ${statusColor}`}>
-                {result.optimal ? 'Optimal Bağlantı' : result.phi < 0.35 ? 'Kontrol Edilmeli' : 'Kritik — Yük Fazla'}
+              <Info size={18} className="shrink-0 text-tp-accent" />
+              <span className="text-[15px] font-bold text-tp-accent">
+                Φ = {result.phi.toFixed(3)}
               </span>
             </div>
           ) : (
@@ -382,10 +360,10 @@ export default function AdvancedAnalysisPage() {
             value={result ? `${(result.db * 1e6).toFixed(2)} ×10⁻⁶ mm/N` : '—'} />
           <ResultRow label="Yük Dağılım Faktörü Φ"
             value={result ? result.phi.toFixed(3) : '—'}
-            color={result ? (result.optimal ? 'text-tp-valid' : result.phi < 0.35 ? 'text-tp-warn' : 'text-tp-error') : 'text-tp-text'} />
+            color={result ? 'text-tp-accent' : 'text-tp-text'} />
           <ResultRow label="Ek Cıvata Kuvveti ΔFb"
             value={result ? `${(result.FK / 1000).toFixed(2)} kN` : '—'}
-            color={result ? (result.optimal ? 'text-tp-accent-light' : 'text-tp-warn') : 'text-tp-text'} />
+            color={result ? 'text-tp-accent' : 'text-tp-text'} />
         </div>
 
         {/* Deferred note */}
