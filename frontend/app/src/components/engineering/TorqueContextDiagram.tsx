@@ -168,7 +168,7 @@ function ResultArrows({ result }: { result: EngineeringCheckResult }) {
 
 // ── Overlay: diameter_d ───────────────────────────────────────────────────────
 // Highlight: shank (x=132..150), dimension from washer face downward
-function OverlayDiameter() {
+function OverlayDiameter({ lang }: { lang: 'tr' | 'en' }) {
   const dimY = 240
   return (
     <g>
@@ -195,7 +195,7 @@ function OverlayDiameter() {
       <text x="141" y={dimY + 14} fill={DIM_COLOR} fontSize="11.5" fontWeight="700"
         textAnchor="middle" fontStyle="italic">d</text>
       <text x="141" y={dimY + 26} fill={NOTE_COLOR} fontSize="8.5" textAnchor="middle">
-        nominal çap
+        {lang === 'tr' ? 'nominal çap' : 'nominal diameter'}
       </text>
     </g>
   )
@@ -203,7 +203,7 @@ function OverlayDiameter() {
 
 // ── Overlay: pitch_p ──────────────────────────────────────────────────────────
 // Highlight thread zone, show pitch bracket on left side
-function OverlayPitch() {
+function OverlayPitch({ lang }: { lang: 'tr' | 'en' }) {
   const x1 = 110  // left bracket x
   return (
     <g>
@@ -234,7 +234,7 @@ function OverlayPitch() {
       <text x={x1 - 4} y="103" fill={DIM_COLOR} fontSize="11.5" fontWeight="700"
         textAnchor="end" fontStyle="italic">P</text>
       <text x="141" y="128" fill={NOTE_COLOR} fontSize="8.5" textAnchor="middle">
-        diş adımı
+        {lang === 'tr' ? 'diş adımı' : 'thread pitch'}
       </text>
     </g>
   )
@@ -274,7 +274,7 @@ function OverlayStressArea({ lang }: { lang: 'tr' | 'en' }) {
 
 // ── Overlay: bearing_diameter_dw ─────────────────────────────────────────────
 // Highlight washer-under-head bearing surface, dimension line below assembly
-function OverlayBearingDiameter() {
+function OverlayBearingDiameter({ lang }: { lang: 'tr' | 'en' }) {
   const dimY = 240
   return (
     <g>
@@ -301,7 +301,7 @@ function OverlayBearingDiameter() {
       <text x="141" y={dimY + 14} fill={DIM_COLOR} fontSize="11.5" fontWeight="700"
         textAnchor="middle" fontStyle="italic">Dw</text>
       <text x="141" y={dimY + 26} fill={NOTE_COLOR} fontSize="8.5" textAnchor="middle">
-        etkin oturma çapı
+        {lang === 'tr' ? 'etkin oturma çapı' : 'effective bearing dia.'}
       </text>
     </g>
   )
@@ -460,10 +460,10 @@ export default function TorqueContextDiagram({ focus, result, lang = 'tr', class
       <BaseAssembly />
 
       {/* Per-focus overlays */}
-      {focus === 'diameter_d'          && <OverlayDiameter />}
-      {focus === 'pitch_p'             && <OverlayPitch />}
+      {focus === 'diameter_d'          && <OverlayDiameter lang={lang} />}
+      {focus === 'pitch_p'             && <OverlayPitch lang={lang} />}
       {focus === 'stress_area_as'      && <OverlayStressArea lang={lang} />}
-      {focus === 'bearing_diameter_dw' && <OverlayBearingDiameter />}
+      {focus === 'bearing_diameter_dw' && <OverlayBearingDiameter lang={lang} />}
       {focus === 'thread_friction'     && <OverlayThreadFriction lang={lang} />}
       {focus === 'bearing_friction'    && <OverlayBearingFriction lang={lang} />}
       {focus === 'yield_utilization'   && <OverlayYieldUtilization lang={lang} />}

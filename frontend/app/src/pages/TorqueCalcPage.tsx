@@ -1,4 +1,4 @@
-import { useState, useRef, useMemo } from 'react'
+import { useState, useRef, useMemo, useCallback, useEffect } from 'react'
 import StatusBadge from '../components/ui/StatusBadge'
 import TorqueContextDiagram, { type TorqueVisualFocus } from '../components/engineering/TorqueContextDiagram'
 import ModuleGuideDrawer from '../components/guidance/ModuleGuideDrawer'
@@ -16,6 +16,26 @@ const DEFAULTS: EngineeringCheckRequest = {
   mu_bearing_min: 0.10, mu_bearing_nom: 0.12, mu_bearing_max: 0.14,
   effective_bearing_diameter_mm: 15, engagement_mm: 10,
   internal_rm_mpa: 500, bolt_rm_mpa: 1000, nut_proof_mpa: 830,
+}
+
+// ── Panel resize constants ─────────────────────────────────────────────────────
+const PANEL_DEFAULT = 350
+const PANEL_MIN = 280
+const PANEL_MAX = 520
+const PANEL_STORAGE_KEY = 'torqpro_torque_context_width'
+
+function getStoredPanelWidth(): number {
+  try {
+    const raw = localStorage.getItem(PANEL_STORAGE_KEY)
+    if (!raw) return PANEL_DEFAULT
+    const n = parseInt(raw, 10)
+    if (isNaN(n)) return PANEL_DEFAULT
+    return Math.max(PANEL_MIN, Math.min(PANEL_MAX, n))
+  } catch { return PANEL_DEFAULT }
+}
+
+function storePanelWidth(w: number): void {
+  try { localStorage.setItem(PANEL_STORAGE_KEY, String(w)) } catch {}
 }
 
 // ── Field component ────────────────────────────────────────────────────────────
@@ -80,7 +100,7 @@ function ResultRow({ label, value, sub, color = 'text-tp-text' }: {
 
 // ── Main page ──────────────────────────────────────────────────────────────────
 export default function TorqueCalcPage() {
-  const { t } = useLanguage()
+  const { t, lang } = useLanguage()
   const [form, setForm] = useState<EngineeringCheckRequest>(DEFAULTS)
   const [result, setResult] = useState<EngineeringCheckResult | null>(null)
   const [error, setError] = useState('')
@@ -89,6 +109,61 @@ export default function TorqueCalcPage() {
   const [guideOpen, setGuideOpen] = useState(false)
   // GEOMETRY-CONTEXT-01: visual focus state (HARD RULE 13)
   const [visualFocus, setVisualFocus] = useState<TorqueVisualFocus>('neutral')
+
+  // ── Panel resize state ───────────────────────────────────────────────────────
+  const [panelWidth, setPanelWidth] = useState<number>(getStoredPanelWidth)
+  const [isLg, setIsLg] = useState(
+    () => typeof window !== 'undefined' && window.matchMedia('(min-width: 1024px)').matches
+  )
+  const [isDragging, setIsDragging] = useState(false)
+  const dragRef = useRef<{ startX: number; startWidth: number } | null>(null)
+
+  useEffect(() => {
+    const mq = window.matchMedia('(min-width: 1024px)')
+    const handler = (e: MediaQueryListEvent) => setIsLg(e.matches)
+    mq.addEventListener('change', handler)
+    return () => mq.removeEventListener('change', handler)
+  }, [])
+
+  const handlePointerDown = useCallback((e: React.PointerEvent<HTMLDivElement>) => {
+    e.preventDefault()
+    dragRef.current = { startX: e.clientX, startWidth: panelWidth }
+    e.currentTarget.setPointerCapture(e.pointerId)
+    setIsDragging(true)
+  }, [panelWidth])
+
+  const handlePointerMove = useCallback((e: React.PointerEvent<HTMLDivElement>) => {
+    if (!dragRef.current) return
+    const delta = dragRef.current.startX - e.clientX
+    const next = Math.max(PANEL_MIN, Math.min(PANEL_MAX, dragRef.current.startWidth + delta))
+    setPanelWidth(next)
+  }, [])
+
+  const handlePointerUp = useCallback((e: React.PointerEvent<HTMLDivElement>) => {
+    if (!dragRef.current) return
+    const delta = dragRef.current.startX - e.clientX
+    const next = Math.max(PANEL_MIN, Math.min(PANEL_MAX, dragRef.current.startWidth + delta))
+    setPanelWidth(next)
+    storePanelWidth(next)
+    dragRef.current = null
+    setIsDragging(false)
+  }, [])
+
+  const handleHandleKeyDown = useCallback((e: React.KeyboardEvent<HTMLDivElement>) => {
+    let next = panelWidth
+    if (e.key === 'ArrowLeft')  next = Math.min(PANEL_MAX, panelWidth + 20)
+    if (e.key === 'ArrowRight') next = Math.max(PANEL_MIN, panelWidth - 20)
+    if (next !== panelWidth) {
+      e.preventDefault()
+      setPanelWidth(next)
+      storePanelWidth(next)
+    }
+  }, [panelWidth])
+
+  const handleDoubleClick = useCallback(() => {
+    setPanelWidth(PANEL_DEFAULT)
+    storePanelWidth(PANEL_DEFAULT)
+  }, [])
 
   // Context titles/subs — reactive to language via useMemo (HARD RULE 07)
   const CONTEXT_TITLE = useMemo((): Record<TorqueVisualFocus, string> => ({
@@ -131,10 +206,8 @@ export default function TorqueCalcPage() {
 
   // ── Guide callbacks ───────────────────────────────────────────────────────
   const handleLoadExample = (values: ExampleValues) => {
-    // Save current form as snapshot before overwriting
     snapshotRef.current = { ...form }
     setForm(values as unknown as EngineeringCheckRequest)
-    // If example uses advanced fields, open that section
     setAdvanced(true)
   }
 
@@ -150,7 +223,6 @@ export default function TorqueCalcPage() {
     if (!el) return
     el.style.scrollMarginTop = '80px'
     el.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
-    // Brief flash highlight
     el.style.outline = '2px solid #4a7cc9'
     el.style.outlineOffset = '4px'
     el.style.boxShadow = '0 0 0 4px rgba(74,124,201,0.12)'
@@ -166,7 +238,6 @@ export default function TorqueCalcPage() {
 
   const nutUtil = result?.nut_proof_util_pct ?? 0
   // NOTE: 75/90 are UNSOURCED UI-only thresholds — not authoritative engineering limits.
-  // Display nut utilization as a neutral computed result, not pass/warn/fail.
   const nutColor = 'text-tp-accent'
   const nutBadge = 'info' as const
   const nutLabel = t('torque.computed')
@@ -186,7 +257,7 @@ export default function TorqueCalcPage() {
       />
 
       {/* Single primary page scroll — wraps both columns */}
-      <div className="flex h-full overflow-y-auto bg-tp-bg">
+      <div className={`flex h-full overflow-y-auto bg-tp-bg${isDragging ? ' select-none' : ''}`}>
 
         {/* ── LEFT: Inputs ──────────────────────────────────────────────────── */}
         <div className="flex-1 px-5 py-4 min-w-0 bg-tp-workspace">
@@ -227,10 +298,10 @@ export default function TorqueCalcPage() {
           {/* Mobile inline context visual (HARD RULE 06) */}
           {visualFocus !== 'neutral' && (
             <div className="block lg:hidden mt-3">
-              <div className="text-[10px] text-tp-text-3 mb-1 tracking-wide">
+              <div className="text-[13px] font-medium text-tp-text-2 mb-1 tracking-wide">
                 {CONTEXT_TITLE[visualFocus]}
                 {CONTEXT_SUB[visualFocus] && (
-                  <span className="ml-1 text-tp-text-3 normal-case">
+                  <span className="ml-1 text-[11px] font-normal text-tp-text-2 normal-case leading-[1.45]">
                     — {CONTEXT_SUB[visualFocus]}
                   </span>
                 )}
@@ -238,6 +309,7 @@ export default function TorqueCalcPage() {
               <TorqueContextDiagram
                 focus={visualFocus}
                 result={result}
+                lang={lang}
                 className="w-full max-h-[180px]"
               />
             </div>
@@ -315,13 +387,39 @@ export default function TorqueCalcPage() {
           </div>
         </div>
 
-        {/* ── DIVIDER ───────────────────────────────────────────────────────── */}
-        <div className="w-px bg-tp-border shrink-0 self-stretch" />
+        {/* ── RESIZE HANDLE (desktop/tablet lg+) ───────────────────────────── */}
+        <div
+          className="hidden lg:flex items-center justify-center w-2 shrink-0 self-stretch
+                     cursor-col-resize select-none touch-none z-10
+                     hover:bg-tp-accent/15 active:bg-tp-accent/25 transition-colors
+                     focus-visible:outline-none focus-visible:bg-tp-accent/20"
+          role="separator"
+          aria-orientation="vertical"
+          aria-label="Resize engineering context panel"
+          aria-valuenow={panelWidth}
+          aria-valuemin={PANEL_MIN}
+          aria-valuemax={PANEL_MAX}
+          tabIndex={0}
+          onPointerDown={handlePointerDown}
+          onPointerMove={handlePointerMove}
+          onPointerUp={handlePointerUp}
+          onPointerCancel={handlePointerUp}
+          onKeyDown={handleHandleKeyDown}
+          onDoubleClick={handleDoubleClick}
+        >
+          {/* Visual grab indicator */}
+          <div className="w-[3px] h-10 rounded-full bg-tp-border opacity-60
+                          group-hover:opacity-90 transition-opacity" />
+        </div>
+
+        {/* ── Mobile divider (no resize) ────────────────────────────────────── */}
+        <div className="lg:hidden w-px bg-tp-border shrink-0 self-stretch" />
 
         {/* ── RIGHT: Results — sticky rail, no own scroll ───────────────────── */}
         <div
           id="guide-anchor-result"
-          className="w-[320px] shrink-0 px-5 py-4 flex flex-col gap-0 self-start sticky top-0 bg-tp-result"
+          className="shrink-0 px-5 py-4 flex flex-col gap-0 self-start sticky top-0 bg-tp-result"
+          style={{ width: isLg ? panelWidth : 320 }}
         >
 
           {/* 1. Primary result: Torque */}
@@ -386,7 +484,6 @@ export default function TorqueCalcPage() {
                   style={{
                     width: `${Math.min(nutUtil, 100)}%`,
                     // NOTE: 75/90 thresholds are UNSOURCED (UI-only).
-                    // Bar uses computedResult (neutral engineering result color).
                     backgroundColor: EV.computedResult,
                   }}
                 />
@@ -413,12 +510,12 @@ export default function TorqueCalcPage() {
           <div className="h-px bg-tp-border/60 my-3" />
 
           {/* 5. Contextual joint diagram (GEOMETRY-CONTEXT-01) */}
-          <div className="mb-1">
-            <div className="text-[10px] text-tp-text-3 tracking-wide">
+          <div className="mb-2">
+            <div className="text-[13px] font-medium text-tp-text-2 tracking-wide leading-snug">
               {CONTEXT_TITLE[visualFocus]}
             </div>
             {CONTEXT_SUB[visualFocus] && (
-              <div className="text-[9px] text-tp-text-3 mt-0.5 leading-none">
+              <div className="text-[11px] text-tp-text-2 mt-1 leading-[1.45]">
                 {CONTEXT_SUB[visualFocus]}
               </div>
             )}
@@ -426,6 +523,7 @@ export default function TorqueCalcPage() {
           <TorqueContextDiagram
             focus={visualFocus}
             result={result}
+            lang={lang}
             className="w-full max-h-[260px]"
           />
 
