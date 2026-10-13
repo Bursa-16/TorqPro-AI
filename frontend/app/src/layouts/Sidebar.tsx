@@ -3,6 +3,7 @@ import { useLocation, useNavigate } from 'react-router-dom'
 import * as Collapsible from '@radix-ui/react-collapsible'
 import { ChevronDown, ChevronRight, ChevronLeft, Pin, PinOff } from 'lucide-react'
 import { NAV_GROUPS, HOME_ITEM } from '../lib/navigation'
+import { useLanguage } from '../i18n/LanguageContext'
 import type { LucideIcon } from 'lucide-react'
 
 // ── Persistence ──────────────────────────────────────────────────────────────
@@ -12,10 +13,8 @@ const SIDEBAR_KEY = 'torqpro_sidebar_state'
 
 function loadPrefs(): SidebarPrefs {
   try {
-    // Canonical key
     const raw = localStorage.getItem(SIDEBAR_KEY)
     if (raw) return JSON.parse(raw)
-    // One-time migration from old key used during development
     const legacy = localStorage.getItem('tp_sidebar')
     if (legacy) {
       const parsed = JSON.parse(legacy)
@@ -32,9 +31,6 @@ function savePrefs(p: SidebarPrefs) {
 }
 
 // ── Mobile breakpoint hook ────────────────────────────────────────────────────
-// Returns true when viewport width < 640px (Tailwind's `sm` breakpoint).
-// Forces sidebar into icon-rail mode on mobile regardless of persisted prefs.
-// Desktop prefs are unaffected — toggling back to wide viewport restores them.
 function useIsMobile(): boolean {
   const [isMobile, setIsMobile] = useState(() => window.innerWidth < 640)
   useEffect(() => {
@@ -72,14 +68,13 @@ export default function Sidebar({ role }: { role: string | null }) {
   const navigate = useNavigate()
   const isAdmin = role === 'admin'
   const isMobile = useIsMobile()
+  const { t } = useLanguage()
 
   const [prefs, setPrefs] = useState<SidebarPrefs>(loadPrefs)
   const [hovered, setHovered] = useState(false)
 
   const isCollapsed = prefs.collapsed
   const isPinned = prefs.pinned
-  // On mobile: always render as collapsed icon-rail, never expand.
-  // Desktop: expand on hover when unpinned.
   const effectivelyExpanded = isMobile
     ? false
     : (!isCollapsed || (!isPinned && hovered))
@@ -133,7 +128,9 @@ export default function Sidebar({ role }: { role: string | null }) {
           <span className="shrink-0 w-4 flex justify-center">
             <Icon icon={HOME_ITEM.icon} />
           </span>
-          {effectivelyExpanded && <span className="truncate font-medium">{HOME_ITEM.label}</span>}
+          {effectivelyExpanded && (
+            <span className="truncate font-medium">{t(HOME_ITEM.labelKey)}</span>
+          )}
         </button>
       </div>
 
@@ -146,13 +143,12 @@ export default function Sidebar({ role }: { role: string | null }) {
           const hasActive = group.items.some(i => i.path === location.pathname)
 
           if (!effectivelyExpanded) {
-            // Collapsed: show icons only, no group labels
             return (
               <div key={group.id} className="space-y-0.5 pb-2">
                 {group.items.map(item => {
                   const isActive = location.pathname === item.path
                   return (
-                    <CollapseTooltip key={item.id} label={item.label}>
+                    <CollapseTooltip key={item.id} label={t(item.labelKey)}>
                       <button
                         onClick={() => navigate(item.path)}
                         className={`w-full flex items-center justify-center p-2 rounded transition-colors
@@ -172,12 +168,11 @@ export default function Sidebar({ role }: { role: string | null }) {
 
           return (
             <Collapsible.Root key={group.id} open={isOpen} onOpenChange={() => toggleGroup(group.id)}>
-              {/* Group heading */}
               <Collapsible.Trigger asChild>
                 <button className={`w-full flex items-center justify-between px-2 py-1.5 rounded
                     text-[10px] font-semibold uppercase tracking-widest transition-colors
                     ${hasActive ? 'text-tp-accent-light' : 'text-tp-text-2 hover:text-tp-text'}`}>
-                  <span>{group.label}</span>
+                  <span>{t(group.labelKey)}</span>
                   <span className="text-tp-text-3">
                     {isOpen ? <ChevronDown size={11} /> : <ChevronRight size={11} />}
                   </span>
@@ -185,10 +180,7 @@ export default function Sidebar({ role }: { role: string | null }) {
               </Collapsible.Trigger>
 
               <Collapsible.Content
-                style={{
-                  overflow: 'hidden',
-                  transition: 'height 150ms ease',
-                }}
+                style={{ overflow: 'hidden', transition: 'height 150ms ease' }}
               >
                 <div className="pb-1">
                   {group.items.map(item => {
@@ -206,7 +198,7 @@ export default function Sidebar({ role }: { role: string | null }) {
                         <span className="shrink-0 w-4 flex justify-center">
                           <Icon icon={item.icon} size={14} />
                         </span>
-                        <span className="truncate">{item.label}</span>
+                        <span className="truncate">{t(item.labelKey)}</span>
                       </button>
                     )
                   })}
@@ -217,25 +209,23 @@ export default function Sidebar({ role }: { role: string | null }) {
         })}
       </nav>
 
-      {/* Footer: pin + collapse controls — hidden on mobile (always-collapsed, no user toggle needed) */}
+      {/* Footer: pin + collapse controls — hidden on mobile */}
       {!isMobile && (
         <div className="shrink-0 border-t border-tp-border p-1.5 flex items-center gap-1">
-          {/* Pin/unpin — only shown when expanded */}
           {effectivelyExpanded && (
             <button
               onClick={() => updatePrefs({ pinned: !isPinned })}
-              title={isPinned ? 'Sabitlemeyi kaldır' : 'Sabitle'}
+              title={isPinned ? t('shell.pin_title') : t('shell.unpin_title')}
               className="flex-1 flex items-center gap-1.5 px-2 py-1.5 rounded text-[11px]
                          text-tp-text-3 hover:text-tp-text-2 hover:bg-tp-surface-2 transition-colors"
             >
               {isPinned ? <Pin size={12} /> : <PinOff size={12} />}
-              <span>{isPinned ? 'Sabitlendi' : 'Sabit değil'}</span>
+              <span>{isPinned ? t('shell.pinned') : t('shell.unpinned')}</span>
             </button>
           )}
-          {/* Collapse/expand toggle */}
           <button
             onClick={() => updatePrefs({ collapsed: !isCollapsed, pinned: true })}
-            title={isCollapsed ? 'Genişlet' : 'Daralt'}
+            title={isCollapsed ? t('shell.expand') : t('shell.collapse')}
             className="flex items-center justify-center w-7 h-7 rounded
                        text-tp-text-3 hover:text-tp-text-2 hover:bg-tp-surface-2 transition-colors"
           >

@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { useAuth } from './hooks/useAuth'
+import { useLanguage } from './i18n/LanguageContext'
 import AppShell from './layouts/AppShell'
 import LoginPage from './pages/LoginPage'
 import DashboardPage from './pages/DashboardPage'
@@ -10,8 +11,9 @@ import LegacyIframePage from './pages/LegacyIframePage'
 // ── Legacy iframe wrapper ──────────────────────────────────────────────────
 // Renders legacy page inside an embedded iframe; React shell remains visible.
 // moduleId: when provided and a guide exists for this id, renders ModuleGuideDrawer.
-function Legacy({ id, label, moduleId }: { id: string; label: string; moduleId?: string }) {
-  return <LegacyIframePage legacyPageId={id} label={label} moduleId={moduleId} />
+function Legacy({ id, labelKey, moduleId }: { id: string; labelKey: string; moduleId?: string }) {
+  const { t } = useLanguage()
+  return <LegacyIframePage legacyPageId={id} label={t(labelKey)} moduleId={moduleId} />
 }
 
 function ProtectedRoutes() {
@@ -27,37 +29,37 @@ function ProtectedRoutes() {
 
         {/* ── Calculation ───────────────────────────────────────────────── */}
         <Route path="app/calculation/torque"            element={<TorqueCalcPage />} />
-        <Route path="app/calculation/oem-prediction"    element={<Legacy id="n01391"    label="OEM Tork Öngörüsü"  moduleId="oem-prediction" />} />
+        <Route path="app/calculation/oem-prediction"    element={<Legacy id="n01391"    labelKey="nav.item.n01391"      moduleId="oem-prediction" />} />
         <Route path="app/calculation/advanced-analysis" element={<AdvancedAnalysisPage />} />
 
         {/* ── Validation ────────────────────────────────────────────────── */}
-        <Route path="app/validation/checklist"          element={<Legacy id="checklist" label="Check-List"         moduleId="checklist" />} />
-        <Route path="app/validation/capability"         element={<Legacy id="yetenek"   label="Cm/Cmk Yetenek"     moduleId="yetenek" />} />
-        <Route path="app/validation/technical"          element={<Legacy id="validation"label="Teknik Doğrulama"   moduleId="validation" />} />
+        <Route path="app/validation/checklist"          element={<Legacy id="checklist" labelKey="nav.item.checklist"    moduleId="checklist" />} />
+        <Route path="app/validation/capability"         element={<Legacy id="yetenek"   labelKey="nav.item.yetenek"      moduleId="yetenek" />} />
+        <Route path="app/validation/technical"          element={<Legacy id="validation"labelKey="nav.item.validation"   moduleId="validation" />} />
 
         {/* ── Production ────────────────────────────────────────────────── */}
-        <Route path="app/production/tool-tracking"      element={<Legacy id="sikici"    label="Sıkıcı Takip"       moduleId="sikici" />} />
-        <Route path="app/production/problems"           element={<Legacy id="problem"   label="Problem Yönetimi"   moduleId="problem" />} />
+        <Route path="app/production/tool-tracking"      element={<Legacy id="sikici"    labelKey="nav.item.sikici"       moduleId="sikici" />} />
+        <Route path="app/production/problems"           element={<Legacy id="problem"   labelKey="nav.item.problem"      moduleId="problem" />} />
 
         {/* ── Knowledge ─────────────────────────────────────────────────── */}
-        <Route path="app/knowledge/oem-norms"           element={<Legacy id="oem"       label="OEM Norm Sorgu"     moduleId="oem" />} />
-        <Route path="app/knowledge/norm-guide"          element={<Legacy id="norm"      label="Norm Rehberi"       moduleId="norm" />} />
-        <Route path="app/knowledge/fmea"                element={<Legacy id="fmea"      label="FMEA Kataloğu"      moduleId="fmea" />} />
+        <Route path="app/knowledge/oem-norms"           element={<Legacy id="oem"       labelKey="nav.item.oem"          moduleId="oem" />} />
+        <Route path="app/knowledge/norm-guide"          element={<Legacy id="norm"      labelKey="nav.item.norm"         moduleId="norm" />} />
+        <Route path="app/knowledge/fmea"                element={<Legacy id="fmea"      labelKey="nav.item.fmea"         moduleId="fmea" />} />
 
         {/* ── Traceability ──────────────────────────────────────────────── */}
-        <Route path="app/traceability/reports"          element={<Legacy id="rapor"     label="Rapor Üret"         moduleId="rapor" />} />
-        <Route path="app/traceability/archive"          element={<Legacy id="arsiv"     label="Arşiv"              moduleId="arsiv" />} />
+        <Route path="app/traceability/reports"          element={<Legacy id="rapor"     labelKey="nav.item.rapor"        moduleId="rapor" />} />
+        <Route path="app/traceability/archive"          element={<Legacy id="arsiv"     labelKey="nav.item.arsiv"        moduleId="arsiv" />} />
 
         {/* ── Data (admin) ──────────────────────────────────────────────── */}
-        <Route path="app/data/calibration"              element={<Legacy id="calibration"    label="Kalibrasyon"          moduleId="calibration" />} />
-        <Route path="app/data/quality-gate"             element={<Legacy id="qualitygate"    label="Veri Kalite Kapısı"   moduleId="qualitygate" />} />
-        <Route path="app/data/golden-cases"             element={<Legacy id="goldencases"    label="Altın Senaryolar"     moduleId="goldencases" />} />
-        <Route path="app/data/release-certificate"      element={<Legacy id="releasecert"    label="Sürüm Sertifikası"    moduleId="releasecert" />} />
-        <Route path="app/data/versions"                 element={<Legacy id="versions"       label="Veri Sürümleri"       moduleId="versions" />} />
-        <Route path="app/data/upload"                   element={<Legacy id="dataadmin"      label="Veri Yükleme & Onay"  moduleId="dataadmin" />} />
+        <Route path="app/data/calibration"              element={<Legacy id="calibration"    labelKey="nav.item.calibration"   moduleId="calibration" />} />
+        <Route path="app/data/quality-gate"             element={<Legacy id="qualitygate"    labelKey="nav.item.qualitygate"   moduleId="qualitygate" />} />
+        <Route path="app/data/golden-cases"             element={<Legacy id="goldencases"    labelKey="nav.item.goldencases"   moduleId="goldencases" />} />
+        <Route path="app/data/release-certificate"      element={<Legacy id="releasecert"    labelKey="nav.item.releasecert"   moduleId="releasecert" />} />
+        <Route path="app/data/versions"                 element={<Legacy id="versions"       labelKey="nav.item.versions"      moduleId="versions" />} />
+        <Route path="app/data/upload"                   element={<Legacy id="dataadmin"      labelKey="nav.item.dataadmin"     moduleId="dataadmin" />} />
 
         {/* ── System (admin) — no guide intentionally ───────────────────── */}
-        <Route path="app/system/admin"                  element={<Legacy id="admin"      label="Yönetici Paneli" />} />
+        <Route path="app/system/admin"                  element={<Legacy id="admin"      labelKey="nav.item.admin" />} />
 
         {/* ── Legacy redirects — old flat routes preserved ───────────────── */}
         <Route path="torque"         element={<Navigate to="/app/calculation/torque"            replace />} />

@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react'
+import { useState, useRef, useMemo } from 'react'
 import StatusBadge from '../components/ui/StatusBadge'
 import TorqueContextDiagram, { type TorqueVisualFocus } from '../components/engineering/TorqueContextDiagram'
 import ModuleGuideDrawer from '../components/guidance/ModuleGuideDrawer'
@@ -7,30 +7,7 @@ import type { EngineeringCheckRequest, EngineeringCheckResult } from '../types/a
 import { torqueGuide } from '../guides/torqueGuide'
 import type { ExampleValues } from '../guides/GuideSchema'
 import { EV } from '../components/engineering-visuals/engineeringVisualTokens'
-
-// ── Context panel titles ──────────────────────────────────────────────────────
-const CONTEXT_TITLE: Record<TorqueVisualFocus, string> = {
-  neutral:              'Bağlantı Diyagramı',
-  diameter_d:           'Çap (d)',
-  pitch_p:              'Adım (P)',
-  stress_area_as:       'As',
-  bearing_diameter_dw:  'Dw',
-  thread_friction:      'Diş Sürtünmesi',
-  bearing_friction:     'Oturma Yüzeyi Sürtünmesi',
-  yield_utilization:    'Akma Kullanım Oranı',
-  rp02:                 'Rp0.2',
-}
-const CONTEXT_SUB: Record<TorqueVisualFocus, string> = {
-  neutral:              '',
-  diameter_d:           'Cıvata nominal çapı',
-  pitch_p:              'Diş adımı',
-  stress_area_as:       'Çekme gerilme alanı',
-  bearing_diameter_dw:  'Etkin oturma çapı',
-  thread_friction:      'Diş temas yüzeyi',
-  bearing_friction:     'Baş/somun altı temas yüzeyi',
-  yield_utilization:    'Hedef akma oranı',
-  rp02:                 'Akma dayanımı (malzeme)',
-}
+import { useLanguage } from '../i18n/LanguageContext'
 
 const DEFAULTS: EngineeringCheckRequest = {
   diameter_mm: 10, pitch_mm: 1.5, stress_area_mm2: 58, rp02_mpa: 900,
@@ -103,6 +80,7 @@ function ResultRow({ label, value, sub, color = 'text-tp-text' }: {
 
 // ── Main page ──────────────────────────────────────────────────────────────────
 export default function TorqueCalcPage() {
+  const { t } = useLanguage()
   const [form, setForm] = useState<EngineeringCheckRequest>(DEFAULTS)
   const [result, setResult] = useState<EngineeringCheckResult | null>(null)
   const [error, setError] = useState('')
@@ -111,6 +89,31 @@ export default function TorqueCalcPage() {
   const [guideOpen, setGuideOpen] = useState(false)
   // GEOMETRY-CONTEXT-01: visual focus state (HARD RULE 13)
   const [visualFocus, setVisualFocus] = useState<TorqueVisualFocus>('neutral')
+
+  // Context titles/subs — reactive to language via useMemo (HARD RULE 07)
+  const CONTEXT_TITLE = useMemo((): Record<TorqueVisualFocus, string> => ({
+    neutral:              t('ctx.neutral'),
+    diameter_d:           t('ctx.diameter_d'),
+    pitch_p:              t('ctx.pitch_p'),
+    stress_area_as:       t('ctx.stress_area_as'),
+    bearing_diameter_dw:  t('ctx.bearing_diameter_dw'),
+    thread_friction:      t('ctx.thread_friction'),
+    bearing_friction:     t('ctx.bearing_friction'),
+    yield_utilization:    t('ctx.yield_utilization'),
+    rp02:                 t('ctx.rp02'),
+  }), [t])
+
+  const CONTEXT_SUB = useMemo((): Record<TorqueVisualFocus, string> => ({
+    neutral:              '',
+    diameter_d:           t('ctx.sub.diameter_d'),
+    pitch_p:              t('ctx.sub.pitch_p'),
+    stress_area_as:       t('ctx.sub.stress_area_as'),
+    bearing_diameter_dw:  t('ctx.sub.bearing_diameter_dw'),
+    thread_friction:      t('ctx.sub.thread_friction'),
+    bearing_friction:     t('ctx.sub.bearing_friction'),
+    yield_utilization:    t('ctx.sub.yield_utilization'),
+    rp02:                 t('ctx.sub.rp02'),
+  }), [t])
 
   // Snapshot for "Değerleri Geri Al"
   const snapshotRef = useRef<EngineeringCheckRequest | null>(null)
@@ -166,7 +169,7 @@ export default function TorqueCalcPage() {
   // Display nut utilization as a neutral computed result, not pass/warn/fail.
   const nutColor = 'text-tp-accent'
   const nutBadge = 'info' as const
-  const nutLabel = 'Hesaplanan'
+  const nutLabel = t('torque.computed')
   const sfColor = (sf: number) => sf < 1 ? 'text-tp-error' : 'text-tp-valid'
 
   return (
@@ -191,33 +194,33 @@ export default function TorqueCalcPage() {
           {/* Page title + guide trigger */}
           <div className="flex items-center gap-3 mb-5">
             <h1 className="text-[16px] font-semibold text-tp-text">
-              Tork Hesap
+              {t('torque.title')}
               <span className="ml-2 text-[11px] font-normal text-tp-text-3">
-                — Mühendislik Kontrolü
+                — {t('torque.subtitle')}
               </span>
             </h1>
             <button
               type="button"
               onClick={() => setGuideOpen(true)}
-              aria-label="Modül rehberini aç"
+              aria-label={t('torque.guide_open')}
               className="flex items-center gap-1 text-[11px] text-tp-text-3
                          hover:text-tp-accent transition-colors
                          focus-visible:outline focus-visible:outline-2 focus-visible:outline-tp-accent
                          rounded px-1 py-0.5"
             >
               <span className="text-[13px] leading-none" aria-hidden="true">ⓘ</span>
-              <span>Modül Rehberi</span>
+              <span>{t('torque.guide')}</span>
             </button>
           </div>
 
           {/* Primary: Geometry */}
           <div id="guide-anchor-geometri">
-            <SectionLabel>Geometri</SectionLabel>
+            <SectionLabel>{t('torque.geometry')}</SectionLabel>
             <div className="grid grid-cols-4 gap-3">
-              <F label="Çap (d)" field="diameter_mm" unit="mm" focusKey="diameter_d" {...fp} />
-              <F label="Adım (P)" field="pitch_mm" unit="mm" focusKey="pitch_p" {...fp} />
-              <F label="As" field="stress_area_mm2" unit="mm²" focusKey="stress_area_as" {...fp} />
-              <F label="Dw" field="effective_bearing_diameter_mm" unit="mm" focusKey="bearing_diameter_dw" {...fp} />
+              <F label={t('torque.diameter')} field="diameter_mm" unit="mm" focusKey="diameter_d" {...fp} />
+              <F label={t('torque.pitch')} field="pitch_mm" unit="mm" focusKey="pitch_p" {...fp} />
+              <F label={t('torque.stress_area')} field="stress_area_mm2" unit="mm²" focusKey="stress_area_as" {...fp} />
+              <F label={t('torque.bearing_diam')} field="effective_bearing_diameter_mm" unit="mm" focusKey="bearing_diameter_dw" {...fp} />
             </div>
           </div>
 
@@ -242,23 +245,23 @@ export default function TorqueCalcPage() {
 
           {/* Primary: Friction */}
           <div id="guide-anchor-surtunme">
-            <SectionLabel>Sürtünme (μ)</SectionLabel>
+            <SectionLabel>{t('torque.friction')}</SectionLabel>
             <div className="grid grid-cols-3 gap-3 mb-1">
-              <F label="Diş min" field="mu_thread_min" focusKey="thread_friction" {...fp} />
-              <F label="Diş nom" field="mu_thread_nom" focusKey="thread_friction" {...fp} />
-              <F label="Diş max" field="mu_thread_max" focusKey="thread_friction" {...fp} />
-              <F label="Oturma Yüzeyi μ min" field="mu_bearing_min" focusKey="bearing_friction" {...fp} />
-              <F label="Oturma Yüzeyi μ nom" field="mu_bearing_nom" focusKey="bearing_friction" {...fp} />
-              <F label="Oturma Yüzeyi μ max" field="mu_bearing_max" focusKey="bearing_friction" {...fp} />
+              <F label={t('torque.thread_min')} field="mu_thread_min" focusKey="thread_friction" {...fp} />
+              <F label={t('torque.thread_nom')} field="mu_thread_nom" focusKey="thread_friction" {...fp} />
+              <F label={t('torque.thread_max')} field="mu_thread_max" focusKey="thread_friction" {...fp} />
+              <F label={t('torque.bearing_min')} field="mu_bearing_min" focusKey="bearing_friction" {...fp} />
+              <F label={t('torque.bearing_nom')} field="mu_bearing_nom" focusKey="bearing_friction" {...fp} />
+              <F label={t('torque.bearing_max')} field="mu_bearing_max" focusKey="bearing_friction" {...fp} />
             </div>
           </div>
 
           {/* Primary: Target */}
           <div id="guide-anchor-hedef">
-            <SectionLabel>Hedef</SectionLabel>
+            <SectionLabel>{t('torque.target')}</SectionLabel>
             <div className="grid grid-cols-2 gap-3">
-              <F label="Akma kullanım oranı" field="target_yield_ratio" focusKey="yield_utilization" {...fp} />
-              <F label="Rp0.2" field="rp02_mpa" unit="MPa" focusKey="rp02" {...fp} />
+              <F label={t('torque.yield_ratio')} field="target_yield_ratio" focusKey="yield_utilization" {...fp} />
+              <F label={t('torque.rp02')} field="rp02_mpa" unit="MPa" focusKey="rp02" {...fp} />
             </div>
           </div>
 
@@ -275,20 +278,20 @@ export default function TorqueCalcPage() {
               >
                 {advanced ? '−' : '+'}
               </span>
-              {advanced ? 'Gelişmiş parametreleri gizle' : 'Gelişmiş parametreler'}
+              {advanced ? t('torque.advanced_hide') : t('torque.advanced_show')}
             </button>
 
             {advanced && (
               <div className="mt-3 pl-4 border-l-2 border-tp-border-2">
-                <SectionLabel>Malzeme Dayanımı</SectionLabel>
+                <SectionLabel>{t('torque.material')}</SectionLabel>
                 <div className="grid grid-cols-3 gap-3">
-                  <F label="Civata Rm" field="bolt_rm_mpa" unit="MPa" {...fp} />
-                  <F label="Somun Proof" field="nut_proof_mpa" unit="MPa" {...fp} />
-                  <F label="İç Malzeme Rm" field="internal_rm_mpa" unit="MPa" {...fp} />
+                  <F label={t('torque.bolt_rm')} field="bolt_rm_mpa" unit="MPa" {...fp} />
+                  <F label={t('torque.nut_proof')} field="nut_proof_mpa" unit="MPa" {...fp} />
+                  <F label={t('torque.internal_rm')} field="internal_rm_mpa" unit="MPa" {...fp} />
                 </div>
-                <SectionLabel>Diş Kavrama</SectionLabel>
+                <SectionLabel>{t('torque.engagement')}</SectionLabel>
                 <div className="grid grid-cols-2 gap-3">
-                  <F label="Kavrama uzunluğu (le)" field="engagement_mm" unit="mm" {...fp} />
+                  <F label={t('torque.engagement_len')} field="engagement_mm" unit="mm" {...fp} />
                 </div>
               </div>
             )}
@@ -306,7 +309,7 @@ export default function TorqueCalcPage() {
                          focus-visible:outline-tp-accent
                          disabled:opacity-40 disabled:cursor-not-allowed disabled:shadow-none"
             >
-              {loading ? 'Hesaplanıyor…' : 'Hesapla'}
+              {loading ? t('torque.calculating') : t('torque.calculate')}
             </button>
             {error && <span className="text-tp-error text-xs">{error}</span>}
           </div>
@@ -325,7 +328,7 @@ export default function TorqueCalcPage() {
           <div className={`rounded-md p-4 transition-colors
             ${result ? 'bg-tp-accent/8 border border-tp-accent/25' : 'bg-tp-result border border-tp-border-2'}`}>
             <div className="text-[10px] text-tp-text-3 mb-2 tracking-wide">
-              Önerilen Sıkma Torku
+              {t('torque.result_title')}
             </div>
             <div className="flex items-baseline gap-1.5 mb-2">
               <span className={`text-[2.25rem] leading-none font-bold tabular-nums tracking-tight
@@ -348,7 +351,7 @@ export default function TorqueCalcPage() {
 
           {/* 2. Preload */}
           <div className="mt-3 flex items-baseline justify-between">
-            <span className="text-[11px] text-tp-text-3">Ön Yük (Fv)</span>
+            <span className="text-[11px] text-tp-text-3">{t('torque.preload')}</span>
             <div className="text-right">
               {result ? (
                 <>
@@ -368,7 +371,7 @@ export default function TorqueCalcPage() {
           {result ? (
             <div>
               <div className="flex items-center justify-between mb-2">
-                <span className="text-[11px] text-tp-text-3">Somun kullanım</span>
+                <span className="text-[11px] text-tp-text-3">{t('torque.nut_util')}</span>
                 <div className="flex items-center gap-2">
                   <span className={`text-sm font-bold tabular-nums ${nutColor}`}>
                     {nutUtil.toFixed(1)}%
@@ -391,19 +394,19 @@ export default function TorqueCalcPage() {
 
               {/* 4. Safety factors */}
               <ResultRow
-                label="Diş SF (iç)"
+                label={t('torque.thread_sf_int')}
                 value={result.internal_thread_sf.toFixed(2)}
                 color={sfColor(result.internal_thread_sf)}
               />
               <ResultRow
-                label="Diş SF (dış)"
+                label={t('torque.thread_sf_ext')}
                 value={result.external_thread_sf.toFixed(2)}
                 color={sfColor(result.external_thread_sf)}
               />
             </div>
           ) : (
             <div className="text-[12px] text-tp-text-3 py-3">
-              Hesap sonuçları burada görünecek
+              {t('torque.empty')}
             </div>
           )}
 
@@ -428,7 +431,7 @@ export default function TorqueCalcPage() {
 
           {/* 6. Traceability footer */}
           <div className="mt-auto pt-3 text-[10px] text-tp-text-3 leading-relaxed">
-            Deterministik hesap · VDI 2230 tabanlı · Backend yetkili
+            {t('torque.footer')}
           </div>
         </div>
       </div>
