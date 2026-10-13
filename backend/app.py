@@ -468,7 +468,7 @@ async def mw(request:Request,call_next):
     except Exception:
         log.exception("Unhandled request_id=%s",rid);return JSONResponse(status_code=500,content={"detail":"Sunucu hatası","request_id":rid})
     r.headers["X-Request-ID"]=rid;r.headers["X-Process-Time-Ms"]=f"{(time.perf_counter()-st)*1000:.1f}"
-    r.headers["X-Content-Type-Options"]="nosniff";r.headers["X-Frame-Options"]="DENY";r.headers["Referrer-Policy"]="no-referrer"
+    r.headers["X-Content-Type-Options"]="nosniff";r.headers["Referrer-Policy"]="no-referrer"
     # rc.1 Security Hardening Phase 2 -- B5: CSP + (production-only) HSTS.
     # frontend/index.html is a single-file SPA with one inline <script>
     # block and ~220 inline style="..." attributes plus one inline
@@ -479,12 +479,20 @@ async def mw(request:Request,call_next):
     # are explicitly allowed here; everything else (external script,
     # style, connect, font, image, object, base, frame-ancestors)
     # defaults to same-origin-or-none -- still real protection against
-    # loading external malicious resources and clickjacking, on top of
-    # (not instead of) the existing X-Frame-Options: DENY above.
+    # loading external malicious resources and clickjacking.
+    #
+    # PRIVATE-DEMO-ROUTE-RENDER-01: /legacy/* paths are embedded as
+    # same-origin iframes by LegacyIframePage. DENY/frame-ancestors 'none'
+    # would block the iframe; use SAMEORIGIN/'self' for those paths only.
+    _is_legacy = request.url.path.startswith("/legacy/")
+    _frame_opt = "SAMEORIGIN" if _is_legacy else "DENY"
+    _frame_anc = "'self'" if _is_legacy else "'none'"
+    r.headers["X-Frame-Options"]=_frame_opt
     r.headers["Content-Security-Policy"]=(
         "default-src 'self'; script-src 'self' 'unsafe-inline'; "
         "style-src 'self' 'unsafe-inline'; img-src 'self'; font-src 'self'; "
-        "connect-src 'self'; object-src 'none'; base-uri 'self'; frame-ancestors 'none'"
+        "connect-src 'self'; object-src 'none'; base-uri 'self'; "
+        f"frame-ancestors {_frame_anc}"
     )
     if _IS_PRODUCTION:
         # Only meaningful once TLS is actually terminated in front of
