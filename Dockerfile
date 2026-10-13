@@ -2,7 +2,13 @@
 # CDR-01B1.5: Produces the exact frontend that passed CUSTOMER_DEMO_GATE_01.
 # vite.config.ts outDir is ../../frontend/dist relative to frontend/app,
 # which resolves to /app/frontend/dist inside this stage.
+# CDR-01B2-B2-R3: VITE_API_BASE_URL defaults to /api (same-origin) for the
+# private/self-hosted Docker build. Vite shell env takes priority over
+# frontend/app/.env.production at build time. Render and other public
+# deployments override this ARG via their own build environment.
 FROM node:20-alpine AS frontend-builder
+ARG VITE_API_BASE_URL=/api
+ENV VITE_API_BASE_URL=$VITE_API_BASE_URL
 WORKDIR /app
 COPY frontend/app /app/frontend/app
 RUN cd /app/frontend/app && npm ci && npm run build
