@@ -10,8 +10,18 @@
       "question_type": "single_choice",
       "question_tr": "Sıkma torku (T), sürtünme katsayısı (mu) ve ön yük (F) arasındaki temel ilişkide, mu sabit tutulup F arttırılırsa T nasıl değişir?",
       "question_en": "In the basic relationship between tightening torque (T), friction coefficient (mu), and preload (F), if mu is held constant and F increases, how does T change?",
-      "options_tr": ["Artar", "Azalır", "Değişmez", "Önce artar sonra azalır"],
-      "options_en": ["Increases", "Decreases", "Stays the same", "Increases then decreases"],
+      "options_tr": [
+        "Artar",
+        "Azalır",
+        "Değişmez",
+        "Önce artar sonra azalır"
+      ],
+      "options_en": [
+        "Increases",
+        "Decreases",
+        "Stays the same",
+        "Increases then decreases"
+      ],
       "correct_answer": 0,
       "technical_explanation_tr": "T = K * F * d bağıntısında K (tork katsayısı, sürtünmeye bağlı) ve d (nominal çap) sabitken, F ile T doğru orantılı olarak artar.",
       "technical_explanation_en": "In T = K * F * d, with K (torque coefficient, friction-dependent) and d (nominal diameter) held constant, T increases proportionally with F.",
@@ -22,7 +32,11 @@
       },
       "source_locator": "backend/engineering_core/torque.py",
       "traceability_level": "PROVISIONAL",
-      "tags": ["torque", "preload", "basic-relationship"],
+      "tags": [
+        "torque",
+        "preload",
+        "basic-relationship"
+      ],
       "learning_objective": "Tork-ön yük ilişkisinin temel orantısını kavramak.",
       "engineering_risk_level": "low",
       "is_active": true
@@ -62,7 +76,11 @@
       },
       "source_locator": null,
       "traceability_level": "APPROVED",
-      "tags": ["iso-16047", "test-method", "scope"],
+      "tags": [
+        "iso-16047",
+        "test-method",
+        "scope"
+      ],
       "learning_objective": "ISO 16047'nin gerçek kapsamını (test metodu) diş sıyırma hesap standartlarından ayırt edebilmek.",
       "engineering_risk_level": "medium",
       "is_active": true
@@ -76,8 +94,14 @@
       "question_type": "true_false",
       "question_tr": "VDI 2230, cıvatalı birleşmelerin tasarım hesaplaması için Alman mühendislik kılavuzudur.",
       "question_en": "VDI 2230 is a German engineering guideline for the design calculation of bolted joints.",
-      "options_tr": ["Doğru", "Yanlış"],
-      "options_en": ["True", "False"],
+      "options_tr": [
+        "Doğru",
+        "Yanlış"
+      ],
+      "options_en": [
+        "True",
+        "False"
+      ],
       "correct_answer": true,
       "technical_explanation_tr": "VDI 2230, cıvatalı sistemlerin sistematik tasarım hesabı için VDI (Verein Deutscher Ingenieure) tarafından yayımlanan bir mühendislik kılavuzudur.",
       "technical_explanation_en": "VDI 2230 is an engineering guideline published by VDI (Verein Deutscher Ingenieure) for the systematic design calculation of bolted joint systems.",
@@ -92,7 +116,10 @@
       },
       "source_locator": null,
       "traceability_level": "APPROVED",
-      "tags": ["vdi-2230", "fundamentals"],
+      "tags": [
+        "vdi-2230",
+        "fundamentals"
+      ],
       "learning_objective": "VDI 2230'un mühendislik kılavuzu niteliğini tanımak.",
       "engineering_risk_level": "low",
       "is_active": true
@@ -119,10 +146,57 @@
       },
       "source_locator": null,
       "traceability_level": "UNVERIFIED",
-      "tags": ["oem-estimation", "tolerance", "unit-conversion"],
+      "tags": [
+        "oem-estimation",
+        "tolerance",
+        "unit-conversion"
+      ],
       "learning_objective": "OEM genel tahmin değerlerinin tolerans aralığıyla nasıl doğrulandığını uygulamak.",
       "engineering_risk_level": "medium",
       "is_active": false
+    },
+    {
+      "question_id": "QB-THREAD-STRESS-AREA-00001",
+      "content_version": 1,
+      "category": "preload_and_clamp_force",
+      "subcategory": "stress_area",
+      "difficulty": "intermediate",
+      "question_type": "single_choice",
+      "question_tr": "Metrik civatali baglantilarda cekme gerilmesi alani (As) ne icin kullanilir ve eksenel gerilme ile iliskisi nedir?",
+      "question_en": "In metric bolted joints, what is the tensile stress area As used for, and what is its relationship to axial bolt stress?",
+      "options_tr": [
+        "Eksenel gerilme hesabinda kullanilir; sigma = F / As iliskisi on yuk kuvvetini alanla iliskilendirir",
+        "Vida disinin kayma dayanimi hesabinda kullanilan geometrik bir capdir",
+        "Yalnizca saplama baglantilarda nominal govde kesit alani yerine kullanilir",
+        "Vida adimina bagli olmayan sabit bir standart degerdir"
+      ],
+      "options_en": [
+        "Used in axial stress calculation; the relation sigma = F / As links preload force to stress area",
+        "It is a geometric diameter used in thread stripping shear strength calculations",
+        "Used only in stud joints as a substitute for the nominal shank cross-section",
+        "A fixed standard value independent of thread pitch"
+      ],
+      "correct_answer": 0,
+      "tolerance": null,
+      "technical_explanation_tr": "Cekme gerilmesi alani (As), metrik vidanin dis geometrisinden turetilmis etkin bir kesit alanidir; nominal govde capi degildir. Civata eksenel gerilme hesabi sigma = F / As bagintisiyla yapilir; burada F on yuk kuvvetidir. As, vida adimina bagli olarak degisir ve ilgili standartlar tarafindan her metrik dis boyutu icin tanimlanir.",
+      "technical_explanation_en": "The tensile stress area As is an effective cross-sectional area derived from metric thread geometry; it is not a geometric diameter. Axial bolt stress is calculated as sigma = F / As, where F is the preload force. As varies with thread pitch and is defined by the applicable standard for each metric thread size.",
+      "standard_reference": null,
+      "source_reference": {
+        "source_type": "engineering_interpretation",
+        "description": "Standard metric thread tensile stress area definition; sigma = F/As axial stress relation from VDI 2230 bolt calculation methodology."
+      },
+      "source_locator": null,
+      "traceability_level": "APPROVED",
+      "tags": [
+        "tensile-stress-area",
+        "preload",
+        "axial-stress",
+        "thread-geometry",
+        "vdi-2230"
+      ],
+      "learning_objective": "Understand that As is the effective tensile stress area derived from thread geometry, used in sigma = F/As for axial bolt stress calculation.",
+      "engineering_risk_level": "medium",
+      "is_active": true
     }
   ]
 }
