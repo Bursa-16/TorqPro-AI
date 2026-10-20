@@ -15,13 +15,20 @@ export type AdvancedContextKey =
   | 'boltLength'
   | 'loadFactor'
   | 'operatingLoad'
+  | 'assemblyPreload'
   | 'deltaT'
+  | 'tensileArea'
+  | 'proofStress'
   | 'plateMaterial'
+  | 'dOuter'
+  | 'dH'
   | null
 
 interface Props {
   contextKey: AdvancedContextKey
   selectedMaterial?: string
+  liveValue?: number | string | null
+  liveUnit?: string
 }
 
 const CTX_KEY_MAP: Record<Exclude<AdvancedContextKey, null>, string> = {
@@ -29,8 +36,13 @@ const CTX_KEY_MAP: Record<Exclude<AdvancedContextKey, null>, string> = {
   boltLength:      'bolt_length',
   loadFactor:      'load_factor',
   operatingLoad:   'operating_load',
+  assemblyPreload: 'assembly_preload',
   deltaT:          'delta_t',
+  tensileArea:     'tensile_area',
+  proofStress:     'proof_stress',
   plateMaterial:   'plate_material',
+  dOuter:          'd_outer',
+  dH:              'd_h',
 }
 
 // ── Arrowhead primitive ───────────────────────────────────────────────────────
@@ -303,6 +315,197 @@ function PlateMaterialDiagram({ material }: { material: string }) {
   )
 }
 
+// ── G: Assembly Preload ───────────────────────────────────────────────────────
+// Compression force arrows showing F_M clamping the joint. NOT FK,res.
+function AssemblyPreloadDiagram({ liveValue, liveUnit }: { liveValue?: number | string | null; liveUnit?: string }) {
+  const label = liveValue != null ? `F_M = ${liveValue} ${liveUnit ?? 'kN'}` : 'F_M'
+  return (
+    <svg viewBox="0 0 220 96" className="w-full" aria-hidden="true">
+      <rect width="220" height="96" rx="3" fill={EV.canvasBackground} />
+      <line x1="110" y1="0" x2="110" y2="96"
+        stroke={EV.centerline} strokeWidth="0.8" strokeDasharray="4,3" />
+      {/* Bolt head */}
+      <rect x="92" y="6" width="36" height="16" rx="1"
+        fill={EV.fastenerFill} stroke={EV.geometryPrimary} strokeWidth="1.5" />
+      {/* Bolt shank */}
+      <rect x="103" y="6" width="14" height="74"
+        fill={EV.shankFill} stroke={EV.geometrySecondary} strokeWidth="0.8" />
+      {/* Upper plate */}
+      <rect x="42" y="22" width="136" height="25"
+        fill={EV.clampedUpperFill} stroke={EV.geometryPrimary} strokeWidth="1.5" />
+      {/* Lower plate */}
+      <rect x="42" y="51" width="136" height="24"
+        fill={EV.clampedLowerFill} stroke={EV.geometryPrimary} strokeWidth="1.5" />
+      {/* Clearance holes */}
+      <rect x="103" y="22" width="14" height="53"
+        fill={EV.holeVoidFill} stroke={EV.holeStroke} strokeWidth="0.7" />
+      {/* F_M compression arrows — head pushing down on upper plate */}
+      <line x1="60" y1="6" x2="60" y2="20"
+        stroke={EV.inputStroke} strokeWidth="2" />
+      <Tip x={60} y={20} dir="down" />
+      <line x1="160" y1="6" x2="160" y2="20"
+        stroke={EV.inputStroke} strokeWidth="2" />
+      <Tip x={160} y={20} dir="down" />
+      {/* F_M reaction arrows — lower plate being pressed up */}
+      <line x1="60" y1="90" x2="60" y2="77"
+        stroke={EV.inputStroke} strokeWidth="2" />
+      <Tip x={60} y={77} dir="up" />
+      <line x1="160" y1="90" x2="160" y2="77"
+        stroke={EV.inputStroke} strokeWidth="2" />
+      <Tip x={160} y={77} dir="up" />
+      {/* Live value label */}
+      <text x="110" y="92" fill={EV.inputText}
+        fontSize="10" fontWeight="700" textAnchor="middle">{label}</text>
+    </svg>
+  )
+}
+
+// ── H: Tensile Stress Area ────────────────────────────────────────────────────
+// Shows A_s as a shaded area (circle). NOT a diameter — no linear dimension arrows.
+function TensileAreaDiagram({ liveValue, liveUnit }: { liveValue?: number | string | null; liveUnit?: string }) {
+  const label = liveValue != null ? `A_s = ${liveValue} ${liveUnit ?? 'mm²'}` : 'A_s'
+  return (
+    <svg viewBox="0 0 220 96" className="w-full" aria-hidden="true">
+      <rect width="220" height="96" rx="3" fill={EV.canvasBackground} />
+      {/* Outer bolt shank cross-section ring */}
+      <circle cx="110" cy="44" r="32"
+        fill={EV.shankFill} stroke={EV.geometryPrimary} strokeWidth="1.5" />
+      {/* Inner stress area — highlighted as an AREA, not a diameter */}
+      <circle cx="110" cy="44" r="22"
+        fill={EV.contextImportant} stroke={EV.inputStroke} strokeWidth="1.5"
+        strokeDasharray="3,2" />
+      {/* A_s label centered in area */}
+      <text x="110" y="40" fill={EV.inputText}
+        fontSize="13" fontWeight="700" textAnchor="middle" dominantBaseline="middle">A_s</text>
+      <text x="110" y="54" fill={EV.schematicNote}
+        fontSize="8" textAnchor="middle" dominantBaseline="middle">area · mm²</text>
+      {/* Live value */}
+      <text x="110" y="90" fill={EV.inputText}
+        fontSize="10" fontWeight="700" textAnchor="middle">{label}</text>
+      {/* Note: area zone bracket on right */}
+      <line x1="148" y1="44" x2="160" y2="44"
+        stroke={EV.guidance} strokeWidth="1" strokeDasharray="2,2" />
+      <text x="185" y="48" fill={EV.guidance}
+        fontSize="8" textAnchor="middle">area</text>
+    </svg>
+  )
+}
+
+// ── I: Proof Stress ───────────────────────────────────────────────────────────
+// Material property context — stress bar representation. NOT a geometric dimension.
+function ProofStressDiagram({ liveValue, liveUnit }: { liveValue?: number | string | null; liveUnit?: string }) {
+  const label = liveValue != null ? `Rp0.2 = ${liveValue} ${liveUnit ?? 'MPa'}` : 'Rp0.2'
+  return (
+    <svg viewBox="0 0 220 96" className="w-full" aria-hidden="true">
+      <rect width="220" height="96" rx="3" fill={EV.canvasBackground} />
+      {/* Material block */}
+      <rect x="30" y="22" width="160" height="40" rx="2"
+        fill={EV.clampedUpperFill} stroke={EV.geometryPrimary} strokeWidth="1.5" />
+      <rect x="30" y="22" width="160" height="40" rx="2" fill={EV.contextImportant} />
+      {/* Rp0.2 label */}
+      <text x="110" y="37" fill={EV.inputText}
+        fontSize="13" fontWeight="700" textAnchor="middle" dominantBaseline="middle">
+        Rp0.2
+      </text>
+      <text x="110" y="53" fill={EV.schematicNote}
+        fontSize="9" textAnchor="middle" dominantBaseline="middle">
+        0.2% proof stress · MPa
+      </text>
+      {/* Horizontal "yield marker" line */}
+      <line x1="30" y1="62" x2="190" y2="62"
+        stroke={EV.warn} strokeWidth="1" strokeDasharray="4,2" />
+      <text x="195" y="65" fill={EV.warn}
+        fontSize="8" textAnchor="start">Rp</text>
+      {/* Live value */}
+      <text x="110" y="86" fill={EV.inputText}
+        fontSize="10" fontWeight="700" textAnchor="middle">{label}</text>
+    </svg>
+  )
+}
+
+// ── J: Outer Contact Diameter ─────────────────────────────────────────────────
+// Plan view of annular bearing surface. D_outer dimension shown. NOT Dw.
+function DOUterDiagram({ liveValue, liveUnit }: { liveValue?: number | string | null; liveUnit?: string }) {
+  const label = liveValue != null ? `D_outer = ${liveValue} ${liveUnit ?? 'mm'}` : 'D_outer'
+  return (
+    <svg viewBox="0 0 220 96" className="w-full" aria-hidden="true">
+      <rect width="220" height="96" rx="3" fill={EV.canvasBackground} />
+      {/* Outer bearing surface — annular ring (plan view) */}
+      <circle cx="110" cy="44" r="36"
+        fill={EV.washerFill} stroke={EV.geometryPrimary} strokeWidth="1.5" />
+      {/* Inner clearance hole */}
+      <circle cx="110" cy="44" r="14"
+        fill={EV.holeVoidFill} stroke={EV.holeStroke} strokeWidth="1" />
+      {/* Bolt shank (center) */}
+      <circle cx="110" cy="44" r="9"
+        fill={EV.shankFill} stroke={EV.geometrySecondary} strokeWidth="0.8" />
+      {/* D_outer dimension: left to right across full outer circle */}
+      <line x1="74" y1="12" x2="146" y2="12"
+        stroke={EV.inputStroke} strokeWidth="1.5" />
+      <line x1="74" y1="8" x2="74" y2="16"
+        stroke={EV.inputStroke} strokeWidth="1" />
+      <line x1="146" y1="8" x2="146" y2="16"
+        stroke={EV.inputStroke} strokeWidth="1" />
+      <Tip x={74} y={12} dir="left" />
+      <Tip x={146} y={12} dir="right" />
+      {/* Guide lines from outer edge to dimension */}
+      <line x1="74" y1="13" x2="74" y2="44"
+        stroke={EV.guidance} strokeWidth="0.7" strokeDasharray="2,2" />
+      <line x1="146" y1="13" x2="146" y2="44"
+        stroke={EV.guidance} strokeWidth="0.7" strokeDasharray="2,2" />
+      {/* Label */}
+      <text x="110" y="9" fill={EV.inputText}
+        fontSize="9" fontWeight="700" textAnchor="middle" dominantBaseline="middle">
+        D_outer
+      </text>
+      {/* Live value */}
+      <text x="110" y="90" fill={EV.inputText}
+        fontSize="10" fontWeight="700" textAnchor="middle">{label}</text>
+    </svg>
+  )
+}
+
+// ── K: Clearance Hole Diameter ────────────────────────────────────────────────
+// Cross-section showing d_h dimension across the hole.
+function DHDiagram({ liveValue, liveUnit }: { liveValue?: number | string | null; liveUnit?: string }) {
+  const label = liveValue != null ? `d_h = ${liveValue} ${liveUnit ?? 'mm'}` : 'd_h'
+  return (
+    <svg viewBox="0 0 220 96" className="w-full" aria-hidden="true">
+      <rect width="220" height="96" rx="3" fill={EV.canvasBackground} />
+      <line x1="110" y1="0" x2="110" y2="96"
+        stroke={EV.centerline} strokeWidth="0.8" strokeDasharray="4,3" />
+      {/* Plate */}
+      <rect x="30" y="22" width="160" height="46" rx="1"
+        fill={EV.clampedUpperFill} stroke={EV.geometryPrimary} strokeWidth="1.5" />
+      {/* Clearance hole (void) */}
+      <rect x="96" y="22" width="28" height="46"
+        fill={EV.holeVoidFill} stroke={EV.holeStroke} strokeWidth="1" />
+      {/* d_h dimension arrow across the hole */}
+      <line x1="96" y1="10" x2="124" y2="10"
+        stroke={EV.inputStroke} strokeWidth="1.5" />
+      <line x1="96" y1="6" x2="96" y2="14"
+        stroke={EV.inputStroke} strokeWidth="1" />
+      <line x1="124" y1="6" x2="124" y2="14"
+        stroke={EV.inputStroke} strokeWidth="1" />
+      <Tip x={96} y={10} dir="left" />
+      <Tip x={124} y={10} dir="right" />
+      {/* Guide lines */}
+      <line x1="96" y1="11" x2="96" y2="22"
+        stroke={EV.guidance} strokeWidth="0.7" strokeDasharray="2,2" />
+      <line x1="124" y1="11" x2="124" y2="22"
+        stroke={EV.guidance} strokeWidth="0.7" strokeDasharray="2,2" />
+      {/* Symbol */}
+      <text x="110" y="7" fill={EV.inputText}
+        fontSize="9" fontWeight="700" textAnchor="middle" dominantBaseline="middle">
+        d_h
+      </text>
+      {/* Live value */}
+      <text x="110" y="90" fill={EV.inputText}
+        fontSize="10" fontWeight="700" textAnchor="middle">{label}</text>
+    </svg>
+  )
+}
+
 // ── Default (null context) ────────────────────────────────────────────────────
 function NeutralDiagram() {
   return (
@@ -333,6 +536,8 @@ function NeutralDiagram() {
 export default function AdvancedConnectionContextDiagram({
   contextKey,
   selectedMaterial = '',
+  liveValue,
+  liveUnit,
 }: Props) {
   const { t } = useLanguage()
 
@@ -361,8 +566,13 @@ export default function AdvancedConnectionContextDiagram({
       case 'boltLength':      return <BoltLengthDiagram />
       case 'loadFactor':      return <LoadFactorDiagram />
       case 'operatingLoad':   return <OperatingLoadDiagram />
+      case 'assemblyPreload': return <AssemblyPreloadDiagram liveValue={liveValue} liveUnit={liveUnit} />
       case 'deltaT':          return <DeltaTDiagram />
+      case 'tensileArea':     return <TensileAreaDiagram liveValue={liveValue} liveUnit={liveUnit} />
+      case 'proofStress':     return <ProofStressDiagram liveValue={liveValue} liveUnit={liveUnit} />
       case 'plateMaterial':   return <PlateMaterialDiagram material={selectedMaterial} />
+      case 'dOuter':          return <DOUterDiagram liveValue={liveValue} liveUnit={liveUnit} />
+      case 'dH':              return <DHDiagram liveValue={liveValue} liveUnit={liveUnit} />
       default:                return <NeutralDiagram />
     }
   })()

@@ -198,11 +198,16 @@ function F({
   onContextChange: (key: AdvancedContextKey) => void
 }) {
   const FIELD_CTX: Partial<Record<keyof VdiInputs, AdvancedContextKey>> = {
-    v_plaka:   'plateThickness',
-    v_boy:     'boltLength',
-    v_n:       'loadFactor',
-    v_FA:      'operatingLoad',
-    v_dT:      'deltaT',
+    v_plaka:    'plateThickness',
+    v_boy:      'boltLength',
+    v_n:        'loadFactor',
+    v_FA:       'operatingLoad',
+    v_FM:       'assemblyPreload',
+    v_dT:       'deltaT',
+    v_AS:       'tensileArea',
+    v_rp02:     'proofStress',
+    v_dOuter:   'dOuter',
+    v_dH:       'dH',
   }
   const ctxKey = FIELD_CTX[field] ?? null
 
@@ -365,6 +370,24 @@ export default function AdvancedAnalysisPage() {
   }
 
   const fp = { inputs, onChange: update, onContextChange: setActiveContext } as const
+
+  // Derive live value + unit for the active context key
+  const { liveValue: ctxLiveValue, liveUnit: ctxLiveUnit } = (() => {
+    switch (activeContext) {
+      case 'plateThickness':  return { liveValue: inputs.v_plaka,   liveUnit: 'mm' }
+      case 'boltLength':      return { liveValue: inputs.v_boy,     liveUnit: 'mm' }
+      case 'loadFactor':      return { liveValue: inputs.v_n,       liveUnit: '' }
+      case 'operatingLoad':   return { liveValue: inputs.v_FA,      liveUnit: 'kN' }
+      case 'assemblyPreload': return { liveValue: inputs.v_FM,      liveUnit: 'kN' }
+      case 'deltaT':          return { liveValue: inputs.v_dT,      liveUnit: '°C' }
+      case 'tensileArea':     return { liveValue: inputs.v_AS,      liveUnit: 'mm²' }
+      case 'proofStress':     return { liveValue: inputs.v_rp02,    liveUnit: 'MPa' }
+      case 'plateMaterial':   return { liveValue: null,             liveUnit: '' }
+      case 'dOuter':          return { liveValue: inputs.v_dOuter,  liveUnit: 'mm' }
+      case 'dH':              return { liveValue: inputs.v_dH,      liveUnit: 'mm' }
+      default:                return { liveValue: null,             liveUnit: '' }
+    }
+  })()
 
   // ── Workflow steps ─────────────────────────────────────────────────────────
   const steps = [
@@ -598,6 +621,8 @@ export default function AdvancedAnalysisPage() {
         <AdvancedConnectionContextDiagram
           contextKey={activeContext}
           selectedMaterial={inputs.v_malzeme}
+          liveValue={ctxLiveValue}
+          liveUnit={ctxLiveUnit}
         />
       </div>
 
@@ -1012,7 +1037,12 @@ export default function AdvancedAnalysisPage() {
             </div>
           </div>
           {/* Engineering schematic */}
-          <AdvancedConnectionContextDiagram contextKey={activeContext} selectedMaterial={inputs.v_malzeme} />
+          <AdvancedConnectionContextDiagram
+            contextKey={activeContext}
+            selectedMaterial={inputs.v_malzeme}
+            liveValue={ctxLiveValue}
+            liveUnit={ctxLiveUnit}
+          />
           {/* Contact pressure schematic */}
           <div className="border border-tp-border-strong rounded-md overflow-hidden">
             <div className="bg-tp-surface-3 border-b border-tp-border px-3 py-1.5">
