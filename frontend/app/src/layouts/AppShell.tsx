@@ -89,23 +89,26 @@ export default function AppShell({ user, role, onLogout }: {
           <span className="text-tp-text-3 font-normal text-[10px]">v3.3.4</span>
         </Link>
 
-        {/* Breadcrumb */}
-        <div className="flex-1 min-w-0">
+        {/* Breadcrumb — hidden on mobile to avoid topbar collision */}
+        <div className="hidden sm:flex flex-1 min-w-0">
           <Breadcrumb pathname={location.pathname} />
         </div>
+        {/* Spacer on mobile so right controls don't crowd logo */}
+        <div className="flex-1 sm:hidden" />
 
         {/* Right controls */}
-        <div className="shrink-0 flex items-center gap-3">
+        <div className="shrink-0 flex items-center gap-2 sm:gap-3">
           <AiStatusBadge />
           <LanguageSwitcher />
-          <div className="flex items-center gap-2 text-xs">
+          {/* User/role — hidden on mobile, shown on sm+ */}
+          <div className="hidden sm:flex items-center gap-2 text-xs">
             <span className="text-tp-text-2">{user}</span>
             <span className="text-tp-text-3 text-[10px]">({role})</span>
           </div>
           <button
             onClick={onLogout}
-            className="text-xs text-tp-text-3 hover:text-tp-error transition-colors px-2 py-1
-                       rounded hover:bg-tp-error-muted"
+            className="text-[11px] sm:text-xs text-tp-text-3 hover:text-tp-error transition-colors
+                       px-1.5 sm:px-2 py-1 rounded hover:bg-tp-error-muted"
           >
             {t('shell.logout')}
           </button>

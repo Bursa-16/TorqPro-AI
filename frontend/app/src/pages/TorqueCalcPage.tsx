@@ -1,5 +1,6 @@
 import { useState, useRef, useMemo, useCallback, useEffect } from 'react'
 import StatusBadge from '../components/ui/StatusBadge'
+import Button from '../components/ui/Button'
 import TorqueContextDiagram, { type TorqueVisualFocus } from '../components/engineering/TorqueContextDiagram'
 import ModuleGuideDrawer from '../components/guidance/ModuleGuideDrawer'
 import { engineeringCheck } from '../services/torque'
@@ -8,6 +9,7 @@ import { torqueGuide } from '../guides/torqueGuide'
 import type { ExampleValues } from '../guides/GuideSchema'
 import { EV } from '../components/engineering-visuals/engineeringVisualTokens'
 import { useLanguage } from '../i18n/LanguageContext'
+import TorqueRangeChart from '../components/charts/TorqueRangeChart'
 
 const DEFAULTS: EngineeringCheckRequest = {
   diameter_mm: 10, pitch_mm: 1.5, stress_area_mm2: 58, rp02_mpa: 900,
@@ -51,20 +53,30 @@ function F({
   focusKey?: TorqueVisualFocus
   onFocusField?: (k: TorqueVisualFocus) => void
 }) {
+  const inputId = `tp-f-${field}`
   return (
-    <div className="flex flex-col gap-0.5">
-      <label className="text-[12px] text-tp-text-3 leading-none">{label}</label>
-      <div className="flex items-center gap-1">
+    <div className="flex flex-col gap-1">
+      <label htmlFor={inputId} className="text-[11px] font-medium text-tp-text-2 leading-none select-none">
+        {label}
+      </label>
+      <div className="relative">
         <input
+          id={inputId}
           type="number" step="any"
           value={form[field]}
           onChange={e => onChange(field, e.target.value)}
           onFocus={() => { if (focusKey) onFocusField?.(focusKey) }}
-          className="w-full bg-tp-workspace border border-tp-border-2 rounded
-                     px-2 py-1.5 text-[14px] text-tp-text tabular-nums
-                     outline-none focus:border-tp-accent transition-colors"
+          className={`w-full bg-tp-workspace border border-tp-border-strong rounded
+                     px-2.5 py-2 text-[13px] text-tp-text tabular-nums
+                     outline-none focus:border-tp-accent transition-colors
+                     ${unit ? 'pr-9' : ''}`}
         />
-        {unit && <span className="text-[10px] text-tp-text-3 shrink-0 w-7">{unit}</span>}
+        {unit && (
+          <span className="absolute right-2.5 top-1/2 -translate-y-1/2
+                           text-[10px] text-tp-text-3 pointer-events-none font-mono leading-none">
+            {unit}
+          </span>
+        )}
       </div>
     </div>
   )
@@ -88,11 +100,11 @@ function ResultRow({ label, value, sub, color = 'text-tp-text' }: {
 }) {
   return (
     <div className="flex items-baseline justify-between gap-2 py-1.5
-                    border-b border-tp-border/40 last:border-b-0">
-      <span className="text-[11px] text-tp-text-3 shrink-0">{label}</span>
+                    border-b border-tp-border last:border-b-0">
+      <span className="text-[12px] text-tp-text-3 shrink-0">{label}</span>
       <div className="text-right">
         <span className={`text-sm font-semibold tabular-nums ${color}`}>{value}</span>
-        {sub && <span className="text-[10px] text-tp-text-3 ml-1">{sub}</span>}
+        {sub && <span className="text-[11px] text-tp-text-3 ml-1">{sub}</span>}
       </div>
     </div>
   )
@@ -263,10 +275,10 @@ export default function TorqueCalcPage() {
         <div className="flex-1 px-5 py-4 min-w-0 bg-tp-workspace">
 
           {/* Page title + guide trigger */}
-          <div className="flex items-center gap-3 mb-5">
-            <h1 className="text-[16px] font-semibold text-tp-text">
+          <div className="flex items-start gap-2 mb-5">
+            <h1 className="text-[15px] sm:text-[16px] font-semibold text-tp-text flex-1 min-w-0">
               {t('torque.title')}
-              <span className="ml-2 text-[11px] font-normal text-tp-text-3">
+              <span className="hidden sm:inline ml-2 text-[11px] font-normal text-tp-text-3">
                 — {t('torque.subtitle')}
               </span>
             </h1>
@@ -274,8 +286,8 @@ export default function TorqueCalcPage() {
               type="button"
               onClick={() => setGuideOpen(true)}
               aria-label={t('torque.guide_open')}
-              className="flex items-center gap-1 text-[11px] text-tp-text-3
-                         hover:text-tp-accent transition-colors
+              className="flex items-center gap-1 text-[11px] text-tp-text-3 shrink-0
+                         hover:text-tp-accent transition-colors mt-0.5
                          focus-visible:outline focus-visible:outline-2 focus-visible:outline-tp-accent
                          rounded px-1 py-0.5"
             >
@@ -284,10 +296,14 @@ export default function TorqueCalcPage() {
             </button>
           </div>
 
-          {/* Primary: Geometry */}
-          <div id="guide-anchor-geometri">
-            <SectionLabel>{t('torque.geometry')}</SectionLabel>
-            <div className="grid grid-cols-4 gap-3">
+          {/* A — Geometry */}
+          <div id="guide-anchor-geometri" className="bg-tp-module border border-tp-border-2 rounded-md overflow-hidden mb-3">
+            <div className="tp-module-header px-4 py-2 flex items-center">
+              <span className="text-[10px] font-bold uppercase tracking-widest text-tp-text-2">
+                {t('torque.geometry')}
+              </span>
+            </div>
+            <div className="p-4 grid grid-cols-2 sm:grid-cols-4 gap-3">
               <F label={t('torque.diameter')} field="diameter_mm" unit="mm" focusKey="diameter_d" {...fp} />
               <F label={t('torque.pitch')} field="pitch_mm" unit="mm" focusKey="pitch_p" {...fp} />
               <F label={t('torque.stress_area')} field="stress_area_mm2" unit="mm²" focusKey="stress_area_as" {...fp} />
@@ -297,7 +313,7 @@ export default function TorqueCalcPage() {
 
           {/* Mobile inline context visual (HARD RULE 06) */}
           {visualFocus !== 'neutral' && (
-            <div className="block lg:hidden mt-3">
+            <div className="block lg:hidden mb-3">
               <div className="text-[13px] font-medium text-tp-text-2 mb-1 tracking-wide">
                 {CONTEXT_TITLE[visualFocus]}
                 {CONTEXT_SUB[visualFocus] && (
@@ -315,74 +331,106 @@ export default function TorqueCalcPage() {
             </div>
           )}
 
-          {/* Primary: Friction */}
-          <div id="guide-anchor-surtunme">
-            <SectionLabel>{t('torque.friction')}</SectionLabel>
-            <div className="grid grid-cols-3 gap-3 mb-1">
-              <F label={t('torque.thread_min')} field="mu_thread_min" focusKey="thread_friction" {...fp} />
-              <F label={t('torque.thread_nom')} field="mu_thread_nom" focusKey="thread_friction" {...fp} />
-              <F label={t('torque.thread_max')} field="mu_thread_max" focusKey="thread_friction" {...fp} />
-              <F label={t('torque.bearing_min')} field="mu_bearing_min" focusKey="bearing_friction" {...fp} />
-              <F label={t('torque.bearing_nom')} field="mu_bearing_nom" focusKey="bearing_friction" {...fp} />
-              <F label={t('torque.bearing_max')} field="mu_bearing_max" focusKey="bearing_friction" {...fp} />
+          {/* B — Friction */}
+          <div id="guide-anchor-surtunme" className="bg-tp-module border border-tp-border-2 rounded-md overflow-hidden mb-3">
+            <div className="tp-module-header px-4 py-2 flex items-center">
+              <span className="text-[10px] font-bold uppercase tracking-widest text-tp-text-2">
+                {t('torque.friction')}
+              </span>
+            </div>
+            <div className="p-4 space-y-3">
+              <div>
+                <div className="text-[10px] text-tp-text-3 font-semibold uppercase tracking-widest mb-2 flex items-center gap-2">
+                  <span className="font-mono">μG</span>
+                  <span className="h-px flex-1 bg-tp-border" />
+                </div>
+                <div className="grid grid-cols-3 gap-3">
+                  <F label={t('torque.thread_min')} field="mu_thread_min" focusKey="thread_friction" {...fp} />
+                  <F label={t('torque.thread_nom')} field="mu_thread_nom" focusKey="thread_friction" {...fp} />
+                  <F label={t('torque.thread_max')} field="mu_thread_max" focusKey="thread_friction" {...fp} />
+                </div>
+              </div>
+              <div>
+                <div className="text-[10px] text-tp-text-3 font-semibold uppercase tracking-widest mb-2 flex items-center gap-2">
+                  <span className="font-mono">μK</span>
+                  <span className="h-px flex-1 bg-tp-border" />
+                </div>
+                <div className="grid grid-cols-3 gap-3">
+                  <F label={t('torque.bearing_min')} field="mu_bearing_min" focusKey="bearing_friction" {...fp} />
+                  <F label={t('torque.bearing_nom')} field="mu_bearing_nom" focusKey="bearing_friction" {...fp} />
+                  <F label={t('torque.bearing_max')} field="mu_bearing_max" focusKey="bearing_friction" {...fp} />
+                </div>
+              </div>
             </div>
           </div>
 
-          {/* Primary: Target */}
-          <div id="guide-anchor-hedef">
-            <SectionLabel>{t('torque.target')}</SectionLabel>
-            <div className="grid grid-cols-2 gap-3">
+          {/* C — Target */}
+          <div id="guide-anchor-hedef" className="bg-tp-module border border-tp-border-2 rounded-md overflow-hidden mb-3">
+            <div className="tp-module-header px-4 py-2 flex items-center">
+              <span className="text-[10px] font-bold uppercase tracking-widest text-tp-text-2">
+                {t('torque.target')}
+              </span>
+            </div>
+            <div className="p-4 grid grid-cols-2 gap-3">
               <F label={t('torque.yield_ratio')} field="target_yield_ratio" focusKey="yield_utilization" {...fp} />
               <F label={t('torque.rp02')} field="rp02_mpa" unit="MPa" focusKey="rp02" {...fp} />
             </div>
           </div>
 
-          {/* Advanced disclosure */}
-          <div id="guide-anchor-advanced">
+          {/* D — Advanced Parameters */}
+          <div id="guide-anchor-advanced" className="mb-3">
             <button
               onClick={() => setAdvanced(v => !v)}
-              className="mt-6 flex items-center gap-2 text-[12px] text-tp-text-3
-                         hover:text-tp-text-2 transition-colors group"
+              aria-expanded={advanced}
+              aria-controls="torque-advanced-params"
+              className="w-full flex items-center gap-2 px-3 py-2.5
+                         bg-tp-surface-2 border border-tp-border-2 rounded-md
+                         text-[12px] text-tp-text-3 hover:text-tp-text-2
+                         hover:border-tp-border-strong hover:bg-tp-surface-3
+                         transition-colors group"
             >
               <span
-                className="w-3.5 h-3.5 border border-tp-border-strong rounded-sm flex items-center
-                           justify-center text-[9px] group-hover:border-tp-text-3 transition-colors"
+                className="w-4 h-4 border border-tp-border-strong rounded-sm flex items-center
+                           justify-center text-[9px] group-hover:border-tp-text-3 transition-colors shrink-0"
+                aria-hidden="true"
               >
                 {advanced ? '−' : '+'}
               </span>
-              {advanced ? t('torque.advanced_hide') : t('torque.advanced_show')}
+              <span>{advanced ? t('torque.advanced_hide') : t('torque.advanced_show')}</span>
             </button>
 
             {advanced && (
-              <div className="mt-3 pl-4 border-l-2 border-tp-border-2">
-                <SectionLabel>{t('torque.material')}</SectionLabel>
-                <div className="grid grid-cols-3 gap-3">
-                  <F label={t('torque.bolt_rm')} field="bolt_rm_mpa" unit="MPa" {...fp} />
-                  <F label={t('torque.nut_proof')} field="nut_proof_mpa" unit="MPa" {...fp} />
-                  <F label={t('torque.internal_rm')} field="internal_rm_mpa" unit="MPa" {...fp} />
-                </div>
-                <SectionLabel>{t('torque.engagement')}</SectionLabel>
-                <div className="grid grid-cols-2 gap-3">
-                  <F label={t('torque.engagement_len')} field="engagement_mm" unit="mm" {...fp} />
+              <div
+                id="torque-advanced-params"
+                className="mt-2 bg-tp-module border border-tp-border-2 rounded-md overflow-hidden"
+              >
+                <div className="p-4">
+                  <SectionLabel>{t('torque.material')}</SectionLabel>
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                    <F label={t('torque.bolt_rm')} field="bolt_rm_mpa" unit="MPa" {...fp} />
+                    <F label={t('torque.nut_proof')} field="nut_proof_mpa" unit="MPa" {...fp} />
+                    <F label={t('torque.internal_rm')} field="internal_rm_mpa" unit="MPa" {...fp} />
+                  </div>
+                  <SectionLabel>{t('torque.engagement')}</SectionLabel>
+                  <div className="grid grid-cols-2 gap-3">
+                    <F label={t('torque.engagement_len')} field="engagement_mm" unit="mm" {...fp} />
+                  </div>
                 </div>
               </div>
             )}
           </div>
 
           {/* CTA */}
-          <div id="guide-anchor-cta" className="mt-6 flex items-center gap-3">
-            <button
+          <div id="guide-anchor-cta" className="mt-4 flex items-center gap-3">
+            <Button
+              variant="primary"
+              size="lg"
               onClick={calculate}
               disabled={loading}
-              className="px-10 py-3 bg-tp-accent hover:bg-tp-accent-light active:brightness-90
-                         text-white text-[14px] font-semibold rounded-md tracking-wide
-                         transition-colors shadow-[0_1px_4px_rgba(74,124,201,0.30)]
-                         focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2
-                         focus-visible:outline-tp-accent
-                         disabled:opacity-40 disabled:cursor-not-allowed disabled:shadow-none"
+              className="min-w-[140px]"
             >
               {loading ? t('torque.calculating') : t('torque.calculate')}
-            </button>
+            </Button>
             {error && <span className="text-tp-error text-xs">{error}</span>}
           </div>
         </div>
@@ -418,19 +466,32 @@ export default function TorqueCalcPage() {
         {/* ── RIGHT: Results — sticky rail, no own scroll ───────────────────── */}
         <div
           id="guide-anchor-result"
-          className="shrink-0 px-5 py-4 flex flex-col gap-0 self-start sticky top-0 bg-tp-result"
+          className="shrink-0 px-5 py-4 flex flex-col gap-0 self-start sticky top-0 bg-tp-result border-l border-tp-border-2"
           style={{ width: isLg ? panelWidth : 320 }}
         >
+          {/* Panel header */}
+          <div className="-mx-5 -mt-4 px-5 py-2.5 mb-4 border-b border-tp-border-2 bg-tp-surface-2
+                          flex items-center gap-2 shrink-0">
+            <div className="w-1.5 h-1.5 rounded-full bg-tp-border-accent shrink-0" />
+            <span className="text-[10px] font-bold uppercase tracking-widest text-tp-text-3 truncate">
+              {t('torque.result_title')}
+            </span>
+            {result && (
+              <div className="ml-auto shrink-0">
+                <StatusBadge variant="calculated">{t('torque.computed')}</StatusBadge>
+              </div>
+            )}
+          </div>
 
           {/* 1. Primary result: Torque */}
           <div className={`rounded-md p-4 transition-colors
-            ${result ? 'bg-tp-accent/8 border border-tp-accent/25' : 'bg-tp-result border border-tp-border-2'}`}>
-            <div className="text-[10px] text-tp-text-3 mb-2 tracking-wide">
+            ${result ? 'bg-tp-accent/15 border border-tp-accent/50 shadow-[0_2px_8px_rgba(74,124,201,0.10)]' : 'bg-tp-surface border border-tp-border-strong'}`}>
+            <div className="text-[11px] text-tp-text-3 mb-2 tracking-wide">
               {t('torque.result_title')}
             </div>
             <div className="flex items-baseline gap-1.5 mb-2">
               <span className={`text-[2.25rem] leading-none font-bold tabular-nums tracking-tight
-                ${result ? 'text-tp-accent-light' : 'text-tp-text-3'}`}>
+                ${result ? 'text-white' : 'text-tp-text-3'}`}>
                 {result ? result.torque_nom_nm.toFixed(1) : '—'}
               </span>
               {result && <span className="text-base text-tp-text-3 font-normal">Nm</span>}
@@ -447,6 +508,13 @@ export default function TorqueCalcPage() {
             )}
           </div>
 
+          {/* 1b. Torque range chart */}
+          {result && (
+            <div className="mt-3">
+              <TorqueRangeChart result={result} lang={lang} />
+            </div>
+          )}
+
           {/* 2. Preload */}
           <div className="mt-3 flex items-baseline justify-between">
             <span className="text-[11px] text-tp-text-3">{t('torque.preload')}</span>
@@ -457,13 +525,13 @@ export default function TorqueCalcPage() {
                     {(result.preload_n / 1000).toFixed(1)}
                   </span>
                   <span className="text-sm text-tp-text-3 ml-1">kN</span>
-                  <div className="text-[10px] text-tp-text-3">{result.preload_n.toFixed(0)} N</div>
+                  <div className="text-[11px] text-tp-text-3">{result.preload_n.toFixed(0)} N</div>
                 </>
               ) : <span className="text-tp-text-3">—</span>}
             </div>
           </div>
 
-          <div className="h-px bg-tp-border/60 my-3" />
+          <div className="h-px bg-tp-border-strong my-3" />
 
           {/* 3. Limit state */}
           {result ? (
@@ -507,28 +575,40 @@ export default function TorqueCalcPage() {
             </div>
           )}
 
-          <div className="h-px bg-tp-border/60 my-3" />
+          <div className="h-px bg-tp-border-strong my-3" />
 
           {/* 5. Contextual joint diagram (GEOMETRY-CONTEXT-01) */}
-          <div className="mb-2">
-            <div className="text-[13px] font-medium text-tp-text-2 tracking-wide leading-snug">
-              {CONTEXT_TITLE[visualFocus]}
-            </div>
-            {CONTEXT_SUB[visualFocus] && (
-              <div className="text-[11px] text-tp-text-2 mt-1 leading-[1.45]">
-                {CONTEXT_SUB[visualFocus]}
+          <div>
+            <div className="mb-2">
+              <div className="text-[13px] font-semibold text-tp-text leading-snug">
+                {CONTEXT_TITLE[visualFocus]}
               </div>
-            )}
+              {CONTEXT_SUB[visualFocus] && (
+                <div className="text-[11px] text-tp-text-3 mt-0.5 leading-relaxed">
+                  {CONTEXT_SUB[visualFocus]}
+                </div>
+              )}
+            </div>
+            <div className="border border-tp-border-strong rounded overflow-hidden
+                            shadow-[inset_0_2px_5px_rgba(0,0,0,0.30)]">
+              <div className="bg-tp-surface-3 border-b border-tp-border px-3 py-1
+                              flex items-center justify-between">
+                <span className="text-[9px] font-bold uppercase tracking-[0.1em] text-tp-text-3">
+                  {lang === 'tr' ? 'Mühendislik Şeması' : 'Engineering Schematic'}
+                </span>
+                <span className="text-[9px] text-tp-text-3 tabular-nums">VDI 2230</span>
+              </div>
+              <TorqueContextDiagram
+                focus={visualFocus}
+                result={result}
+                lang={lang}
+                className="w-full max-h-[260px]"
+              />
+            </div>
           </div>
-          <TorqueContextDiagram
-            focus={visualFocus}
-            result={result}
-            lang={lang}
-            className="w-full max-h-[260px]"
-          />
 
           {/* 6. Traceability footer */}
-          <div className="mt-auto pt-3 text-[10px] text-tp-text-3 leading-relaxed">
+          <div className="mt-auto pt-3 text-[11px] text-tp-text-3 leading-relaxed">
             {t('torque.footer')}
           </div>
         </div>

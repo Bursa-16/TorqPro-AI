@@ -179,9 +179,7 @@ export default function Sidebar({ role }: { role: string | null }) {
                 </button>
               </Collapsible.Trigger>
 
-              <Collapsible.Content
-                style={{ overflow: 'hidden', transition: 'height 150ms ease' }}
-              >
+              <Collapsible.Content className="tp-collapsible-content">
                 <div className="pb-1">
                   {group.items.map(item => {
                     const isActive = location.pathname === item.path

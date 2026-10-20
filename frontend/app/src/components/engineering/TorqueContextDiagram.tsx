@@ -139,7 +139,7 @@ function ResultArrows({ result }: { result: EngineeringCheckResult }) {
         fill="none" stroke={EV.computedResult} strokeWidth="2.2"
         markerEnd="url(#tcd-blue)" />
       <text x="196" y="50" fill={EV.computedResult} fontSize="11" fontWeight="700">M_A</text>
-      <text x="196" y="63" fill={EV.inputText} fontSize="9.5" fontWeight="500">
+      <text x="196" y="63" fill={EV.inputText} fontSize="10.5" fontWeight="500">
         {torque.toFixed(1)} Nm
       </text>
 
@@ -151,7 +151,7 @@ function ResultArrows({ result }: { result: EngineeringCheckResult }) {
       <text x="100" y="93" fill={EV.computedResult} fontSize="10" fontWeight="700" textAnchor="middle">
         F_M
       </text>
-      <text x="100" y="106" fill={EV.inputText} fontSize="9" textAnchor="middle">
+      <text x="100" y="106" fill={EV.inputText} fontSize="10.5" textAnchor="middle">
         {(preload / 1000).toFixed(1)} kN
       </text>
 
@@ -161,7 +161,7 @@ function ResultArrows({ result }: { result: EngineeringCheckResult }) {
       <line x1="198" y1="190" x2="198" y2="168"
         stroke={EV.guidance} strokeWidth="2.2" markerEnd="url(#tcd-clamp)" />
       <text x="240" y="154" fill={EV.guidance} fontSize="10" fontWeight="700" textAnchor="middle">Fc</text>
-      <text x="240" y="166" fill={EV.guidance} fontSize="9" textAnchor="middle">Clamp</text>
+      <text x="240" y="166" fill={EV.guidance} fontSize="10" textAnchor="middle">Clamp</text>
     </g>
   )
 }
@@ -192,9 +192,9 @@ function OverlayDiameter({ lang }: { lang: 'tr' | 'en' }) {
       <line x1="147" y1={dimY} x2="153" y2={dimY} stroke={ACT_STROKE} strokeWidth="1.1" />
 
       {/* Label */}
-      <text x="141" y={dimY + 14} fill={DIM_COLOR} fontSize="11.5" fontWeight="700"
+      <text x="141" y={dimY + 16} fill={DIM_COLOR} fontSize="13" fontWeight="700"
         textAnchor="middle" fontStyle="italic">d</text>
-      <text x="141" y={dimY + 26} fill={NOTE_COLOR} fontSize="8.5" textAnchor="middle">
+      <text x="141" y={dimY + 29} fill={NOTE_COLOR} fontSize="10" textAnchor="middle">
         {lang === 'tr' ? 'nominal çap' : 'nominal diameter'}
       </text>
     </g>
@@ -231,9 +231,9 @@ function OverlayPitch({ lang }: { lang: 'tr' | 'en' }) {
         markerStart="url(#tcd-act-u)" markerEnd="url(#tcd-act-d)" />
 
       {/* Label */}
-      <text x={x1 - 4} y="103" fill={DIM_COLOR} fontSize="11.5" fontWeight="700"
+      <text x={x1 - 4} y="104" fill={DIM_COLOR} fontSize="13" fontWeight="700"
         textAnchor="end" fontStyle="italic">P</text>
-      <text x="141" y="128" fill={NOTE_COLOR} fontSize="8.5" textAnchor="middle">
+      <text x="141" y="129" fill={NOTE_COLOR} fontSize="10" textAnchor="middle">
         {lang === 'tr' ? 'diş adımı' : 'thread pitch'}
       </text>
     </g>
@@ -256,17 +256,17 @@ function OverlayStressArea({ lang }: { lang: 'tr' | 'en' }) {
       {/* Leader line */}
       <line x1="152" y1="152" x2="175" y2="152"
         stroke={ACT_STROKE} strokeWidth="0.9" />
-      <line x1="175" y1="152" x2="175" y2="162"
+      <line x1="175" y1="152" x2="175" y2="158"
         stroke={ACT_STROKE} strokeWidth="0.9" />
 
-      {/* Annotation box */}
-      <rect x="159" y="162" width="90" height="50" rx="3"
+      {/* Annotation box — expanded to prevent text overflow */}
+      <rect x="159" y="158" width="94" height="62" rx="3"
         fill={EV.canvasBackground} stroke={ACT_STROKE} strokeWidth="0.9" opacity="0.97" />
-      <text x="204" y="177" fill={DIM_COLOR} fontSize="11" fontWeight="700" textAnchor="middle"
+      <text x="206" y="173" fill={DIM_COLOR} fontSize="12" fontWeight="700" textAnchor="middle"
         fontStyle="italic">As</text>
-      <text x="204" y="191" fill={NOTE_COLOR} fontSize="8" textAnchor="middle">{noteL1}</text>
-      <text x="204" y="202" fill={NOTE_COLOR} fontSize="8" textAnchor="middle">{noteL2}</text>
-      <text x="204" y="214" fill={EV.schematicNote} fontSize="7.5" textAnchor="middle"
+      <text x="206" y="188" fill={NOTE_COLOR} fontSize="9.5" textAnchor="middle">{noteL1}</text>
+      <text x="206" y="200" fill={NOTE_COLOR} fontSize="9.5" textAnchor="middle">{noteL2}</text>
+      <text x="206" y="213" fill={EV.schematicNote} fontSize="9" textAnchor="middle"
         fontStyle="italic">{noteL3}</text>
     </g>
   )
@@ -298,9 +298,9 @@ function OverlayBearingDiameter({ lang }: { lang: 'tr' | 'en' }) {
       <line x1="166" y1={dimY} x2="172" y2={dimY} stroke={ACT_STROKE} strokeWidth="1.1" />
 
       {/* Label */}
-      <text x="141" y={dimY + 14} fill={DIM_COLOR} fontSize="11.5" fontWeight="700"
+      <text x="141" y={dimY + 16} fill={DIM_COLOR} fontSize="13" fontWeight="700"
         textAnchor="middle" fontStyle="italic">Dw</text>
-      <text x="141" y={dimY + 26} fill={NOTE_COLOR} fontSize="8.5" textAnchor="middle">
+      <text x="141" y={dimY + 29} fill={NOTE_COLOR} fontSize="10" textAnchor="middle">
         {lang === 'tr' ? 'etkin oturma çapı' : 'effective bearing dia.'}
       </text>
     </g>
@@ -327,8 +327,8 @@ function OverlayThreadFriction({ lang }: { lang: 'tr' | 'en' }) {
         stroke={ACT_STROKE} strokeWidth="0.9" />
 
       {/* Annotation */}
-      <text x="186" y="228" fill={DIM_COLOR} fontSize="10.5" fontWeight="700">μG</text>
-      <text x="186" y="241" fill={NOTE_COLOR} fontSize="7.5">{label}</text>
+      <text x="186" y="228" fill={DIM_COLOR} fontSize="12" fontWeight="700">μG</text>
+      <text x="186" y="242" fill={NOTE_COLOR} fontSize="9.5">{label}</text>
     </g>
   )
 }
@@ -349,14 +349,14 @@ function OverlayBearingFriction({ lang }: { lang: 'tr' | 'en' }) {
 
       {/* μK label — head side */}
       <line x1="169" y1="57" x2="195" y2="57" stroke={ACT_STROKE} strokeWidth="0.9" />
-      <text x="197" y="61" fill={DIM_COLOR} fontSize="10.5" fontWeight="700">μK</text>
+      <text x="197" y="62" fill={DIM_COLOR} fontSize="12" fontWeight="700">μK</text>
 
       {/* μK label — nut side */}
       <line x1="169" y1="187" x2="195" y2="187" stroke={ACT_STROKE} strokeWidth="0.9" />
-      <text x="197" y="191" fill={DIM_COLOR} fontSize="10.5" fontWeight="700">μK</text>
+      <text x="197" y="192" fill={DIM_COLOR} fontSize="12" fontWeight="700">μK</text>
 
       {/* Shared annotation */}
-      <text x="141" y="255" fill={NOTE_COLOR} fontSize="8.5" textAnchor="middle">{label}</text>
+      <text x="141" y="256" fill={NOTE_COLOR} fontSize="10" textAnchor="middle">{label}</text>
     </g>
   )
 }
@@ -379,13 +379,13 @@ function OverlayYieldUtilization({ lang }: { lang: 'tr' | 'en' }) {
         stroke={ACT_STROKE} strokeWidth="1.1" strokeDasharray="3,1.5" />
       <text x="52" y={124 + 21} fill={DIM_COLOR} fontSize="8.5">75%</text>
 
-      {/* Annotation */}
-      <rect x="60" y="238" width="180" height="44" rx="3"
+      {/* Annotation — expanded to prevent text overflow */}
+      <rect x="58" y="234" width="184" height="52" rx="3"
         fill={EV.canvasBackground} stroke={EV.geometrySecondary} strokeWidth="0.8" opacity="0.96" />
-      <text x="150" y="253" fill={NOTE_COLOR} fontSize="9" textAnchor="middle">{line1}</text>
-      <text x="150" y="266" fill={EV.schematicNote} fontSize="8" textAnchor="middle"
+      <text x="150" y="250" fill={NOTE_COLOR} fontSize="10" textAnchor="middle">{line1}</text>
+      <text x="150" y="263" fill={EV.schematicNote} fontSize="9" textAnchor="middle"
         fontStyle="italic">{line2}</text>
-      <text x="150" y="278" fill={NOTE_COLOR} fontSize="8" textAnchor="middle">{line3}</text>
+      <text x="150" y="276" fill={NOTE_COLOR} fontSize="9" textAnchor="middle">{line3}</text>
     </g>
   )
 }
@@ -404,16 +404,16 @@ function OverlayRp02({ lang }: { lang: 'tr' | 'en' }) {
 
       {/* Leader */}
       <line x1="162" y1="44" x2="188" y2="44" stroke={ACT_STROKE} strokeWidth="0.9" />
-      <line x1="188" y1="44" x2="188" y2="58" stroke={ACT_STROKE} strokeWidth="0.9" />
+      <line x1="188" y1="44" x2="188" y2="54" stroke={ACT_STROKE} strokeWidth="0.9" />
 
-      {/* Annotation box */}
-      <rect x="159" y="58" width="96" height="50" rx="3"
+      {/* Annotation box — expanded to prevent text overflow */}
+      <rect x="157" y="54" width="100" height="64" rx="3"
         fill={EV.canvasBackground} stroke={ACT_STROKE} strokeWidth="0.9" opacity="0.97" />
-      <text x="207" y="73" fill={DIM_COLOR} fontSize="10.5" fontWeight="700"
+      <text x="207" y="70" fill={DIM_COLOR} fontSize="12" fontWeight="700"
         textAnchor="middle" fontStyle="italic">Rp0.2</text>
-      <text x="207" y="87" fill={NOTE_COLOR} fontSize="7.5" textAnchor="middle">{line1}</text>
-      <text x="207" y="98" fill={NOTE_COLOR} fontSize="7.5" textAnchor="middle">{line2}</text>
-      <text x="207" y="109" fill={EV.schematicNote} fontSize="7" textAnchor="middle"
+      <text x="207" y="85" fill={NOTE_COLOR} fontSize="9" textAnchor="middle">{line1}</text>
+      <text x="207" y="97" fill={NOTE_COLOR} fontSize="9" textAnchor="middle">{line2}</text>
+      <text x="207" y="110" fill={EV.schematicNote} fontSize="8.5" textAnchor="middle"
         fontStyle="italic">{line3}</text>
     </g>
   )
@@ -474,12 +474,12 @@ export default function TorqueContextDiagram({ focus, result, lang = 'tr', class
 
       {/* Neutral / idle state messages */}
       {focus === 'neutral' && noResult && (
-        <text x="150" y="258" fill={NOTE_COLOR} fontSize="10.5" textAnchor="middle">
+        <text x="150" y="258" fill={NOTE_COLOR} fontSize="11.5" textAnchor="middle">
           {neutralMsg}
         </text>
       )}
       {focus === 'neutral' && noResult && (
-        <text x="150" y="273" fill={EV.schematicNote} fontSize="9" textAnchor="middle">
+        <text x="150" y="274" fill={EV.schematicNote} fontSize="10.5" textAnchor="middle">
           {noCalcMsg}
         </text>
       )}
