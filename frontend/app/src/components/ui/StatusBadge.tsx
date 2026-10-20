@@ -12,5 +12,5 @@ const styles: Record<Variant, string> = {
   planned: 'bg-tp-surface-3 text-tp-text-3 border-tp-border',
 }
 export default function StatusBadge({ variant, children }: { variant: Variant; children: React.ReactNode }) {
-  return <span className={`inline-flex items-center gap-1 px-2 py-0.5 text-xs font-medium rounded border ${styles[variant]}`}>{children}</span>
+  return <span role="status" className={`inline-flex items-center gap-1 px-2 py-0.5 text-xs font-medium rounded-sm border ${styles[variant]}`}>{children}</span>
 }
