@@ -4,6 +4,14 @@
 // Engineering terminology follows HARD RULE 08 — do not alter.
 
 export const tr: Record<string, string> = {
+  // ── Login page ────────────────────────────────────────────────────────────
+  'login.username':         'Kullanıcı adı',
+  'login.password':         'Şifre',
+  'login.sign_in':          'GİRİŞ',
+  'login.signing_in':       'Giriş yapılıyor...',
+  'login.demo_banner':      'CUSTOMER DEMO',
+  'login.demo_hint':        'Demo hesabı hazır — GİRİŞ butonuna tıklayın',
+
   // ── Shell / header ────────────────────────────────────────────────────────
   'shell.logout':           'Çıkış',
   'shell.language_label':   'Dil seçici',
@@ -260,6 +268,14 @@ export const tr: Record<string, string> = {
 }
 
 export const en: Record<string, string> = {
+  // ── Login page ────────────────────────────────────────────────────────────
+  'login.username':         'Username',
+  'login.password':         'Password',
+  'login.sign_in':          'SIGN IN',
+  'login.signing_in':       'Signing in...',
+  'login.demo_banner':      'CUSTOMER DEMO',
+  'login.demo_hint':        'Demo account pre-filled — click SIGN IN',
+
   // ── Shell / header ────────────────────────────────────────────────────────
   'shell.logout':           'Logout',
   'shell.language_label':   'Language selector',

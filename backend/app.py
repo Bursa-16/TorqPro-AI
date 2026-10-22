@@ -164,7 +164,7 @@ def _parse_rate_limit(raw:Optional[str]):
     return (max_requests,window_seconds)
 _API_RATE_LIMIT=_parse_rate_limit(os.getenv("TORQPRO_API_RATE_LIMIT"))
 _API_RATE_BUCKETS: dict[str, deque] = defaultdict(deque)
-_RATE_LIMIT_EXEMPT_PATHS={"/api/login","/api/health"}
+_RATE_LIMIT_EXEMPT_PATHS={"/api/login","/api/health","/api/demo-config"}
 if _API_RATE_LIMIT:
     _RATE_MAX,_RATE_WINDOW=_API_RATE_LIMIT
     @app.middleware("http")
@@ -539,6 +539,16 @@ def health():
         ok=True
     except Exception:ok=False
     return {"status":"ok" if ok else "degraded","version":APP_VERSION,"database_ok":ok,"server_time":now_iso()}
+
+@app.get("/api/demo-config")
+def demo_config():
+    # Public, unauthenticated endpoint. Returns demo login credentials
+    # exclusively when TORQPRO_DEMO_USER_ENABLED=true (the isolated demo
+    # service). Credentials are publicly disclosed by design for this
+    # engineer-only account. Never present on the production service.
+    if (os.getenv("TORQPRO_DEMO_USER_ENABLED") or "").strip().lower()!="true":
+        return {"enabled":False}
+    return {"enabled":True,"username":(os.getenv("TORQPRO_DEMO_USERNAME") or "").strip(),"password":(os.getenv("TORQPRO_DEMO_PASSWORD") or "").strip()}
 
 @app.post("/api/login")
 def login(x:Login,request:Request):

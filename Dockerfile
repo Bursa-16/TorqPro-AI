@@ -9,6 +9,12 @@
 FROM node:20-alpine AS frontend-builder
 ARG VITE_API_BASE_URL=/api
 ENV VITE_API_BASE_URL=$VITE_API_BASE_URL
+# Demo-mode flag — set only on demo/render-v2-customer.
+# Main branch omits this entirely, keeping login UI non-demo in all
+# production builds.  Credentials are never baked into the bundle;
+# the frontend fetches them from /api/health at runtime.
+ARG VITE_DEMO_MODE=true
+ENV VITE_DEMO_MODE=$VITE_DEMO_MODE
 WORKDIR /app
 COPY frontend/app /app/frontend/app
 RUN cd /app/frontend/app && npm ci && npm run build
