@@ -12,7 +12,7 @@ ENV VITE_API_BASE_URL=$VITE_API_BASE_URL
 # Demo-mode flag — set only on demo/render-v2-customer.
 # Main branch omits this entirely, keeping login UI non-demo in all
 # production builds.  Credentials are never baked into the bundle;
-# the frontend fetches them from /api/health at runtime.
+# the frontend fetches them from /api/demo-config at runtime.
 ARG VITE_DEMO_MODE=true
 ENV VITE_DEMO_MODE=$VITE_DEMO_MODE
 WORKDIR /app
