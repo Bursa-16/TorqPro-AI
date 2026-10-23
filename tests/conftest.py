@@ -7,6 +7,13 @@ import pytest
 os.environ.setdefault("TORQPRO_SECRET_KEY", "x" * 64)
 _tmpdir = tempfile.mkdtemp(prefix="torqpro-test-")
 os.environ["TORQPRO_DB_PATH"] = str(Path(_tmpdir) / "torqpro_test.db")
+# CDR-01B1: provision the shared test user via env vars (mirrors production
+# provisioning path). Role is "admin" here so admin-endpoint tests pass;
+# the render.yaml demo service uses "engineer" (customer-facing).
+os.environ.setdefault("TORQPRO_DEMO_USER_ENABLED", "true")
+os.environ.setdefault("TORQPRO_DEMO_USERNAME", "demo")
+os.environ.setdefault("TORQPRO_DEMO_PASSWORD", "A1234")
+os.environ.setdefault("TORQPRO_DEMO_ROLE", "admin")
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
